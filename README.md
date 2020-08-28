@@ -1,7 +1,11 @@
 # NinGine
 
+## About:
+Ningine - is the game engine project, created and developed in educational purposes. It's going to be the part of my diploma work. 
+
 ## Getting started:
-### Windows:
+**Windows:**
+
 0) Download\Install Visual Studio 19
 1) Download\Install CMake
 2) Download\Install vcpkg -> https://github.com/microsoft/vcpkg
@@ -16,3 +20,11 @@
 	
 	vcpkg install glfw:x64-windows
 	vcpkg install glad:x64-windows
+	
+**Linux:**
+
+ - WIP
+
+**MacOS:**
+
+ - WIP
