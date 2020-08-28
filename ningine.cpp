@@ -11,8 +11,23 @@ constexpr unsigned short WINDOW_WIDTH = 1366;
 constexpr unsigned short WINDOW_HEIGHT = 768;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-
 void processInput(GLFWwindow* window);
+
+constexpr char* vertexShaderCode =
+	"#version 330 core\n"
+	"layout(location = 0) in vec3 aPos;\n"
+	"void main()\n"
+	"{\n"
+	"	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+	"}\0";
+
+constexpr char* fragmentShaderCode = 
+	"#version 330 core\n"
+	"out vec4 FragColor;\n"
+	"void main()\n"
+	"{\n"
+	"	FragColor = vec4(0.0, 0.0, 0.0, 1.0);\n"
+	"}\0";
 
 inline float getDurationInMilisec(milliseconds start)
 {
@@ -59,33 +74,6 @@ int main(int argc, char* argv[])
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	
-	float vertices[] = {
-		-0.5f, -0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,
-		 0.0f,  0.5f, 0.0f
-	};
-
-	unsigned int VBO;
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	constexpr char* vertexShaderCode = 
-		"#version 330 core\n"
-		"layout(location = 0) in vec3 aPos;\n"
-		"void main()\n"
-		"{\n"
-		"	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-		"}\0";
-
-	constexpr char* fragmentShaderCode = 
-		"#version 330 core\n"
-		"out vec4 FragColor;\n"
-		"void main()\n"
-		"{\n"
-		"	FragColor = vec4(1.0, 0.5, 0.2, 1.0);\n"
-		"}\0";
-
 	unsigned int vertexShader{};
 	unsigned int fragmentShader{};
 
@@ -131,10 +119,34 @@ int main(int argc, char* argv[])
 		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << '\n';
 	}
 
-	glUseProgram(shaderProgram);
-
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
+
+	float vertices[] = {
+		-0.4f, -0.5f, 0.0f,
+		 0.4f, -0.5f, 0.0f,
+		 0.0f,  0.7f, 0.0f
+	};
+
+	unsigned int VBO;
+	unsigned int VAO;
+
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+
+	glBindVertexArray(VAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<void*>(0));
+	glEnableVertexAttribArray(0);
+
+	// we can unbind buffer for now, because we already bind our VBO to VAO
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// we can unbind VAO too
+	glBindVertexArray(0);
 
 	milliseconds startTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
@@ -143,10 +155,15 @@ int main(int argc, char* argv[])
 		processInput(window);
 
 		// RENDERING
-		float colorTime = getDurationInMilisec(startTime) / 2000.0f;
-
+		float colorTime = getDurationInMilisec(startTime) / 1500.0f;
 		glClearColor(sin(0.2f * colorTime), cos(0.5 * colorTime), sin(0.3f * colorTime), 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		glUseProgram(shaderProgram);
+		// we have only one VAO, so we don't need to bind/unbind it every time
+		// but we'll do it, for education purposes -> when we'll have more than 1 VAOs we'll ned to bind/unbind them and use properly
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		glfwPollEvents();
 		glfwSwapBuffers(window);
