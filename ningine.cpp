@@ -86,8 +86,8 @@ int main(int argc, char* argv[])
 		"	FragColor = vec4(1.0, 0.5, 0.2, 1.0);\n"
 		"}\0";
 
-	unsigned int vertexShader;
-	unsigned int fragmentShader;
+	unsigned int vertexShader{};
+	unsigned int fragmentShader{};
 
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
 	glShaderSource(vertexShader, 1, &vertexShaderCode, nullptr);
 	glCompileShader(vertexShader);
 
-	int success;
+	int success{};
 	char infoLog[512];
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 
@@ -115,6 +115,26 @@ int main(int argc, char* argv[])
 		glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
 		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << '\n';
 	}
+	
+	unsigned int shaderProgram{};
+	shaderProgram = glCreateProgram();
+
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+
+	glLinkProgram(shaderProgram);
+
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+	if (!success)
+	{
+		glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
+		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << '\n';
+	}
+
+	glUseProgram(shaderProgram);
+
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
 
 	milliseconds startTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
