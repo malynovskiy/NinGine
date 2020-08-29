@@ -13,21 +13,27 @@ constexpr unsigned short WINDOW_HEIGHT = 768;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
-constexpr char* vertexShaderCode =
-	"#version 330 core\n"
-	"layout(location = 0) in vec3 aPos;\n"
-	"void main()\n"
-	"{\n"
-	"	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-	"}\0";
+constexpr char* vertexShaderCode = R"glsl(
+	#version 330 core
 
-constexpr char* fragmentShaderCode = 
-	"#version 330 core\n"
-	"out vec4 FragColor;\n"
-	"void main()\n"
-	"{\n"
-	"	FragColor = vec4(0.0, 0.0, 0.0, 1.0);\n"
-	"}\0";
+	layout(location = 0) in vec3 aPos;
+	
+	void main()
+	{
+		gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+	}
+)glsl";
+
+constexpr char* fragmentShaderCode = R"glsl(
+	#version 330 core
+	
+	out vec4 FragColor;
+	
+	void main()
+	{
+		FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+	}
+)glsl";
 
 inline float getDurationInMilisec(milliseconds start)
 {
@@ -159,8 +165,6 @@ int main(int argc, char* argv[])
 
 	// we can unbind buffer for now, because we already bind our VBO to VAO
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	milliseconds startTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
