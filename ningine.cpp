@@ -122,22 +122,37 @@ int main(int argc, char* argv[])
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
-	float vertices[] = {
+	float triangleVertices[] = {
 		-0.4f, -0.5f, 0.0f,
 		 0.4f, -0.5f, 0.0f,
 		 0.0f,  0.7f, 0.0f
 	};
 
-	unsigned int VBO;
-	unsigned int VAO;
+	float vertices[] = {
+		-0.5f,  0.5f, 0.0f,
+		-0.5f, -0.5f, 0.0f,
+		 0.5f, -0.5f, 0.0f,
+		 0.5f,  0.5f, 0.0f
+	};
+
+	unsigned int vertexIndices[] = {
+		0, 1, 3,
+		1, 2, 3
+	};
+
+	unsigned int VBO, VAO, EBO;
 
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
 
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(vertexIndices), vertexIndices, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<void*>(0));
 	glEnableVertexAttribArray(0);
@@ -145,8 +160,7 @@ int main(int argc, char* argv[])
 	// we can unbind buffer for now, because we already bind our VBO to VAO
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	// we can unbind VAO too
-	glBindVertexArray(0);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	milliseconds startTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
@@ -163,7 +177,8 @@ int main(int argc, char* argv[])
 		// we have only one VAO, so we don't need to bind/unbind it every time
 		// but we'll do it, for education purposes -> when we'll have more than 1 VAOs we'll ned to bind/unbind them and use properly
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
 
 		glfwPollEvents();
 		glfwSwapBuffers(window);
