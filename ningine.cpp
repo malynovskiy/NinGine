@@ -16,22 +16,28 @@ void processInput(GLFWwindow* window);
 constexpr char* vertexShaderCode = R"glsl(
 	#version 330 core
 
-	layout(location = 0) in vec3 aPos;
+	layout(location = 0) in vec3 inPos;
+	layout(location = 1) in vec3 inColor;
 	
+	out vec3 Color;
+
 	void main()
 	{
-		gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+		Color = inColor;
+		gl_Position = vec4(inPos.x, inPos.y, inPos.z, 1.0);
 	}
 )glsl";
 
 constexpr char* fragmentShaderCode = R"glsl(
 	#version 330 core
 	
-	out vec4 FragColor;
+	in vec3 Color;
+
+	out vec4 FragmentColor;
 	
 	void main()
 	{
-		FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+		FragmentColor = vec4(Color, 1.0);
 	}
 )glsl";
 
@@ -126,10 +132,11 @@ int main(int argc, char* argv[])
 	};
 
 	float vertices[] = {
-		-0.5f,  0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,
-		 0.5f,  0.5f, 0.0f
+		// positions			//colors
+		-0.5f,  0.5f, 0.0f,		1.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, 0.0f,		0.0f, 1.0f, 0.0f,
+		 0.5f, -0.5f, 0.0f,		0.0f, 0.0f, 1.0f,
+		 0.5f,  0.5f, 0.0f,		1.0f, 1.0f, 1.0f
 	};
 
 	unsigned int vertexIndices[] = {
@@ -151,8 +158,10 @@ int main(int argc, char* argv[])
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(vertexIndices), vertexIndices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<void*>(0));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, (3 + 3)  * sizeof(float), static_cast<void*>(0));
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, (3 + 3) * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 	glUseProgram(shaderProgram);
 
