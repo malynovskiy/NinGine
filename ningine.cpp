@@ -35,14 +35,6 @@ constexpr char* fragmentShaderCode = R"glsl(
 	}
 )glsl";
 
-inline float getDurationInMilisec(milliseconds start)
-{
-	milliseconds now = std::chrono::duration_cast<milliseconds>(
-		system_clock::now().time_since_epoch());
-
-	return (now - start).count();
-}
-
 int main(int argc, char* argv[])
 {
 	if (glfwInit() == GLFW_FALSE)
@@ -115,7 +107,6 @@ int main(int argc, char* argv[])
 
 	glAttachShader(shaderProgram, vertexShader);
 	glAttachShader(shaderProgram, fragmentShader);
-
 	glLinkProgram(shaderProgram);
 
 	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
@@ -163,30 +154,32 @@ int main(int argc, char* argv[])
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<void*>(0));
 	glEnableVertexAttribArray(0);
 
-	// we can unbind buffer for now, because we already bind our VBO to VAO
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glUseProgram(shaderProgram);
 
-	milliseconds startTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
+	auto t_start = high_resolution_clock::now();
 
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
 
 		// RENDERING
-		float colorTime = getDurationInMilisec(startTime) / 1500.0f;
-		glClearColor(sin(0.2f * colorTime), cos(0.5 * colorTime), sin(0.3f * colorTime), 1.0f);
+		auto t_now = high_resolution_clock::now();
+		float time = duration_cast<duration<float>>(t_start - t_now).count();
+
+		glClearColor(sin(0.2f * time), cos(0.5 * time), sin(0.3f * time), 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glUseProgram(shaderProgram);
-		// we have only one VAO, so we don't need to bind/unbind it every time
-		// but we'll do it, for education purposes -> when we'll have more than 1 VAOs we'll ned to bind/unbind them and use properly
-		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
 
 		glfwPollEvents();
 		glfwSwapBuffers(window);
 	}
+
+	glDeleteProgram(shaderProgram);
+	glDeleteBuffers(1, &EBO);
+	glDeleteBuffers(1, &VBO);
+
+	glDeleteVertexArrays(1, &VAO);
 
 	glfwTerminate();
 	return 0;
