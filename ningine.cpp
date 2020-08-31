@@ -31,13 +31,14 @@ constexpr char* vertexShaderCode = R"glsl(
 constexpr char* fragmentShaderCode = R"glsl(
 	#version 330 core
 	
-	in vec3 Color;
+	uniform vec3 colorBlending;
 
+	in vec3 Color;
 	out vec4 FragmentColor;
 	
 	void main()
 	{
-		FragmentColor = vec4(Color, 1.0);
+		FragmentColor = vec4(colorBlending * Color, 1.0);
 	}
 )glsl";
 
@@ -165,6 +166,8 @@ int main(int argc, char* argv[])
 
 	glUseProgram(shaderProgram);
 
+	GLint blendingColor = glGetUniformLocation(shaderProgram, "colorBlending");
+
 	auto t_start = high_resolution_clock::now();
 
 	while (!glfwWindowShouldClose(window))
@@ -177,6 +180,8 @@ int main(int argc, char* argv[])
 
 		glClearColor(sin(0.2f * time), cos(0.5 * time), sin(0.3f * time), 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		glUniform3f(blendingColor, (sin(time * 4.0f) + 1.0f) / 2.0f, 0, cos(time * 2.0f));
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
