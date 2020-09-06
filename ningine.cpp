@@ -168,13 +168,17 @@ int main(int argc, char* argv[])
 		glClearColor(0, 0, 0, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		const float red = (sin(time * 4.0f) + 1.0f) / 2.0f;
+		const float green = 0.0f;
+		const float blue = cos(time * 2.0f);
+
 		glUseProgram(shaderProgram);
-		glUniform3f(blendingColor, (sin(time * 4.0f) + 1.0f) / 2.0f, 0, cos(time * 2.0f));
+		glUniform3f(blendingColor, red, green, blue);
 		glBindVertexArray(VAO[1]);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 		
 		glUseProgram(newShaderProgram);
-		glUniform3f(blendingColor, (sin(time * 4.0f) + 1.0f) / 2.0f, 0, cos(time * 2.0f));
+		glUniform3f(blendingColor, red, green, blue);
 		glBindVertexArray(VAO[0]);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
