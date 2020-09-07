@@ -107,50 +107,40 @@ int main(int argc, char* argv[])
 	glDeleteShader(fragmentShader);
 	glDeleteShader(newFS);
 
-	float smallTriangleVertices[] = {
-		// positions			//colors
-		-0.4f, -0.5f, 0.0f,		1.0f, 0.0f, 0.0f,
-		 0.4f, -0.5f, 0.0f,		0.0f, 1.0f, 0.0f,
-		 0.0f,  0.7f, 0.0f,		0.0f, 0.0f, 1.0f
-	};
+	constexpr size_t n = 2;
 
-	float bigTriangleVertices[] = {
+	float vertices[n][18] = {
 		// positions			//colors
-		-0.6f, -0.7f, 0.0f,		0.0f, 0.0f, 1.0f,
-		 0.6f, -0.7f, 0.0f,		0.0f, 1.0f, 0.0f,
-		 0.0f,  0.9f, 0.0f,		1.0f, 0.0f, 0.0f
+		{
+		 -0.4f, -0.5f, 0.0f,	1.0f, 0.0f, 0.0f,
+		  0.4f, -0.5f, 0.0f,	0.0f, 1.0f, 0.0f,
+		  0.0f,  0.7f, 0.0f,	0.0f, 0.0f, 1.0f
+		},
+		{
+		 -0.6f, -0.7f, 0.0f,	0.0f, 0.0f, 1.0f,
+		  0.6f, -0.7f, 0.0f,	0.0f, 1.0f, 0.0f,
+		  0.0f,  0.9f, 0.0f,	1.0f, 0.0f, 0.0f
+		}
 	};
 
 	// setting up buffers for TRIANGLE
-	unsigned int VBO[2], VAO[2];
-	glGenVertexArrays(1, &VAO[0]);
-	glGenBuffers(1, &VBO[0]);
+	unsigned int VBO[n], VAO[n];
+	for (size_t i = 0; i < n; ++i)
+	{
+		glGenVertexArrays(1, &VAO[i]);
+		glGenBuffers(1, &VBO[i]);
 
-	// binding vertex buffer and array object for TRIANGLE
-	glBindVertexArray(VAO[0]);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(smallTriangleVertices), smallTriangleVertices, GL_STATIC_DRAW);
+		// binding vertex buffer and array object for TRIANGLE
+		glBindVertexArray(VAO[i]);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO[i]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[i]), vertices[i], GL_STATIC_DRAW);
 	
-	// setting up vertex attributes for current array object (for TRIANGLE)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, (3 + 3)  * sizeof(float), static_cast<void*>(0));
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, (3 + 3) * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	// setting up buffers for RECTANGLE
-	glGenVertexArrays(1, &VAO[1]);
-	glGenBuffers(1, &VBO[1]);
-
-	// binding vertex buffer, array object and index buffer for RECTANGLE
-	glBindVertexArray(VAO[1]);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(bigTriangleVertices), bigTriangleVertices, GL_STATIC_DRAW);
-	
-	// setting up vertex attributes for current array object (for RECTANGLE)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, (3 + 3) * sizeof(float), static_cast<void*>(0));
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, (3 + 3) * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
+		// setting up vertex attributes for current array object (for TRIANGLE)
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, (3 + 3)  * sizeof(float), static_cast<void*>(0));
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, (3 + 3) * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+	}
 
 	GLint blendingColor = glGetUniformLocation(shaderProgram, "colorBlending");
 	GLint newblendingColor = glGetUniformLocation(newShaderProgram, "colorBlending");
@@ -171,17 +161,14 @@ int main(int argc, char* argv[])
 		const float red = (sin(time * 4.0f) + 1.0f) / 2.0f;
 		const float green = 0.0f;
 		const float blue = cos(time * 2.0f);
-
-		glUseProgram(shaderProgram);
-		glUniform3f(blendingColor, red, green, blue);
-		glBindVertexArray(VAO[1]);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
 		
-		glUseProgram(newShaderProgram);
-		glUniform3f(blendingColor, red, green, blue);
-		glBindVertexArray(VAO[0]);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-
+		for (int i = n-1; i >= 0; i--)
+		{
+			glUseProgram(shaderProgram);
+			glUniform3f(blendingColor, red, green, blue);
+			glBindVertexArray(VAO[i]);
+			glDrawArrays(GL_TRIANGLES, 0, 3);
+		}
 		glfwPollEvents();
 		glfwSwapBuffers(window);
 	}
@@ -189,11 +176,11 @@ int main(int argc, char* argv[])
 	glDeleteProgram(shaderProgram);
 	glDeleteProgram(newShaderProgram);
 
-	glDeleteBuffers(1, &VBO[0]);
-	glDeleteVertexArrays(1, &VAO[0]);
-	
-	glDeleteBuffers(1, &VBO[1]);
-	glDeleteVertexArrays(1, &VAO[1]);
+	for (size_t i = 0; i < n; ++i)
+	{
+		glDeleteBuffers(1, &VBO[i]);
+		glDeleteVertexArrays(1, &VAO[i]);
+	}
 
 	glfwTerminate();
 	return 0;
