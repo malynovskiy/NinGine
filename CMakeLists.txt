@@ -16,7 +16,7 @@ target_include_directories(${PROJECT_NAME}
 	PUBLIC
 		include
 	PRIVATE
-		source
+		src
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -29,5 +29,5 @@ target_link_libraries(${PROJECT_NAME}
 target_sources(${PROJECT_NAME}
 	PUBLIC
 	PRIVATE
-		ningine.cpp
-)
+		src
+		ningine.cpp)
