@@ -4,14 +4,28 @@
 #include <GLFW/glfw3.h>
 
 #include <chrono>
+#include <fstream>
+#include <sstream>
 
 using namespace std::chrono;
 
 constexpr unsigned short WINDOW_WIDTH = 1366;
 constexpr unsigned short WINDOW_HEIGHT = 768;
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow* window);
+inline std::string readFromFile(const char *path)
+{
+  std::ifstream file;
+  file.open(path);
+
+  std::stringstream stream;
+  stream << file.rdbuf();
+  file.close();
+
+  return stream.str();
+}
+
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+void processInput(GLFWwindow *window);
 
 constexpr char *vsCode = R"glsl(
 	#version 330 core
@@ -42,8 +56,7 @@ constexpr char *fsCode = R"glsl(
 	}
 )glsl";
 
-
-GLuint createShader(GLenum type, char* source);
+GLuint createShader(GLenum type, const std::string &source);
 GLuint createShaderProgram(GLuint vertexShader, GLuint fragmentShader);
 
 int main(int argc, char *argv[])
@@ -168,12 +181,13 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-GLuint createShader(GLenum type, char* source)
+GLuint createShader(GLenum type, const std::string &source)
 {
   unsigned int shader = glCreateShader(type);
 
+  const char *source_cstr = source.c_str();
 
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+  glShaderSource(shader, 1, &source_cstr, nullptr);
   glCompileShader(shader);
 
   int success{};

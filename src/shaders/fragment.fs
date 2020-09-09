@@ -1,7 +1,10 @@
 #version 330 core
-out vec4 FragColor;
+
+uniform vec3 colorBlending;
+in vec3 Color;
+out vec4 FragmentColor;
 
 void main()
 {
-	FragColor = vec4(1.0, 0.0, 0.2, 1.0);
+    FragmentColor = vec4(colorBlending * Color, 1.0);
 }
