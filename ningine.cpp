@@ -103,40 +103,30 @@ int main(int argc, char *argv[])
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
-	constexpr size_t n = 2;
-
-	float vertices[n][18] = {
-		// positions			//colors
-		{
+	float vertices[] = 
+  {
+		  // positions			//colors
 		 -0.4f, -0.5f, 0.0f,	1.0f, 0.0f, 0.0f,
 		  0.4f, -0.5f, 0.0f,	0.0f, 1.0f, 0.0f,
 		  0.0f,  0.7f, 0.0f,	0.0f, 0.0f, 1.0f
-		},
-		{
-		 -0.6f, -0.7f, 0.0f,	0.0f, 0.0f, 1.0f,
-		  0.6f, -0.7f, 0.0f,	0.0f, 1.0f, 0.0f,
-		  0.0f,  0.9f, 0.0f,	1.0f, 0.0f, 0.0f
-		}
 	};
 
 	// setting up buffers for TRIANGLE
-	unsigned int VBO[n], VAO[n];
-	for (size_t i = 0; i < n; ++i)
-	{
-    glGenVertexArrays(1, &VAO[i]);
-    glGenBuffers(1, &VBO[i]);
+	unsigned int VBO, VAO;
 
-    // binding vertex buffer and array object for TRIANGLE
-    glBindVertexArray(VAO[i]);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO[i]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[i]), vertices[i], GL_STATIC_DRAW);
-
-    // setting up vertex attributes for current array object (for TRIANGLE)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, (3 + 3) * sizeof(float), static_cast<void *>(0));
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, (3 + 3) * sizeof(float), reinterpret_cast<void *>(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-	}
+  glGenVertexArrays(1, &VAO);
+  glGenBuffers(1, &VBO);
+  
+  // binding vertex buffer and array object for TRIANGLE
+  glBindVertexArray(VAO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  
+  // setting up vertex attributes for current array object (for TRIANGLE)
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, (3 + 3) * sizeof(float), static_cast<void *>(0));
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, (3 + 3) * sizeof(float), reinterpret_cast<void *>(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
 
 	GLint blendingColor = glGetUniformLocation(shaderProgram, "colorBlending");
 
@@ -157,25 +147,21 @@ int main(int argc, char *argv[])
     const float green = 0.0f;
     const float blue = cos(time * 2.0f);
 
-    for (int i = n - 1; i >= 0; i--) {
-      glUseProgram(shaderProgram);
+    glUseProgram(shaderProgram);
 
-      glUniform3f(blendingColor, red, green, blue);
+    glUniform3f(blendingColor, red, green, blue);
 
-      glBindVertexArray(VAO[i]);
-      glDrawArrays(GL_TRIANGLES, 0, 3);
-    }
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+
     glfwPollEvents();
     glfwSwapBuffers(window);
 	}
 
 	glDeleteProgram(shaderProgram);
 
-	for (size_t i = 0; i < n; ++i)
-	{
-    glDeleteBuffers(1, &VBO[i]);
-    glDeleteVertexArrays(1, &VAO[i]);
-	}
+  glDeleteBuffers(1, &VBO);
+  glDeleteVertexArrays(1, &VAO);
 
 	glfwTerminate();
 	return 0;
