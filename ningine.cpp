@@ -57,12 +57,13 @@ constexpr char *fsCode = R"glsl(
 	out vec4 FragmentColor;
 
 	uniform vec3 colorBlending;
-	uniform sampler2D Texture;
+	
+  uniform sampler2D woodTexture;
+	uniform sampler2D memeTexture;
 
 	void main()
 	{
-		//FragmentColor = vec4(colorBlending * Color, 1.0);
-		FragmentColor = texture(Texture, TextureCoords) * vec4(Color, 1.0);
+		FragmentColor = mix(texture(woodTexture, TextureCoords), texture(memeTexture, TextureCoords), 0.4) * vec4(Color, 1.0);
 	}
 )glsl";
 
@@ -118,9 +119,9 @@ int main(int argc, char *argv[])
   {
 		  //position coords     //colors        //texture coords
 		 -0.35f, -0.5f, 0.0f,	1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-		  0.35f, -0.5f, 0.0f,	0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
-		 -0.35f,  0.5f, 0.0f,	0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
-		  0.35f,  0.5f, 0.0f,	0.2f, 0.5f, 0.1f,  1.0f, 1.0f
+		  0.35f, -0.5f, 0.0f,	0.0f, 1.0f, 0.0f,  2.0f, 0.0f,
+		 -0.35f,  0.5f, 0.0f,	0.0f, 0.0f, 1.0f,  0.0f, 2.0f,
+		  0.35f,  0.5f, 0.0f,	0.2f, 0.5f, 0.1f,  2.0f, 2.0f
 	};
 
   unsigned indices[] =
@@ -155,28 +156,54 @@ int main(int argc, char *argv[])
   glEnableVertexAttribArray(2);
   
   // setting up texture
-  unsigned int iceTexture;
-  glGenTextures(1, &iceTexture);
-  glBindTexture(GL_TEXTURE_2D, iceTexture);
+  unsigned int woodTexture{};
+  glGenTextures(1, &woodTexture);
+  glBindTexture(GL_TEXTURE_2D, woodTexture);
   
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
+  
   int textureWidth{}, textureHeight{}, textureNumChannels{};
-  unsigned char* iceTextureData = stbi_load("resources/textures/iceiceice.jpg",
+
+  stbi_set_flip_vertically_on_load(true);
+  unsigned char* woodTextureData = stbi_load("resources/textures/wood.jpg",
     &textureWidth, &textureHeight, &textureNumChannels, 0);
   
-  if (iceTextureData)
+  if (woodTextureData)
   {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, iceTextureData);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, woodTextureData);
     glGenerateMipmap(GL_TEXTURE_2D);
   }
   else
     std::cout << "Error, failed to load the texture!\n";
  
-  stbi_image_free(iceTextureData);
+  stbi_image_free(woodTextureData);
+  
+  unsigned int memeTexture{};
+  glGenTextures(1, &memeTexture);
+  glBindTexture(GL_TEXTURE_2D, memeTexture);
+  
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  
+  woodTextureData = stbi_load("resources/textures/meme.png", &textureWidth, &textureHeight, &textureNumChannels, 0);
+  if (woodTextureData)
+  {
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, woodTextureData);
+    glGenerateMipmap(GL_TEXTURE_2D);
+  }
+  else
+    std::cout << "Error, failed to load the texture!\n";
+ 
+  stbi_image_free(woodTextureData);
+
+  glUseProgram(shaderProgram);
+  glUniform1i(glGetUniformLocation(shaderProgram, "woodTexture"), 0);
+  glUniform1i(glGetUniformLocation(shaderProgram, "memeTexture"), 1);
 
 	GLint blendingColor = glGetUniformLocation(shaderProgram, "colorBlending");
 
@@ -197,7 +224,10 @@ int main(int argc, char *argv[])
     const float green = 0.0f;
     const float blue = cos(time * 2.0f);
 
-    glBindTexture(GL_TEXTURE, iceTexture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, woodTexture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, memeTexture);
 
     glUseProgram(shaderProgram);
 
