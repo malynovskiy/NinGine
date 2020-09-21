@@ -7,6 +7,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "stb_image.h"
+
 using namespace std::chrono;
 
 constexpr unsigned short WINDOW_WIDTH = 1366;
@@ -32,27 +34,35 @@ constexpr char *vsCode = R"glsl(
 
 	layout(location = 0) in vec3 inPos;
 	layout(location = 1) in vec3 inColor;
-	
+	layout(location = 2) in vec2 inTextureCoords;
+
 	out vec3 Color;
+  out vec2 TextureCoords;
 
 	void main()
 	{
+		gl_Position = vec4(inPos, 1.0);
+
 		Color = inColor;
-		gl_Position = vec4(inPos.x, inPos.y, inPos.z, 1.0);
+    TextureCoords = vec2(inTextureCoords.x, inTextureCoords.y);
 	}
 )glsl";
 
 constexpr char *fsCode = R"glsl(
 	#version 330 core
 	
-	uniform vec3 colorBlending;
-
 	in vec3 Color;
-	out vec4 FragmentColor;
+  in vec2 TextureCoords;
 	
+	out vec4 FragmentColor;
+
+	uniform vec3 colorBlending;
+	uniform sampler2D Texture;
+
 	void main()
 	{
-		FragmentColor = vec4(colorBlending * Color, 1.0);
+		//FragmentColor = vec4(colorBlending * Color, 1.0);
+		FragmentColor = texture(Texture, TextureCoords) * vec4(Color, 1.0);
 	}
 )glsl";
 
@@ -61,7 +71,8 @@ GLuint createShaderProgram(GLuint vertexShader, GLuint fragmentShader);
 
 int main(int argc, char *argv[])
 {
-  if (glfwInit() == GLFW_FALSE) {
+  if (glfwInit() == GLFW_FALSE)
+  {
     return -1;
     std::cout << "Oops, failed to initializeGLFW!\n";
   }
@@ -103,30 +114,69 @@ int main(int argc, char *argv[])
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
-	float vertices[] = 
+	float vertexData[] = 
   {
-		  // positions			//colors
-		 -0.4f, -0.5f, 0.0f,	1.0f, 0.0f, 0.0f,
-		  0.4f, -0.5f, 0.0f,	0.0f, 1.0f, 0.0f,
-		  0.0f,  0.7f, 0.0f,	0.0f, 0.0f, 1.0f
+		  //position coords     //colors        //texture coords
+		 -0.35f, -0.5f, 0.0f,	1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+		  0.35f, -0.5f, 0.0f,	0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
+		 -0.35f,  0.5f, 0.0f,	0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
+		  0.35f,  0.5f, 0.0f,	0.2f, 0.5f, 0.1f,  1.0f, 1.0f
 	};
 
+  unsigned indices[] =
+  {
+    0, 1, 2,
+    1, 2, 3
+  };
+
 	// setting up buffers for TRIANGLE
-	unsigned int VBO, VAO;
+	unsigned int VBO, VAO, EBO;
 
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
-  
+  glGenBuffers(1, &EBO);
+
   // binding vertex buffer and array object for TRIANGLE
   glBindVertexArray(VAO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+  
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
   
   // setting up vertex attributes for current array object (for TRIANGLE)
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, (3 + 3) * sizeof(float), static_cast<void *>(0));
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, (3 + 3 + 2) * sizeof(float), static_cast<void *>(0));
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, (3 + 3) * sizeof(float), reinterpret_cast<void *>(3 * sizeof(float)));
+
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, (3 + 3 + 2) * sizeof(float), reinterpret_cast<void *>(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
+
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, (3+3+2)*sizeof(float), reinterpret_cast<void*>((3+3)*sizeof(float)));
+  glEnableVertexAttribArray(2);
+  
+  // setting up texture
+  unsigned int iceTexture;
+  glGenTextures(1, &iceTexture);
+  glBindTexture(GL_TEXTURE_2D, iceTexture);
+  
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  int textureWidth{}, textureHeight{}, textureNumChannels{};
+  unsigned char* iceTextureData = stbi_load("resources/textures/iceiceice.jpg",
+    &textureWidth, &textureHeight, &textureNumChannels, 0);
+  
+  if (iceTextureData)
+  {
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, iceTextureData);
+    glGenerateMipmap(GL_TEXTURE_2D);
+  }
+  else
+    std::cout << "Error, failed to load the texture!\n";
+ 
+  stbi_image_free(iceTextureData);
 
 	GLint blendingColor = glGetUniformLocation(shaderProgram, "colorBlending");
 
@@ -147,12 +197,14 @@ int main(int argc, char *argv[])
     const float green = 0.0f;
     const float blue = cos(time * 2.0f);
 
+    glBindTexture(GL_TEXTURE, iceTexture);
+
     glUseProgram(shaderProgram);
 
     glUniform3f(blendingColor, red, green, blue);
 
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glfwPollEvents();
     glfwSwapBuffers(window);
@@ -161,6 +213,7 @@ int main(int argc, char *argv[])
 	glDeleteProgram(shaderProgram);
 
   glDeleteBuffers(1, &VBO);
+  glDeleteBuffers(1, &EBO);
   glDeleteVertexArrays(1, &VAO);
 
 	glfwTerminate();
@@ -180,12 +233,12 @@ GLuint createShader(GLenum type, const std::string &source)
   char infoLog[512];
   glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
-  if (!success) {
+  if (!success)
+  {
     glGetShaderInfoLog(shader, 512, nullptr, infoLog);
 
     char *shaderType = (type == GL_VERTEX_SHADER) ? "Vertex" : "Fragment";
-    std::cout << "ERROR! : " << shaderType << " shader compilation failed\n"
-              << infoLog << '\n';
+    std::cout << "ERROR! : " << shaderType << " shader compilation failed\n" << infoLog << '\n';
 
     return 0;
   }
@@ -205,10 +258,10 @@ GLuint createShaderProgram(GLuint vertexShader, GLuint fragmentShader)
   char infoLog[512];
 
   glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-  if (!success) {
+  if (!success)
+  {
     glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
-    std::cout << "ERROR! : Shader program linking failed\n"
-              << infoLog << '\n';
+    std::cout << "ERROR! : Shader program linking failed\n" << infoLog << '\n';
     return 0;
   }
 
@@ -217,11 +270,7 @@ GLuint createShaderProgram(GLuint vertexShader, GLuint fragmentShader)
 
 void processInput(GLFWwindow *window)
 {
-  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-    glfwSetWindowShouldClose(window, true);
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(window, true);
 }
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height)
-{
-  glViewport(0, 0, width, height);
-}
+void framebuffer_size_callback(GLFWwindow *window, int width, int height) { glViewport(0, 0, width, height); }
