@@ -5,7 +5,7 @@ AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: Left
 AlignOperands: true
 AlignTrailingComments: false
-AllowAllParametersOfDeclarationOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: All
@@ -18,20 +18,22 @@ AlwaysBreakTemplateDeclarations: false
 BinPackArguments: false
 BinPackParameters: false
 BraceWrapping:
+  AfterCaseLabel: false
   AfterClass: true
-  AfterControlStatement: false
-  AfterEnum: false
+  AfterControlStatement: true
+  AfterEnum: true
   AfterFunction: true
-  AfterNamespace: false
-  AfterObjCDeclaration: false
+  AfterNamespace: true
+  AfterObjCDeclaration: true
   AfterStruct: true
   AfterUnion: false
-  BeforeCatch: false
-  BeforeElse: false
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeElse: true
   IndentBraces: false
-  SplitEmptyFunction: false
-  SplitEmptyNamespace: true
+  SplitEmptyFunction: true
   SplitEmptyRecord: true
+  SplitEmptyNamespace: true
 BreakAfterJavaFieldAnnotations: true
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Custom
@@ -40,9 +42,9 @@ BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeColon
 BreakConstructorInitializersBeforeComma: false
 BreakStringLiterals: true
-ColumnLimit: 0
+ColumnLimit: 120
 CommentPragmas: '^ IWYU pragma:'
-CompactNamespaces: false
+CompactNamespaces: true
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth: 2
 ContinuationIndentWidth: 2

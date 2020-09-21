@@ -29,5 +29,6 @@ target_link_libraries(${PROJECT_NAME}
 target_sources(${PROJECT_NAME}
 	PUBLIC
 	PRIVATE
-		src
+		src/graphics
+		src/stb_image.cpp
 		ningine.cpp)
