@@ -118,16 +118,16 @@ int main(int argc, char *argv[])
 	float vertexData[] = 
   {
 		  //position coords     //colors        //texture coords
-		 -0.35f, -0.5f, 0.0f,	1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-		  0.35f, -0.5f, 0.0f,	0.0f, 1.0f, 0.0f,  2.0f, 0.0f,
-		 -0.35f,  0.5f, 0.0f,	0.0f, 0.0f, 1.0f,  0.0f, 2.0f,
-		  0.35f,  0.5f, 0.0f,	0.2f, 0.5f, 0.1f,  2.0f, 2.0f
+		 -0.4f, -0.6f, 0.0f,	1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+		 -0.4f,  0.6f, 0.0f,	0.0f, 0.0f, 1.0f,  0.0f, 4.0f,
+		  0.4f, -0.6f, 0.0f,	0.0f, 1.0f, 0.0f,  2.0f, 0.0f,
+		  0.4f,  0.6f, 0.0f,	0.2f, 0.5f, 0.1f,  4.0f, 4.0f
 	};
 
   unsigned indices[] =
   {
-    0, 1, 2,
-    1, 2, 3
+    0, 1, 3,
+    0, 2, 3
   };
 
 	// setting up buffers for TRIANGLE
@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
   glGenTextures(1, &memeTexture);
   glBindTexture(GL_TEXTURE_2D, memeTexture);
   
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
