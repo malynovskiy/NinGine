@@ -11,8 +11,8 @@
 
 using namespace std::chrono;
 
-constexpr unsigned short WINDOW_WIDTH = 1366;
-constexpr unsigned short WINDOW_HEIGHT = 768;
+constexpr unsigned short WINDOW_WIDTH{ 1366 };
+constexpr unsigned short WINDOW_HEIGHT{ 768 };
 
 inline std::string read_file(const std::string &filePath)
 {
@@ -24,7 +24,7 @@ inline std::string read_file(const std::string &filePath)
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
-void processArrowsInput(GLFWwindow *window, const GLfloat &uniformLocation, GLfloat &texturesMix);
+void processArrowsInput(GLFWwindow *window, const GLint &uniformLocation, GLfloat &texturesMix);
 
 GLuint createShader(GLenum type, const std::string &source);
 GLuint createShaderProgram(GLuint vertexShader, GLuint fragmentShader);
@@ -33,8 +33,8 @@ int main(int argc, char *argv[])
 {
   if (glfwInit() == GLFW_FALSE)
   {
-    return -1;
     std::cout << "Oops, failed to initializeGLFW!\n";
+    return -1;
   }
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -286,9 +286,9 @@ void processInput(GLFWwindow *window)
     glfwSetWindowShouldClose(window, true);
 }
 
-void processArrowsInput(GLFWwindow *window, const GLfloat &uniformLocation, GLfloat &texturesMix)
+void processArrowsInput(GLFWwindow *window, const GLint &uniformLocation, GLfloat &texturesMix)
 {
-  constexpr float texturesMixIncome = 0.0035;
+  constexpr float texturesMixIncome{ 0.0035f };
 
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && texturesMix < 1.0f)
     glUniform1f(uniformLocation, texturesMix += texturesMixIncome);
