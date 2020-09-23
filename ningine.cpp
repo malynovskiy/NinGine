@@ -28,6 +28,7 @@ inline std::string readFromFile(const char *path)
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
+void processArrowsInput(GLFWwindow *window, const GLfloat &uniformLocation, GLfloat &texturesMix);
 
 constexpr char *vsCode = R"glsl(
 	#version 330 core
@@ -58,12 +59,14 @@ constexpr char *fsCode = R"glsl(
 
 	uniform vec3 colorBlending;
 	
+  uniform float texturesMixCoefficient;
+
   uniform sampler2D woodTexture;
 	uniform sampler2D memeTexture;
 
 	void main()
 	{
-		FragmentColor = mix(texture(woodTexture, TextureCoords), texture(memeTexture, TextureCoords), 0.4) * vec4(Color, 1.0);
+		FragmentColor = mix(texture(woodTexture, TextureCoords), texture(memeTexture, TextureCoords), texturesMixCoefficient) * vec4(Color, 1.0);
 	}
 )glsl";
 
@@ -205,13 +208,17 @@ int main(int argc, char *argv[])
   glUniform1i(glGetUniformLocation(shaderProgram, "woodTexture"), 0);
   glUniform1i(glGetUniformLocation(shaderProgram, "memeTexture"), 1);
 
-	GLint blendingColor = glGetUniformLocation(shaderProgram, "colorBlending");
+	GLint blendColorLocation = glGetUniformLocation(shaderProgram, "colorBlending");
+	
+  GLfloat texMixVal = 0.4f;
+  GLint texMixLocation = glGetUniformLocation(shaderProgram, "texturesMixCoefficient");
 
 	auto t_start = high_resolution_clock::now();
 
 	while (!glfwWindowShouldClose(window))
 	{
     processInput(window);
+    processArrowsInput(window, texMixLocation, texMixVal);
 
     // RENDERING
     auto t_now = high_resolution_clock::now();
@@ -231,7 +238,7 @@ int main(int argc, char *argv[])
 
     glUseProgram(shaderProgram);
 
-    glUniform3f(blendingColor, red, green, blue);
+    glUniform3f(blendColorLocation, red, green, blue);
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -303,9 +310,18 @@ void processInput(GLFWwindow *window)
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
 }
+
+void processArrowsInput(GLFWwindow *window, const GLfloat &uniformLocation, GLfloat &texturesMix)
+{
+  constexpr float texturesMixIncome = 0.0035;
+
+  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && texturesMix < 1.0f)
+    glUniform1f(uniformLocation, texturesMix += texturesMixIncome);
+
+  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && texturesMix > 0.0f)
+    glUniform1f(uniformLocation, texturesMix -= texturesMixIncome);
 }
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height) { glViewport(0, 0, width, height); }
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
   glViewport(0, 0, width, height);
