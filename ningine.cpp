@@ -172,7 +172,15 @@ int main(int argc, char *argv[])
   
   if (woodTextureData)
   {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, woodTextureData);
+    glTexImage2D(GL_TEXTURE_2D,
+      0,
+      GL_RGB,
+      textureWidth,
+      textureHeight,
+      0,
+      GL_RGB,
+      GL_UNSIGNED_BYTE,
+      woodTextureData);
     glGenerateMipmap(GL_TEXTURE_2D);
   }
   else
@@ -192,7 +200,15 @@ int main(int argc, char *argv[])
   woodTextureData = stbi_load("resources/textures/meme.png", &textureWidth, &textureHeight, &textureNumChannels, 0);
   if (woodTextureData)
   {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, woodTextureData);
+    glTexImage2D(GL_TEXTURE_2D,
+      0,
+      GL_RGBA,
+      textureWidth,
+      textureHeight,
+      0,
+      GL_RGBA,
+      GL_UNSIGNED_BYTE,
+      woodTextureData);
     glGenerateMipmap(GL_TEXTURE_2D);
   }
   else
