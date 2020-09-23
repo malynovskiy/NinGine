@@ -14,16 +14,12 @@ using namespace std::chrono;
 constexpr unsigned short WINDOW_WIDTH = 1366;
 constexpr unsigned short WINDOW_HEIGHT = 768;
 
-inline std::string readFromFile(const char *path)
+inline std::string read_file(const std::string &filePath)
 {
-  std::ifstream file;
-  file.open(path);
-
-  std::stringstream stream;
-  stream << file.rdbuf();
-  file.close();
-
-  return stream.str();
+  std::ifstream file(filePath);
+  std::string content(
+    std::istreambuf_iterator<char>(file.rdbuf()), std::istreambuf_iterator<char>());
+  return content;
 }
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
