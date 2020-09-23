@@ -26,46 +26,6 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
 void processArrowsInput(GLFWwindow *window, const GLfloat &uniformLocation, GLfloat &texturesMix);
 
-constexpr char *vsCode = R"glsl(
-	#version 330 core
-
-	layout(location = 0) in vec3 inPos;
-	layout(location = 1) in vec3 inColor;
-	layout(location = 2) in vec2 inTextureCoords;
-
-	out vec3 Color;
-  out vec2 TextureCoords;
-
-	void main()
-	{
-		gl_Position = vec4(inPos, 1.0);
-
-		Color = inColor;
-    TextureCoords = vec2(inTextureCoords.x, inTextureCoords.y);
-	}
-)glsl";
-
-constexpr char *fsCode = R"glsl(
-	#version 330 core
-	
-	in vec3 Color;
-  in vec2 TextureCoords;
-	
-	out vec4 FragmentColor;
-
-	uniform vec3 colorBlending;
-	
-  uniform float texturesMixCoefficient;
-
-  uniform sampler2D woodTexture;
-	uniform sampler2D memeTexture;
-
-	void main()
-	{
-		FragmentColor = mix(texture(woodTexture, TextureCoords), texture(memeTexture, TextureCoords), texturesMixCoefficient) * vec4(Color, 1.0);
-	}
-)glsl";
-
 GLuint createShader(GLenum type, const std::string &source);
 GLuint createShaderProgram(GLuint vertexShader, GLuint fragmentShader);
 
@@ -106,8 +66,11 @@ int main(int argc, char *argv[])
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	
-	unsigned int vertexShader = createShader(GL_VERTEX_SHADER, std::string(vsCode));
-	unsigned int fragmentShader = createShader(GL_FRAGMENT_SHADER, std::string(fsCode));
+  // TODO: FIX THIS AWFULL PATHS
+  //        1) investigate boost filesystem
+  //        2) probably need to copy shaders by script into folder with build
+	unsigned int vertexShader = createShader(GL_VERTEX_SHADER, read_file("../../../src/shaders/vertex.glsl"));
+	unsigned int fragmentShader = createShader(GL_FRAGMENT_SHADER, read_file("../../../src/shaders/fragment.glsl"));
 	
 	unsigned int shaderProgram = createShaderProgram(vertexShader, fragmentShader);
 
