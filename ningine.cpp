@@ -11,16 +11,19 @@
 
 using namespace std::chrono;
 
+typedef unsigned short ushort;
+
 constexpr unsigned short WINDOW_WIDTH{ 1366 };
 constexpr unsigned short WINDOW_HEIGHT{ 768 };
 
 inline std::string read_file(const std::string &filePath)
 {
   std::ifstream file(filePath);
-  std::string content(
-    std::istreambuf_iterator<char>(file.rdbuf()), std::istreambuf_iterator<char>());
+  std::string content(std::istreambuf_iterator<char>(file.rdbuf()), std::istreambuf_iterator<char>());
   return content;
 }
+
+GLFWwindow *initGLFWwindow(const std::string &windowTitle, const ushort &windowWidth, const ushort &windowHeight);
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -31,69 +34,51 @@ GLuint createShaderProgram(GLuint vertexShader, GLuint fragmentShader);
 
 int main(int argc, char *argv[])
 {
-  if (glfwInit() == GLFW_FALSE)
+  GLFWwindow *window = initGLFWwindow("OpenGL HELLO WORLD!", WINDOW_WIDTH, WINDOW_HEIGHT);
+  if (window == nullptr)
   {
-    std::cout << "Oops, failed to initializeGLFW!\n";
-    return -1;
-  }
-
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-#ifdef __APPLE__
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE;
-#endif
-
-	GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "OpenGL Hello World", 
-		nullptr, nullptr);
-
-	if (window == nullptr)
-	{
     std::cout << "Oops, failed to create the GLFW window!\n";
     glfwTerminate();
-    return -2;
-	}
-	glfwMakeContextCurrent(window);
-	
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
+    return -1;
+  }
+  glfwMakeContextCurrent(window);
+
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+  {
     std::cout << "Oops, failed to load the GLAD!\n";
     return -3;
-	}
+  }
 
-	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+  glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
   // TODO: FIX THIS AWFULL PATHS
   //        1) investigate boost filesystem
   //        2) probably need to copy shaders by script into folder with build
-	unsigned int vertexShader = createShader(GL_VERTEX_SHADER, read_file("../../../src/shaders/vertex.glsl"));
-	unsigned int fragmentShader = createShader(GL_FRAGMENT_SHADER, read_file("../../../src/shaders/fragment.glsl"));
-	
-	unsigned int shaderProgram = createShaderProgram(vertexShader, fragmentShader);
+  unsigned int vertexShader = createShader(GL_VERTEX_SHADER, read_file("../../../src/shaders/vertex.glsl"));
+  unsigned int fragmentShader = createShader(GL_FRAGMENT_SHADER, read_file("../../../src/shaders/fragment.glsl"));
 
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
+  unsigned int shaderProgram = createShaderProgram(vertexShader, fragmentShader);
 
-	float vertexData[] = 
-  {
-		  //position coords     //colors        //texture coords
-		 -0.4f, -0.6f, 0.0f,	1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-		 -0.4f,  0.6f, 0.0f,	0.0f, 0.0f, 1.0f,  0.0f, 4.0f,
-		  0.4f, -0.6f, 0.0f,	0.0f, 1.0f, 0.0f,  2.0f, 0.0f,
-		  0.4f,  0.6f, 0.0f,	0.2f, 0.5f, 0.1f,  4.0f, 4.0f
-	};
+  glDeleteShader(vertexShader);
+  glDeleteShader(fragmentShader);
 
-  unsigned indices[] =
-  {
-    0, 1, 3,
-    0, 2, 3
+  float vertexData[] = { 
+    // position coords     //colors        //texture coords
+    -0.4f, -0.6f, 0.0f,   1.0f, 0.0f, 0.0f,   0.0f, 0.0f,
+    -0.4f,  0.6f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 4.0f,
+     0.4f, -0.6f, 0.0f,   0.0f, 1.0f, 0.0f,   2.0f, 0.0f,
+     0.4f,  0.6f, 0.0f,   0.2f, 0.5f, 0.1f,   4.0f, 4.0f
   };
 
-	// setting up buffers for TRIANGLE
-	unsigned int VBO, VAO, EBO;
+  unsigned indices[] = { 
+    0, 1, 3, 
+    0, 2, 3 
+  };
+
+  // setting up buffers for TRIANGLE
+  unsigned int VBO, VAO, EBO;
 
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
@@ -103,95 +88,81 @@ int main(int argc, char *argv[])
   glBindVertexArray(VAO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
-  
+
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-  
+
   // setting up vertex attributes for current array object (for TRIANGLE)
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, (3 + 3 + 2) * sizeof(float), static_cast<void *>(0));
   glEnableVertexAttribArray(0);
 
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, (3 + 3 + 2) * sizeof(float), reinterpret_cast<void *>(3 * sizeof(float)));
+  glVertexAttribPointer(
+    1, 3, GL_FLOAT, GL_FALSE, (3 + 3 + 2) * sizeof(float), reinterpret_cast<void *>(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, (3+3+2)*sizeof(float), reinterpret_cast<void*>((3+3)*sizeof(float)));
+  glVertexAttribPointer(
+    2, 2, GL_FLOAT, GL_FALSE, (3 + 3 + 2) * sizeof(float), reinterpret_cast<void *>((3 + 3) * sizeof(float)));
   glEnableVertexAttribArray(2);
-  
+
   // setting up texture
   unsigned int woodTexture{};
   glGenTextures(1, &woodTexture);
   glBindTexture(GL_TEXTURE_2D, woodTexture);
-  
+
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  
+
   int textureWidth{}, textureHeight{}, textureNumChannels{};
 
   stbi_set_flip_vertically_on_load(true);
-  unsigned char* woodTextureData = stbi_load("resources/textures/wood.jpg",
-    &textureWidth, &textureHeight, &textureNumChannels, 0);
-  
+  unsigned char *woodTextureData =
+    stbi_load("resources/textures/wood.jpg", &textureWidth, &textureHeight, &textureNumChannels, 0);
+
   if (woodTextureData)
   {
-    glTexImage2D(GL_TEXTURE_2D,
-      0,
-      GL_RGB,
-      textureWidth,
-      textureHeight,
-      0,
-      GL_RGB,
-      GL_UNSIGNED_BYTE,
-      woodTextureData);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, woodTextureData);
     glGenerateMipmap(GL_TEXTURE_2D);
   }
   else
     std::cout << "Error, failed to load the texture!\n";
- 
+
   stbi_image_free(woodTextureData);
-  
+
   unsigned int memeTexture{};
   glGenTextures(1, &memeTexture);
   glBindTexture(GL_TEXTURE_2D, memeTexture);
-  
+
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  
+
   woodTextureData = stbi_load("resources/textures/meme.png", &textureWidth, &textureHeight, &textureNumChannels, 0);
   if (woodTextureData)
   {
-    glTexImage2D(GL_TEXTURE_2D,
-      0,
-      GL_RGBA,
-      textureWidth,
-      textureHeight,
-      0,
-      GL_RGBA,
-      GL_UNSIGNED_BYTE,
-      woodTextureData);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, woodTextureData);
     glGenerateMipmap(GL_TEXTURE_2D);
   }
   else
     std::cout << "Error, failed to load the texture!\n";
- 
+
   stbi_image_free(woodTextureData);
 
   glUseProgram(shaderProgram);
   glUniform1i(glGetUniformLocation(shaderProgram, "woodTexture"), 0);
   glUniform1i(glGetUniformLocation(shaderProgram, "memeTexture"), 1);
 
-	GLint blendColorLocation = glGetUniformLocation(shaderProgram, "colorBlending");
-	
+  GLint blendColorLocation = glGetUniformLocation(shaderProgram, "colorBlending");
+
   GLfloat texMixVal = 0.4f;
   GLint texMixLocation = glGetUniformLocation(shaderProgram, "texturesMixCoefficient");
 
-	auto t_start = high_resolution_clock::now();
+  auto t_start = high_resolution_clock::now();
 
-	while (!glfwWindowShouldClose(window))
-	{
+  while (!glfwWindowShouldClose(window))
+  {
     processInput(window);
     processArrowsInput(window, texMixLocation, texMixVal);
 
@@ -220,16 +191,38 @@ int main(int argc, char *argv[])
 
     glfwPollEvents();
     glfwSwapBuffers(window);
-	}
+  }
 
-	glDeleteProgram(shaderProgram);
+  glDeleteProgram(shaderProgram);
 
   glDeleteBuffers(1, &VBO);
   glDeleteBuffers(1, &EBO);
   glDeleteVertexArrays(1, &VAO);
 
-	glfwTerminate();
-	return 0;
+  glfwTerminate();
+  return 0;
+}
+
+GLFWwindow *initGLFWwindow(const std::string &windowTitle, const ushort &windowWidth, const ushort &windowHeight)
+{
+  if (glfwInit() == GLFW_FALSE)
+  {
+    std::cout << "Oops, failed to initializeGLFW!\n";
+    return nullptr;
+  }
+
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE;
+#endif
+
+	GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, windowTitle.c_str(), 
+		nullptr, nullptr);
+
+  return window;
 }
 
 GLuint createShader(GLenum type, const std::string &source)
