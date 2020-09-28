@@ -14,8 +14,7 @@ uniform sampler2D memeTexture;
 
 void main()
 {
-  FragmentColor = mix(texture(woodTexture, TextureCoords),
-                    texture(memeTexture, TextureCoords),
-                    texturesMixCoefficient)
-                  * vec4(Color, 1.0);
+  FragmentColor = mix(texture(woodTexture, TextureCoords).rgba,
+    texture(memeTexture, TextureCoords),
+    vec4(texture(memeTexture, TextureCoords)).a * texturesMixCoefficient);
 }

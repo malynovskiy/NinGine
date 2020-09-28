@@ -17,8 +17,8 @@ using namespace std::chrono;
 
 typedef unsigned short ushort;
 
-constexpr unsigned short WINDOW_WIDTH{ 1366 };
-constexpr unsigned short WINDOW_HEIGHT{ 768 };
+constexpr unsigned short WINDOW_WIDTH{ 1000 };
+constexpr unsigned short WINDOW_HEIGHT{ 1000 };
 
 inline std::string read_file(const std::string &filePath)
 {
@@ -36,8 +36,37 @@ void processArrowsInput(GLFWwindow *window, const GLint &uniformLocation, GLfloa
 GLuint createShader(GLenum type, const std::string &source);
 GLuint createShaderProgram(GLuint vertexShader, GLuint fragmentShader);
 
+inline void printMat4(const glm::mat4& m) 
+{
+  for (int i = 0; i < 4; ++i) 
+    std::cout << '|' << m[i].x << ' ' << m[i].y << ' ' << m[i].z << ' ' << m[i].w << "|\n";
+  std::cout << std::endl;
+}
+
+void glm_stuff() 
+{
+  glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
+  glm::mat4 trans(1.0f);
+  
+  printMat4(trans);
+  
+  trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
+  
+  printMat4(trans);
+
+  vec = trans * vec;
+  
+  trans = glm::mat4(1.0f);
+  trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+  trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.0f));
+
+
+}
+
 int main(int argc, char *argv[])
 {
+  glm_stuff();
+
   GLFWwindow *window = initGLFWwindow("OpenGL HELLO WORLD!", WINDOW_WIDTH, WINDOW_HEIGHT);
   if (window == nullptr)
   {
@@ -60,8 +89,8 @@ int main(int argc, char *argv[])
   // TODO: FIX THIS AWFULL PATHS
   //        1) investigate boost filesystem
   //        2) probably need to copy shaders by script into folder with build
-  unsigned int vertexShader = createShader(GL_VERTEX_SHADER, read_file("../../../src/shaders/vertex.glsl"));
-  unsigned int fragmentShader = createShader(GL_FRAGMENT_SHADER, read_file("../../../src/shaders/fragment.glsl"));
+  unsigned int vertexShader = createShader(GL_VERTEX_SHADER, read_file("../../../src/shaders/vertex.vert"));
+  unsigned int fragmentShader = createShader(GL_FRAGMENT_SHADER, read_file("../../../src/shaders/fragment.frag"));
 
   unsigned int shaderProgram = createShaderProgram(vertexShader, fragmentShader);
 
@@ -70,10 +99,10 @@ int main(int argc, char *argv[])
 
   float vertexData[] = { 
     // position coords     //colors        //texture coords
-    -0.4f, -0.6f, 0.0f,   1.0f, 0.0f, 0.0f,   0.0f, 0.0f,
-    -0.4f,  0.6f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 4.0f,
-     0.4f, -0.6f, 0.0f,   0.0f, 1.0f, 0.0f,   2.0f, 0.0f,
-     0.4f,  0.6f, 0.0f,   0.2f, 0.5f, 0.1f,   4.0f, 4.0f
+    -0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   0.0f, 0.0f,
+    -0.5f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 1.0f,
+     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+     0.5f,  0.5f, 0.0f,   0.2f, 0.5f, 0.1f,   1.0f, 1.0f
   };
 
   unsigned indices[] = { 
@@ -122,7 +151,7 @@ int main(int argc, char *argv[])
 
   stbi_set_flip_vertically_on_load(true);
   unsigned char *woodTextureData =
-    stbi_load("resources/textures/wood.jpg", &textureWidth, &textureHeight, &textureNumChannels, 0);
+    stbi_load("resources/textures/container.jpg", &textureWidth, &textureHeight, &textureNumChannels, 0);
 
   if (woodTextureData)
   {
@@ -160,8 +189,15 @@ int main(int argc, char *argv[])
 
   GLint blendColorLocation = glGetUniformLocation(shaderProgram, "colorBlending");
 
-  GLfloat texMixVal = 0.4f;
+  GLfloat texMixVal = 0.2f;
   GLint texMixLocation = glGetUniformLocation(shaderProgram, "texturesMixCoefficient");
+
+  glm::mat4 trans(1.0f);
+  trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+  trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.0f));
+
+  GLint transformLocation = glGetUniformLocation(shaderProgram, "transform");
+  glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(trans));
 
   auto t_start = high_resolution_clock::now();
 
