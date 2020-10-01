@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 
   stbi_set_flip_vertically_on_load(true);
   unsigned char *woodTextureData =
-    stbi_load("resources/textures/container.jpg", &textureWidth, &textureHeight, &textureNumChannels, 0);
+    stbi_load("resources/textures/container-pepe.jpg", &textureWidth, &textureHeight, &textureNumChannels, 0);
 
   if (woodTextureData)
   {
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-  woodTextureData = stbi_load("resources/textures/meme.png", &textureWidth, &textureHeight, &textureNumChannels, 0);
+  woodTextureData = stbi_load("resources/textures/pepe.png", &textureWidth, &textureHeight, &textureNumChannels, 0);
   if (woodTextureData)
   {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, woodTextureData);
@@ -193,11 +193,8 @@ int main(int argc, char *argv[])
   GLint texMixLocation = glGetUniformLocation(shaderProgram, "texturesMixCoefficient");
 
   glm::mat4 trans(1.0f);
-  trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-  trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.0f));
 
   GLint transformLocation = glGetUniformLocation(shaderProgram, "transform");
-  glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(trans));
 
   auto t_start = high_resolution_clock::now();
 
@@ -225,6 +222,23 @@ int main(int argc, char *argv[])
     glUseProgram(shaderProgram);
 
     glUniform3f(blendColorLocation, red, green, blue);
+     
+    trans = glm::mat4(1.0f);
+    trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+    trans = glm::rotate(trans, static_cast<float>(glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
+    
+    glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(trans));
+
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    trans = glm::mat4(1.0f);
+    trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
+
+    float scale_coeff = abs(sinf(glfwGetTime()));
+
+    trans = glm::scale(trans, glm::vec3(scale_coeff, scale_coeff, 0.0f));
+    glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(trans));
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
