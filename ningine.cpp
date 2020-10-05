@@ -143,9 +143,8 @@ int main(int argc, char *argv[])
     2, 2, GL_FLOAT, GL_FALSE, (3 + 3 + 2) * sizeof(float), reinterpret_cast<void *>((3 + 3) * sizeof(float)));
   glEnableVertexAttribArray(2);
 
-  // setting up texture
   stbi_set_flip_vertically_on_load(true);
-  
+  // setting up textures
   unsigned int backTexture =
     create2DTexture("resources/textures/container-pepe.jpg", GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
 
@@ -162,6 +161,10 @@ int main(int argc, char *argv[])
   GLint texMixLocation = glGetUniformLocation(shaderProgram, "texturesMixCoefficient");
 
   glm::mat4 trans(1.0f);
+
+  glm::mat4 orthographic = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
+  glm::mat4 projection = glm::perspective(
+    glm::radians(45.0f), static_cast<float>(WINDOW_WIDTH) / static_cast<float>(WINDOW_HEIGHT), 0.1f, 100.0f);
 
   GLint transformLocation = glGetUniformLocation(shaderProgram, "transform");
 
