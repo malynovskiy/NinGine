@@ -138,9 +138,9 @@ int main(int argc, char *argv[])
   glEnableVertexAttribArray(2);
 
   // setting up texture
-  unsigned int woodTexture{};
-  glGenTextures(1, &woodTexture);
-  glBindTexture(GL_TEXTURE_2D, woodTexture);
+  unsigned int backTexture{};
+  glGenTextures(1, &backTexture);
+  glBindTexture(GL_TEXTURE_2D, backTexture);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -150,42 +150,42 @@ int main(int argc, char *argv[])
   int textureWidth{}, textureHeight{}, textureNumChannels{};
 
   stbi_set_flip_vertically_on_load(true);
-  unsigned char *woodTextureData =
+  unsigned char *textureData=
     stbi_load("resources/textures/container-pepe.jpg", &textureWidth, &textureHeight, &textureNumChannels, 0);
 
-  if (woodTextureData)
+  if (textureData)
   {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, woodTextureData);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
     glGenerateMipmap(GL_TEXTURE_2D);
   }
   else
     std::cout << "Error, failed to load the texture!\n";
 
-  stbi_image_free(woodTextureData);
+  stbi_image_free(textureData);
 
-  unsigned int memeTexture{};
-  glGenTextures(1, &memeTexture);
-  glBindTexture(GL_TEXTURE_2D, memeTexture);
+  unsigned int frontTexture{};
+  glGenTextures(1, &frontTexture);
+  glBindTexture(GL_TEXTURE_2D, frontTexture);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-  woodTextureData = stbi_load("resources/textures/pepe.png", &textureWidth, &textureHeight, &textureNumChannels, 0);
-  if (woodTextureData)
+  textureData = stbi_load("resources/textures/pepe.png", &textureWidth, &textureHeight, &textureNumChannels, 0);
+  if (textureData)
   {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, woodTextureData);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
     glGenerateMipmap(GL_TEXTURE_2D);
   }
   else
     std::cout << "Error, failed to load the texture!\n";
 
-  stbi_image_free(woodTextureData);
+  stbi_image_free(textureData);
 
   glUseProgram(shaderProgram);
-  glUniform1i(glGetUniformLocation(shaderProgram, "woodTexture"), 0);
-  glUniform1i(glGetUniformLocation(shaderProgram, "memeTexture"), 1);
+  glUniform1i(glGetUniformLocation(shaderProgram, "backTexture"), 0);
+  glUniform1i(glGetUniformLocation(shaderProgram, "frontTexture"), 1);
 
   GLint blendColorLocation = glGetUniformLocation(shaderProgram, "colorBlending");
 
@@ -215,9 +215,9 @@ int main(int argc, char *argv[])
     const float blue = cos(time * 2.0f);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, woodTexture);
+    glBindTexture(GL_TEXTURE_2D, backTexture);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, memeTexture);
+    glBindTexture(GL_TEXTURE_2D, frontTexture);
 
     glUseProgram(shaderProgram);
 
