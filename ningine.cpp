@@ -163,10 +163,18 @@ int main(int argc, char *argv[])
   glm::mat4 trans(1.0f);
 
   glm::mat4 orthographic = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
+  glm::mat4 model(1.0f);
+  model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+  glm::mat4 view(1.0f);
+  view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
   glm::mat4 projection = glm::perspective(
     glm::radians(45.0f), static_cast<float>(WINDOW_WIDTH) / static_cast<float>(WINDOW_HEIGHT), 0.1f, 100.0f);
 
-  GLint transformLocation = glGetUniformLocation(shaderProgram, "transform");
+  GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+  GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
+  GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
 
   auto t_start = high_resolution_clock::now();
 
@@ -194,24 +202,11 @@ int main(int argc, char *argv[])
     glUseProgram(shaderProgram);
 
     glUniform3f(blendColorLocation, red, green, blue);
-     
-    trans = glm::mat4(1.0f);
-    trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-    trans = glm::rotate(trans, static_cast<float>(glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
     
-    glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(trans));
-
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-    trans = glm::mat4(1.0f);
-    trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
-
-    float scale_coeff = abs(sinf(glfwGetTime()));
-
-    trans = glm::scale(trans, glm::vec3(scale_coeff, scale_coeff, 0.0f));
-    glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(trans));
-
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
