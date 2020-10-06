@@ -49,30 +49,8 @@ inline void printMat4(const glm::mat4& m)
   std::cout << std::endl;
 }
 
-void glm_stuff() 
-{
-  glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
-  glm::mat4 trans(1.0f);
-  
-  printMat4(trans);
-  
-  trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
-  
-  printMat4(trans);
-
-  vec = trans * vec;
-  
-  trans = glm::mat4(1.0f);
-  trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-  trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.0f));
-
-
-}
-
 int main(int argc, char *argv[])
 {
-  glm_stuff();
-
   GLFWwindow *window = initGLFWwindow("OpenGL HELLO WORLD!", WINDOW_WIDTH, WINDOW_HEIGHT);
   if (window == nullptr)
   {
@@ -146,7 +124,7 @@ int main(int argc, char *argv[])
   stbi_set_flip_vertically_on_load(true);
   // setting up textures
   unsigned int backTexture =
-    create2DTexture("resources/textures/container-pepe.jpg", GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
+    create2DTexture("resources/textures/container.jpg", GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
 
   unsigned int frontTexture =
     create2DTexture("resources/textures/pepe.png", GL_MIRRORED_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);

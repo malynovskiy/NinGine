@@ -15,6 +15,6 @@ uniform sampler2D frontTexture;
 void main()
 {
   FragmentColor = mix(texture(backTexture, TextureCoords).rgba,
-    texture(frontTexture, TextureCoords) * vec4(colorBlending, 1.0),
+    texture(frontTexture, TextureCoords),
     vec4(texture(frontTexture, TextureCoords)).a * texturesMixCoefficient);
 }
