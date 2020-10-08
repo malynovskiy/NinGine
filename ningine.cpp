@@ -82,11 +82,11 @@ int main(int argc, char *argv[])
   glDeleteShader(fragmentShader);
 
   float vertexData[] = { 
-    // position coords     //colors        //texture coords
-    -0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   0.0f, 0.0f,
-    -0.5f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 1.0f,
-     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-     0.5f,  0.5f, 0.0f,   0.2f, 0.5f, 0.1f,   1.0f, 1.0f
+    // position coords  //texture coords
+    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f,
+    -0.5f,  0.5f, 0.0f,   0.0f, 1.0f,
+     0.5f, -0.5f, 0.0f,   1.0f, 0.0f,
+     0.5f,  0.5f, 0.0f,   1.0f, 1.0f
   };
 
   unsigned indices[] = { 
@@ -110,16 +110,13 @@ int main(int argc, char *argv[])
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
   // setting up vertex attributes for current array object (for TRIANGLE)
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, (3 + 3 + 2) * sizeof(float), static_cast<void *>(0));
+
+  const GLsizei stride = (3 + 2) * sizeof(float);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, static_cast<void *>(0));
   glEnableVertexAttribArray(0);
 
-  glVertexAttribPointer(
-    1, 3, GL_FLOAT, GL_FALSE, (3 + 3 + 2) * sizeof(float), reinterpret_cast<void *>(3 * sizeof(float)));
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void *>(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
-
-  glVertexAttribPointer(
-    2, 2, GL_FLOAT, GL_FALSE, (3 + 3 + 2) * sizeof(float), reinterpret_cast<void *>((3 + 3) * sizeof(float)));
-  glEnableVertexAttribArray(2);
 
   stbi_set_flip_vertically_on_load(true);
   // setting up textures
@@ -132,8 +129,6 @@ int main(int argc, char *argv[])
   glUseProgram(shaderProgram);
   glUniform1i(glGetUniformLocation(shaderProgram, "backTexture"), 0);
   glUniform1i(glGetUniformLocation(shaderProgram, "frontTexture"), 1);
-
-  GLint blendColorLocation = glGetUniformLocation(shaderProgram, "colorBlending");
 
   GLfloat texMixVal = 0.2f;
   GLint texMixLocation = glGetUniformLocation(shaderProgram, "texturesMixCoefficient");
@@ -168,19 +163,11 @@ int main(int argc, char *argv[])
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    const float red = (sin(time * 4.0f) + 1.0f) / 2.0f;
-    const float green = 0.0f;
-    const float blue = cos(time * 2.0f);
-
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, backTexture);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, frontTexture);
 
-    glUseProgram(shaderProgram);
-
-    glUniform3f(blendColorLocation, red, green, blue);
-    
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
