@@ -188,20 +188,20 @@ int main(int argc, char *argv[])
   GLint texMixLocation = glGetUniformLocation(shaderProgram, "texturesMixCoefficient");
 
   glm::mat4 trans(1.0f);
-
-  glm::mat4 orthographic = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
-  glm::mat4 model(1.0f);
-
   glm::mat4 view(1.0f);
-  view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+  glm::mat4 projection(1.0f);
 
-  glm::mat4 projection = glm::perspective(
+  view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f));
+  projection = glm::perspective(
     glm::radians(45.0f), static_cast<float>(WINDOW_WIDTH) / static_cast<float>(WINDOW_HEIGHT), 0.1f, 100.0f);
 
   GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
   GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
   GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
 
+  glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+  glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+      
   auto t_start = high_resolution_clock::now();
 
   while (!glfwWindowShouldClose(window))
@@ -224,15 +224,12 @@ int main(int argc, char *argv[])
     glBindVertexArray(VAO);
     for (size_t i = 0; i < cubePositions.size(); ++i) 
     {
-      model = glm::mat4(1.0f);
+      glm::mat4 model(1.0f);
       model = glm::translate(model, cubePositions[i]);
       model = glm::rotate(model, (float)glfwGetTime() * glm::radians(20.0f * (i+1)),
         glm::vec3(0.5f, 1.0f, 0.7f));
 
       glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-      glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-      glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-      
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
