@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 project(NinGine)
 
+set(MATH_LIB_NAME Math)
+add_subdirectory(source/Math)
+
 add_executable(${PROJECT_NAME})
 
 set(resources_src_dir "${CMAKE_SOURCE_DIR}/resources")
@@ -38,6 +41,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
 	PUBLIC
 	PRIVATE
+		${MATH_LIB_NAME}
 		glfw
 		glad::glad
 		glm

@@ -18,8 +18,8 @@ namespace math
 
     bool hasNaNs() const { return std::isnan(x) || std::isnan(y); }
 
-    explicit Vector2(const Point2<T> &point);
-    explicit Vector2(const Point3<T> &point);
+    //explicit Vector2(const Point2<T> &point);
+    //explicit Vector2(const Point3<T> &point);
 
 #ifndef NDEBUG
     Vector2(const Vector2<T> &v)
@@ -130,7 +130,7 @@ namespace math
 
     bool hasNaNs() const { return std::isnan(x) || std::isnan(y) || std::isnan(z); }
 
-    explicit Vector3(const Point3<T> &point);
+    //explicit Vector3(const Point3<T> &point);
 
 #ifndef NDEBUG
     Vector3(const Vector3<T> &v)
@@ -241,6 +241,8 @@ namespace math
     float LengthSquared() const { return x * x + y * y + z * z; }
     float Length() const { return std::sqrt(LengthSquared()); }
 
+    Vector3<T>& normalize() { return *this = Normalize(*this); }
+
     T x, y, z;
   };
 
@@ -293,5 +295,17 @@ namespace math
   {
     return Vector3<T>(v[x], v[y], v[z]);
   }
+
+  // [different from original}
+  template<typename T> 
+  Vector3<T> CoordinateSystems(const Vector3<T> &v1, Vector3<T> &v2, Vector3<T> &v3)
+  {
+    if(std::abs(v1.x) > std::abs(v1.y))
+      v2 = Vector3<T>(-v1.z, 0, v1.x).normalize();
+    else
+      v2 = Vector3<T>(0, v1.z, -v1.y).normalize();
+    
+  }
+
 }// namespace math
 }// namespace ningine
