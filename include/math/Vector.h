@@ -6,11 +6,6 @@ namespace ningine
 {
 namespace math
 {
-  typedef Vector2<float> Vector2f;
-  typedef Vector2<int> Vector2i;
-  typedef Vector3<float> Vector3f;
-  typedef Vector3<float> Vector3i;
-
   template<typename T> struct Vector2
   {
     Vector2() { x = y = 0; }
@@ -306,6 +301,11 @@ namespace math
       v2 = Vector3<T>(0, v1.z, -v1.y).normalize();
     
   }
+
+  typedef Vector2<float> Vector2f;
+  typedef Vector2<int> Vector2i;
+  typedef Vector3<float> Vector3f;
+  typedef Vector3<float> Vector3i;
 
 }// namespace math
 }// namespace ningine
