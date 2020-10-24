@@ -120,7 +120,7 @@ namespace math
 
   template<typename T> struct Vector3
   {
-    Vector3() { x = y = z = 0; }
+    Vector3() : x(0), y(0), z(0) {}
     Vector3(T X, T Y, T Z) : x(X), y(Y), z(Z) { assert(!hasNaNs()); }
 
     bool hasNaNs() const { return std::isnan(x) || std::isnan(y) || std::isnan(z); }
@@ -293,13 +293,13 @@ namespace math
 
   // [different from original}
   template<typename T> 
-  Vector3<T> CoordinateSystems(const Vector3<T> &v1, Vector3<T> &v2, Vector3<T> &v3)
+  void CoordinateSystem(const Vector3<T> &v1, Vector3<T> &v2, Vector3<T> &v3)
   {
     if(std::abs(v1.x) > std::abs(v1.y))
       v2 = Vector3<T>(-v1.z, 0, v1.x).normalize();
     else
       v2 = Vector3<T>(0, v1.z, -v1.y).normalize();
-    
+    v3 = Cross(v1, v2);
   }
 
   typedef Vector2<float> Vector2f;
