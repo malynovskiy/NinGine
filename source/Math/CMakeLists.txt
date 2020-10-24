@@ -28,6 +28,7 @@ target_sources(${MATH_LIB_NAME}
 	PRIVATE
 		# Headers
 		${CMAKE_SOURCE_DIR}/include/Math/Vector.h
+		${CMAKE_SOURCE_DIR}/include/Math/Point.h
 		# Sources
 		placeholder.cpp
 )
