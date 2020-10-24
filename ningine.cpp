@@ -74,8 +74,8 @@ int main(int argc, char *argv[])
   // TODO: FIX THIS AWFULL PATHS
   //        1) investigate boost filesystem
   //        2) probably need to copy shaders by script into folder with build
-  unsigned int vertexShader = createShader(GL_VERTEX_SHADER, read_file("../../../src/shaders/vertex.vert"));
-  unsigned int fragmentShader = createShader(GL_FRAGMENT_SHADER, read_file("../../../src/shaders/fragment.frag"));
+  unsigned int vertexShader = createShader(GL_VERTEX_SHADER, read_file("../../../source/Shaders/vertex.vert"));
+  unsigned int fragmentShader = createShader(GL_FRAGMENT_SHADER, read_file("../../../source/Shaders/fragment.frag"));
 
   unsigned int shaderProgram = createShaderProgram(vertexShader, fragmentShader);
 

@@ -22,7 +22,6 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
-
 add_custom_target(copy-files ALL
 	COMMAND ${CMAKE_COMMAND} -E resources
 	${CMAKE_CURRENT_SOURCE_DIR}/resources
@@ -33,7 +32,7 @@ target_include_directories(${PROJECT_NAME}
 	PUBLIC
 		include
 	PRIVATE
-		src
+		source
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -47,6 +46,6 @@ target_link_libraries(${PROJECT_NAME}
 target_sources(${PROJECT_NAME}
 	PUBLIC
 	PRIVATE
-		src/graphics
-		src/stb_image.cpp
+		source/Graphics
+		source/stb_image.cpp
 		ningine.cpp)
