@@ -58,6 +58,9 @@ bool Ningine::init()
   glfwSetKeyCallback(window, key_callback);
 
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+  if (!program.load(glShaderProgramName, vertexShaderName, fragmentShaderName))
+    std::cerr << "Failed to load a shader program" << std::endl;
 }
 
 

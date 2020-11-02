@@ -1,13 +1,13 @@
-#include "Ningine.h"
+#include "Ningine.hpp"
 
-int main(int argc, char *argv[]) 
+int main(int argc, char *argv[])
 {
-	ningine::Ningine engine;
-	
-	if(!engine.init())
-		return -1;
+  ningine::Ningine engine;
 
-	engine.run();
+  if (!engine.init())
+    return -1;
 
-	return 0;
+  engine.run();
+
+  return 0;
 }

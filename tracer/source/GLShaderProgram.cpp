@@ -1,4 +1,4 @@
-#include "GLProgram.h"
+#include "GLShaderProgram.hpp"
 #include <fstream>
 #include <iostream>
 
@@ -12,9 +12,9 @@ inline std::string readfromFile(const std::string &filePath)
   return content;
 }
 
-GLProgram::GLProgram() : m_name(""), m_vertexShader(0), m_fragmentShader(0), m_program(0) {}
+GLShaderProgram::GLShaderProgram() : m_name(""), m_vertexShader(0), m_fragmentShader(0), m_program(0) {}
 
-GLProgram::~GLProgram()
+GLShaderProgram::~GLShaderProgram()
 {
   glUseProgram(0);
   glDeleteShader(m_vertexShader);
@@ -22,7 +22,7 @@ GLProgram::~GLProgram()
   glDeleteProgram(m_program);
 }
 
-bool GLProgram::load(const std::string name, std::string vertexFileName, std::string fragmentFileName)
+bool GLShaderProgram::load(const std::string name, std::string vertexFileName, std::string fragmentFileName)
 {
   m_name = name;
   GLint success = 0;
@@ -61,7 +61,7 @@ bool GLProgram::load(const std::string name, std::string vertexFileName, std::st
   return true;
 }
 
-GLuint GLProgram::createShader(std::string fileName, GLenum type, GLint &success)
+GLuint GLShaderProgram::createShader(std::string fileName, GLenum type, GLint &success)
 {
   const char *source_cstr = readfromFile(fileName).c_str();
 
@@ -87,7 +87,7 @@ GLuint GLProgram::createShader(std::string fileName, GLenum type, GLint &success
   return shader;
 }
 
-std::string GLProgram::shaderInfoLog(const GLuint shader) const
+std::string GLShaderProgram::shaderInfoLog(const GLuint shader) const
 {
   GLsizei infoLogSize = 0;
   std::string infoLog;
@@ -100,7 +100,7 @@ std::string GLProgram::shaderInfoLog(const GLuint shader) const
 }
 
 
-std::string GLProgram::programInfoLog(const GLuint program) const
+std::string GLShaderProgram::programInfoLog(const GLuint program) const
 {
   GLsizei infoLogSize = 0;
   std::string infoLog;

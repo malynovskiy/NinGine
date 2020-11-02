@@ -5,21 +5,20 @@
 
 namespace ningine
 {
-
-class GLProgram
+class GLShaderProgram
 {
 public:
-  GLProgram();
-  ~GLProgram();
+  GLShaderProgram();
+  ~GLShaderProgram();
 
-  GLProgram(const GLProgram &) = delete;
-  GLProgram &operator=(const GLProgram &) = delete;
+  GLShaderProgram(const GLShaderProgram &) = delete;
+  GLShaderProgram &operator=(const GLShaderProgram &) = delete;
 
   GLuint handle() const { return m_program; }
   bool load(const std::string name, std::string vertexFileName, std::string fragmentFileName);
 
 private:
-  GLuint GLProgram::createShader(std::string fileName, GLenum type, GLint &success);
+  GLuint GLShaderProgram::createShader(std::string fileName, GLenum type, GLint &success);
 
   std::string shaderInfoLog(const GLuint shader) const;
   std::string programInfoLog(const GLuint program) const;
