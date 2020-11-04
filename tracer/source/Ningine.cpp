@@ -61,8 +61,210 @@ bool Ningine::init()
 
   if (!program.load(glShaderProgramName, vertexShaderName, fragmentShaderName))
     std::cerr << "Failed to load a shader program" << std::endl;
+
+  screenPlane.constructGeometry(&program, screenWidth, screenHeight);
+
+  initKeyMappings();
+
+  glEnable(GL_DEPTH_TEST);
 }
 
+void Nigine::createScreenImage()
+{
+  GLubyte *image = NULL;
+
+  int width, height;
+  bool hasAlpha;
+
+  // allocate the space for the window texture
+  int screenDim = ((screenWidth > screenHeight) ? screenWidth : screenHeight);
+
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+  glGenTextures(1, &texID);
+  glBindTexture(GL_TEXTURE_2D, texID);
+
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenDim, screenDim, 0, GL_RGB, GL_FLOAT, nullptr);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
+
+  glUniform1i(glGetUniformLocation(program.handle(), "tex"), 0);
+}
+
+// Pushes sphere data into the common buffer the will be passed into OpenCL kernels
+void Ningine::addSphere(glm::vec3 position,
+  float radius,
+  glm::vec3 color,
+  glm::vec3 lightAmbiant,
+  glm::vec3 lightSpecular,
+  glm::vec3 materialAmbiant,
+  glm::vec3 materialDiffuse,
+  glm::vec3 materialSpecular,
+  float materialShinyness,
+  float reflectiveIndex,
+  float opacity,
+  float refractiveIndex)
+{
+  spheres.push_back(pos.x);
+  spheres.push_back(pos.y);
+  spheres.push_back(pos.z);
+
+  spheres.push_back(radius);
+
+  spheres.push_back(color.r);
+  spheres.push_back(color.g);
+  spheres.push_back(color.b);
+
+  spheres.push_back(materialAmbiant.r);
+  spheres.push_back(materialAmbiant.g);
+  spheres.push_back(materialAmbiant.b);
+
+  spheres.push_back(materialDiffuse.r);
+  spheres.push_back(materialDiffuse.g);
+  spheres.push_back(materialDiffuse.b);
+
+  spheres.push_back(materialSpecular.r);
+  spheres.push_back(materialSpecular.g);
+  spheres.push_back(materialSpecular.b);
+
+  spheres.push_back(materialShinyness);
+
+  spheres.push_back(reflective);
+
+  spheres.push_back(opacity);
+
+  spheres.push_back(refractiveIndex);
+
+  numberOfSpheres++;
+}
+
+// basic scene with some spheres
+void Ningine::createSpheres()
+{
+  addSphere(glm::vec3(620, 360, 70),
+    15,
+    glm::vec3(1, 1, 1),
+    glm::vec3(0.8, 0.8, 0.8),
+    glm::vec3(0.9, 0.9, 0.9),
+    glm::vec3(0.2, 0.2, 0.2),
+    glm::vec3(0.8, 0.8, 0.8),
+    glm::vec3(0.9, 0.9, 0.9),
+    50,
+    0.50f,
+    0.3f,
+    0.8f);
+
+  addSphere(glm::vec3(668, 341, 100),
+    15,
+    glm::vec3(1, 0, 0),
+    glm::vec3(0.8, 0.8, 0.8),
+    glm::vec3(0.9, 0.9, 0.9),
+    glm::vec3(0.2, 0.2, 0.2),
+    glm::vec3(0.8, 0.8, 0.8),
+    glm::vec3(0.9, 0.9, 0.9),
+    50,
+    0.90f,
+    1.0f,
+    0.7f);
+  addSphere(glm::vec3(632, 374, 110),
+    5,
+    glm::vec3(0, 1, 0),
+    glm::vec3(0.8, 0.8, 0.8),
+    glm::vec3(0.9, 0.9, 0.9),
+    glm::vec3(0.2, 0.2, 0.2),
+    glm::vec3(0.8, 0.8, 0.8),
+    glm::vec3(0.9, 0.9, 0.9),
+    50,
+    0.90f,
+    1.0f,
+    0.7f);
+  addSphere(glm::vec3(646, 354, 107),
+    7,
+    glm::vec3(0, 0, 1),
+    glm::vec3(0.8, 0.8, 0.8),
+    glm::vec3(0.9, 0.9, 0.9),
+    glm::vec3(0.2, 0.2, 0.2),
+    glm::vec3(0.8, 0.8, 0.8),
+    glm::vec3(0.9, 0.9, 0.9),
+    50,
+    0.90f,
+    1.0f,
+    0.7f);
+
+  addSphere(glm::vec3(618, 348, 100),
+    5,
+    glm::vec3(1, 1, 0),
+    glm::vec3(0.8, 0.8, 0.8),
+    glm::vec3(0.9, 0.9, 0.9),
+    glm::vec3(0.2, 0.2, 0.2),
+    glm::vec3(0.8, 0.8, 0.8),
+    glm::vec3(0.9, 0.9, 0.9),
+    50,
+    0.90f,
+    1.0f,
+    0.7f);
+  addSphere(glm::vec3(602, 369, 115),
+    10,
+    glm::vec3(0, 1, 1),
+    glm::vec3(0.8, 0.8, 0.8),
+    glm::vec3(0.9, 0.9, 0.9),
+    glm::vec3(0.2, 0.2, 0.2),
+    glm::vec3(0.8, 0.8, 0.8),
+    glm::vec3(0.9, 0.9, 0.9),
+    50,
+    0.90f,
+    1.0f,
+    0.7f);
+  addSphere(glm::vec3(663, 371, 120),
+    20,
+    glm::vec3(1, 0, 1),
+    glm::vec3(0.8, 0.8, 0.8),
+    glm::vec3(0.9, 0.9, 0.9),
+    glm::vec3(0.2, 0.2, 0.2),
+    glm::vec3(0.8, 0.8, 0.8),
+    glm::vec3(0.9, 0.9, 0.9),
+    50,
+    0.90f,
+    1.0f,
+    0.7f);
+
+  spheres.shrink_to_fit();
+}
+
+void Ningine::initKeyMappings()
+{
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_1, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_2, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_3, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_4, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_5, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_6, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_7, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_8, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_9, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_LEFT_SHIFT, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_RIGHT_SHIFT, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_BACKSPACE, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_DELETE, false));
+
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_A, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_D, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_W, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_S, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_LEFT_SHIFT, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_SPACE, false));
+
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_UP, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_DOWN, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_LEFT, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_RIGHT, false));
+
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_PAGE_DOWN, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_PAGE_UP, false));
+}
 
 void Ningine::resize_callback(GLFWwindow *window, int width, int height)
 {

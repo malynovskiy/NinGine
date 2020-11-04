@@ -25,18 +25,31 @@ class Ningine
   GLShaderProgram program;
   GLScreen screenPlane;
 
-public:
   static int screenWidth;
   static int screenHeight;
-
   static std::map<int, bool> keyMap;
 
+  std::vector<float> spheres;
+  int numberOfSpheres;
+  
+private:
+  void initKeyMappings();
+
+  //TODO: Ivestigete whether we can drop the next function
+  //      and create some sort of scenes (width preloaded objects)
+  void createSpheres();
+  
+  void addSphere(glm::vec3 pos, float r, glm::vec3 colour,
+						  glm::vec3 lightAmbiant, glm::vec3 lightSpecular,
+						  glm::vec3 materialAmbiant, glm::vec3 materialDiffuse, glm::vec3 materialSpecular, float materialShinyness,
+						  float reflective, float opacity, float refractiveIndex);
 public:
   bool init();
   void run();
 
-
   bool createGLContext();
+
+  void createScreenImage();
 
   static void resize_callback(GLFWwindow *window, int width, int height);
   static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
