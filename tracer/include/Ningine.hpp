@@ -5,6 +5,7 @@
 
 #include "GLShaderProgram.hpp"
 #include "GLScreen.hpp"
+#include "CLWrapper.hpp"
 
 #include <random>
 #include <map>
@@ -24,6 +25,9 @@ class Ningine
 
   GLShaderProgram program;
   GLScreen screenPlane;
+  CLWrapper clContext;
+
+  GLuint textureID;
 
   static int screenWidth;
   static int screenHeight;
@@ -34,10 +38,13 @@ class Ningine
   
 private:
   void initKeyMappings();
-
+  void initGLTexture();
+  bool initCLContext();
+  
   //TODO: Ivestigete whether we can drop the next function
   //      and create some sort of scenes (width preloaded objects)
   void createSpheres();
+  void createCLKernels();
   
   void addSphere(glm::vec3 pos, float r, glm::vec3 colour,
 						  glm::vec3 lightAmbiant, glm::vec3 lightSpecular,

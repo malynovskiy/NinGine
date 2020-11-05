@@ -67,6 +67,16 @@ bool Ningine::init()
   initKeyMappings();
 
   glEnable(GL_DEPTH_TEST);
+
+  createSpheres();
+  createScreenImage();
+
+  raytracer.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*spheres.size(), spheres.data());
+
+  float lighting[6] = { 0.8,0.8,0.8,0.9,0.9,0.9 };
+	raytracer.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float) * 6, lighting);
+
+
 }
 
 void Nigine::createScreenImage()
@@ -76,13 +86,58 @@ void Nigine::createScreenImage()
   int width, height;
   bool hasAlpha;
 
+  initGLTexture();
+
+  
+}
+
+bool Ningine::initCLContext()
+{
+  cl_int error = CL_SUCCESS;
+
+	cl::Platform lPlatform = getPlatform();
+  cl_context_properties contextProperties[] = {
+            CL_GL_CONTEXT_KHR, (cl_context_properties)glfwGetWGLContext(window),
+            CL_WGL_HDC_KHR, (cl_context_properties)GetDC(glfwGetWin32Window(window)),
+            CL_CONTEXT_PLATFORM, (cl_context_properties)lPlatform(),
+            0};
+
+  clContext.init("CLfiles/raytracer.cl", contextProperties);
+
+  error = CL_SUCCESS;
+	screen = cl::ImageGL(
+		clContext.getContext(),
+		CL_MEM_WRITE_ONLY,
+		GL_TEXTURE_2D,
+		0,
+		textureID,
+		&error);
+
+	if (error != CL_SUCCESS) 
+  {
+		std::cerr << "error creating cl::ImageGL:\t" << getErrorString(error) << std::endl;
+		return(error);
+	}
+
+  createCLKernels();
+	
+  return true;
+}
+
+void Ningine::createCLKernels()
+{
+  clContext.createKernel("raytracer");
+}
+
+void Ningine::initGLTexture()
+{
   // allocate the space for the window texture
   int screenDim = ((screenWidth > screenHeight) ? screenWidth : screenHeight);
 
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-  glGenTextures(1, &texID);
-  glBindTexture(GL_TEXTURE_2D, texID);
+  glGenTextures(1, &textureID);
+  glBindTexture(GL_TEXTURE_2D, textureID);
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenDim, screenDim, 0, GL_RGB, GL_FLOAT, nullptr);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
