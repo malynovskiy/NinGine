@@ -7,7 +7,5 @@ int main(int argc, char *argv[])
   if (!engine.init())
     return -1;
 
-  engine.run();
-
-  return 0;
+  return engine.run();
 }

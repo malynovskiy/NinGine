@@ -27,35 +27,53 @@ class Ningine
   GLScreen screenPlane;
   CLWrapper clContext;
 
+  float screenDistance;
+
   GLuint textureID;
+
+  std::vector<float> spheres;
+  int numberOfSpheres;
 
   static int screenWidth;
   static int screenHeight;
   static std::map<int, bool> keyMap;
 
-  std::vector<float> spheres;
-  int numberOfSpheres;
-  
+  glm::vec3 spherePos;
+
+  cl_float3 camPos;
+
 private:
   void initKeyMappings();
   void initGLTexture();
   bool initCLContext();
-  
-  //TODO: Ivestigete whether we can drop the next function
+
+  // TODO: Ivestigete whether we can drop the next function
   //      and create some sort of scenes (width preloaded objects)
   void createSpheres();
   void createCLKernels();
-  
-  void addSphere(glm::vec3 pos, float r, glm::vec3 colour,
-						  glm::vec3 lightAmbiant, glm::vec3 lightSpecular,
-						  glm::vec3 materialAmbiant, glm::vec3 materialDiffuse, glm::vec3 materialSpecular, float materialShinyness,
-						  float reflective, float opacity, float refractiveIndex);
+
+  void addSphere(glm::vec3 pos,
+    float r,
+    glm::vec3 colour,
+    glm::vec3 lightAmbiant,
+    glm::vec3 lightSpecular,
+    glm::vec3 materialAmbiant,
+    glm::vec3 materialDiffuse,
+    glm::vec3 materialSpecular,
+    float materialShinyness,
+    float reflective,
+    float opacity,
+    float refractiveIndex);
+
+  float calculateDist(float fov);
+
 public:
   bool init();
-  void run();
+  int run();
+  void display();
+  void processEvents();
 
   bool createGLContext();
-
   void createScreenImage();
 
   static void resize_callback(GLFWwindow *window, int width, int height);

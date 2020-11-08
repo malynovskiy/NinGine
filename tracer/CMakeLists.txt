@@ -33,5 +33,9 @@ target_link_libraries(${PROJECT_NAME}
 target_sources(${PROJECT_NAME}
 	PUBLIC
 	PRIVATE
-		source
-		nintracer.cpp)
+		source/CLError.cpp
+		source/CLWrapper.cpp
+		source/GLScreen.cpp
+		source/GLShaderProgram.cpp
+		source/Ningine.cpp
+		nintracer.cpp "include/UtilitiesOpenCL.hpp")

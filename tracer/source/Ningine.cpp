@@ -1,13 +1,17 @@
-#include "Ningine.h"
+#include "Ningine.hpp"
 
 #include <iostream>
 #include <iomanip>
 
+#include "UtilitiesOpenCL.hpp"
+
+#define PI 3.14159265358979
+
 namespace ningine
 {
 
-int Ningine::screenWidth = 1366;
-int Ningine::screenHeight = 768;
+int Ningine::screenWidth = 1920;
+int Ningine::screenHeight = 1080;
 
 std::map<int, bool> Ningine::keyMap;
 
@@ -25,7 +29,7 @@ bool Ningine::createGLContext()
   // TODO: probably the next hint will be useful for fps capabilities
   glfwWindowHint(GLFW_REFRESH_RATE, GLFW_DONT_CARE);
 
-  window = glfwCreateWindow(screenWidth, screenHeight, "real-time Ray-Tracing test", nullptr, nullptr);
+  window = glfwCreateWindow(screenWidth, screenHeight, "Real-Time Ray-Tracing test", glfwGetPrimaryMonitor(), nullptr);
   if (window == nullptr)
   {
     std::cerr << "Error, failed to create glfw window!\n";
@@ -71,15 +75,51 @@ bool Ningine::init()
   createSpheres();
   createScreenImage();
 
-  raytracer.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*spheres.size(), spheres.data());
+  // pushing our spheres data to the common OpenCL buffer
+  clContext.createBuffer(
+    CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float) * spheres.size(), spheres.data());
 
-  float lighting[6] = { 0.8,0.8,0.8,0.9,0.9,0.9 };
-	raytracer.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float) * 6, lighting);
+  // mock ligting for now
+  float lighting[6] = { 0.8, 0.8, 0.8, 0.9, 0.9, 0.9 };
+  clContext.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float) * 6, lighting);
 
+  // TODO: Rework for to be customizable
+  screenDistance = calculateDist(60);
 
+  // main sphere with movement
+  spherePos = glm::vec3((screenWidth / 2.0) - 33, (screenHeight / 2.0) - 15, 70);
+
+  camPos = { screenWidth / 2.0f, screenHeight / 2.0f, 0.0f };
+
+  std::cout << "screenDist\t" << screenDistance << "\n";
+
+  std::cout << "FOV:\t"
+            << calculateFOV(glm::vec2(640, 0), glm::vec2(0, screenDistance), glm::vec2(1280, screenDistance));
+  std::cout << (char)167 << "\n";
+
+  glfwSwapInterval(1);
+  resize_callback(window, screenWidth, screenHeight);
+  return true;
 }
 
-void Nigine::createScreenImage()
+int Ningine::run()
+{
+  while (!glfwWindowShouldClose(window))
+  {
+    display();
+    glfwSwapBuffers(window);
+    processEvents();
+  }
+
+  glfwTerminate();
+  return 0;
+}
+
+void Ningine::display() {}
+
+void Ningine::processEvents() {}
+
+void Ningine::createScreenImage()
 {
   GLubyte *image = NULL;
 
@@ -88,40 +128,41 @@ void Nigine::createScreenImage()
 
   initGLTexture();
 
-  
+  initCLContext();
 }
 
 bool Ningine::initCLContext()
 {
   cl_int error = CL_SUCCESS;
 
-	cl::Platform lPlatform = getPlatform();
-  cl_context_properties contextProperties[] = {
-            CL_GL_CONTEXT_KHR, (cl_context_properties)glfwGetWGLContext(window),
-            CL_WGL_HDC_KHR, (cl_context_properties)GetDC(glfwGetWin32Window(window)),
-            CL_CONTEXT_PLATFORM, (cl_context_properties)lPlatform(),
-            0};
+  cl::Platform lPlatform = getPlatform();
+  cl_context_properties contextProperties[] = { CL_GL_CONTEXT_KHR,
+    (cl_context_properties)glfwGetWGLContext(window),
+    CL_WGL_HDC_KHR,
+    (cl_context_properties)GetDC(glfwGetWin32Window(window)),
+    CL_CONTEXT_PLATFORM,
+    (cl_context_properties)lPlatform(),
+    0 };
 
   clContext.init("CLfiles/raytracer.cl", contextProperties);
 
   error = CL_SUCCESS;
-	screen = cl::ImageGL(
-		clContext.getContext(),
-		CL_MEM_WRITE_ONLY,
-		GL_TEXTURE_2D,
-		0,
-		textureID,
-		&error);
+  screen = cl::ImageGL(clContext.getContext(), CL_MEM_WRITE_ONLY, GL_TEXTURE_2D, 0, textureID, &error);
 
-	if (error != CL_SUCCESS) 
+  if (error != CL_SUCCESS)
   {
-		std::cerr << "error creating cl::ImageGL:\t" << getErrorString(error) << std::endl;
-		return(error);
-	}
+    std::cerr << "error creating cl::ImageGL:\t" << getErrorString(error) << std::endl;
+    return (error);
+  }
 
   createCLKernels();
-	
+
   return true;
+}
+
+float Ningine::calculateDist(float fov)
+{
+  return (screenWidth / 2.0f) / tan(fov / 2.0 * PI / 180.0f);
 }
 
 void Ningine::createCLKernels()
@@ -163,9 +204,9 @@ void Ningine::addSphere(glm::vec3 position,
   float opacity,
   float refractiveIndex)
 {
-  spheres.push_back(pos.x);
-  spheres.push_back(pos.y);
-  spheres.push_back(pos.z);
+  spheres.push_back(position.x);
+  spheres.push_back(position.y);
+  spheres.push_back(position.z);
 
   spheres.push_back(radius);
 
@@ -187,7 +228,7 @@ void Ningine::addSphere(glm::vec3 position,
 
   spheres.push_back(materialShinyness);
 
-  spheres.push_back(reflective);
+  spheres.push_back(reflectiveIndex);
 
   spheres.push_back(opacity);
 
