@@ -3,7 +3,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "UtilitiesOpenCL.hpp"
+#include "OpenCLUtility.hpp"
 
 #define PI 3.14159265358979
 
@@ -147,7 +147,7 @@ bool Ningine::initCLContext()
   clContext.init("CLfiles/raytracer.cl", contextProperties);
 
   error = CL_SUCCESS;
-  screen = cl::ImageGL(clContext.getContext(), CL_MEM_WRITE_ONLY, GL_TEXTURE_2D, 0, textureID, &error);
+  screenImage = cl::ImageGL(clContext.getContext(), CL_MEM_WRITE_ONLY, GL_TEXTURE_2D, 0, textureID, &error);
 
   if (error != CL_SUCCESS)
   {

@@ -38,4 +38,5 @@ target_sources(${PROJECT_NAME}
 		source/GLScreen.cpp
 		source/GLShaderProgram.cpp
 		source/Ningine.cpp
-		nintracer.cpp "include/UtilitiesOpenCL.hpp")
+		source/OpenCLUtility.cpp
+		nintracer.cpp)

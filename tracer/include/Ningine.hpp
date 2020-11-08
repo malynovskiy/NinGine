@@ -1,7 +1,14 @@
 #pragma once
 
 #include <glad/glad.h>
+
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#ifdef _WIN32
+#define GLFW_EXPOSE_NATIVE_WGL
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+#endif
 
 #include "GLShaderProgram.hpp"
 #include "GLScreen.hpp"
@@ -27,6 +34,7 @@ class Ningine
   GLScreen screenPlane;
   CLWrapper clContext;
 
+  cl::ImageGL screenImage;
   float screenDistance;
 
   GLuint textureID;
