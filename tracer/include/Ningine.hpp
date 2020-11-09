@@ -24,6 +24,10 @@ constexpr char glShaderProgramName[] = "BasicView";
 constexpr char vertexShaderName[] = "shaders/basic.vert";
 constexpr char fragmentShaderName[] = "shaders/basic.frag";
 
+// start coodinate for the first sphere that could be added in runtime
+constexpr glm::vec3 start_sphere_pos = glm::vec3(607, 345, 70);
+constexpr glm::vec3 spheres_offset = glm::vec3(15, 15, 15);
+
 class Ningine
 {
   GLFWwindow *window;
@@ -50,7 +54,11 @@ class Ningine
 
   cl_float3 camPos;
 
+  // coordinates for adding new spheres in run-time
+  glm::vec3 curr_coordinate;
   glm::vec3 spherePos;
+  const u_int attrsPerSphere = 20;
+
 private:
   void initKeyMappings();
   void initGLTexture();
@@ -60,6 +68,8 @@ private:
   //      and create some sort of scenes (width preloaded objects)
   void createSpheres();
   void createCLKernels();
+
+  void processKeyboardInput();
 
   void addSphere(glm::vec3 pos,
     float r,
