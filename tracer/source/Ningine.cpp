@@ -10,8 +10,11 @@
 namespace ningine
 {
 
-int Ningine::screenWidth = 1920;
-int Ningine::screenHeight = 1080;
+// int Ningine::screenWidth = 1920;
+// int Ningine::screenHeight = 1080;
+// for test purposes lower reso
+int Ningine::screenWidth = 1366;
+int Ningine::screenHeight = 768;
 
 std::map<int, bool> Ningine::keyMap;
 
@@ -29,7 +32,19 @@ bool Ningine::createGLContext()
   // TODO: probably the next hint will be useful for fps capabilities
   glfwWindowHint(GLFW_REFRESH_RATE, GLFW_DONT_CARE);
 
-  window = glfwCreateWindow(screenWidth, screenHeight, "Real-Time Ray-Tracing test", glfwGetPrimaryMonitor(), nullptr);
+  GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+  const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+
+  glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+  glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+  glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+  glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+  // window mode without borders
+  window = glfwCreateWindow(mode->width, mode->height, "Realtime ratracing test", monitor, nullptr);
+	
+  // FULL-SCREEN mode below
+  //window = glfwCreateWindow(screenWidth, screenHeight, "Real-Time Ray-Tracing test", glfwGetPrimaryMonitor(), nullptr);
   if (window == nullptr)
   {
     std::cerr << "Error, failed to create glfw window!\n";
