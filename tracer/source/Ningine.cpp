@@ -195,7 +195,7 @@ bool Ningine::initCLContext()
     (cl_context_properties)lPlatform(),
     0 };
 
-  clContext.init("CLfiles/raytracer.cl", contextProperties);
+  clContext.init("shaders/OpenCL/raytracer.cl", contextProperties);
 
   error = CL_SUCCESS;
   screenImage = cl::ImageGL(clContext.getContext(), CL_MEM_WRITE_ONLY, GL_TEXTURE_2D, 0, textureID, &error);
@@ -213,9 +213,9 @@ bool Ningine::initCLContext()
 
 float Ningine::calculateFOV(glm::vec2 a, glm::vec2 b, glm::vec2 c)
 {
-	glm::vec2 v1 = glm::normalize(b-a);
-	glm::vec2 v2 = glm::normalize(c-a);
-	return (acos(glm::dot(v1,v2))*180/PI);
+  glm::vec2 v1 = glm::normalize(b - a);
+  glm::vec2 v2 = glm::normalize(c - a);
+  return (acos(glm::dot(v1, v2)) * 180 / PI);
 }
 
 float Ningine::calculateDist(float fov)
