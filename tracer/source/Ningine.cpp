@@ -196,6 +196,13 @@ bool Ningine::initCLContext()
   return true;
 }
 
+float Ningine::calculateFOV(glm::vec2 a, glm::vec2 b, glm::vec2 c)
+{
+	glm::vec2 v1 = glm::normalize(b-a);
+	glm::vec2 v2 = glm::normalize(c-a);
+	return (acos(glm::dot(v1,v2))*180/PI);
+}
+
 float Ningine::calculateDist(float fov)
 {
   return (screenWidth / 2.0f) / tan(fov / 2.0 * PI / 180.0f);
@@ -221,7 +228,7 @@ void Ningine::initGLTexture()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16.0f);
 
   glUniform1i(glGetUniformLocation(program.handle(), "tex"), 0);
 }
@@ -490,7 +497,7 @@ void Ningine::processKeyboardInput()
   {
     addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
       5,
-      glm::vec3(dis(gen), dis(gen), dis(gen)),
+      glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
       glm::vec3(0.8, 0.8, 0.8),
       glm::vec3(0.9, 0.9, 0.9),
       glm::vec3(0.2, 0.2, 0.2),
@@ -505,10 +512,10 @@ void Ningine::processKeyboardInput()
   }
   if (keyMap.at(GLFW_KEY_KP_2))
   {
-    // generator.seed(time(NULL));
+    // randGenerator.seed(time(NULL));
     addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
       5,
-      glm::vec3(dis(gen), dis(gen), dis(gen)),
+      glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
       glm::vec3(0.8, 0.8, 0.8),
       glm::vec3(0.9, 0.9, 0.9),
       glm::vec3(0.2, 0.2, 0.2),
@@ -523,11 +530,9 @@ void Ningine::processKeyboardInput()
   }
   if (keyMap.at(GLFW_KEY_KP_3))
   {
-    // generator.seed(time(NULL));
-    // std::cout << rand() << " " << rand() << " " << rand() << "\n";
     addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
       5,
-      glm::vec3(dis(gen), dis(gen), dis(gen)),
+      glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
       glm::vec3(0.8, 0.8, 0.8),
       glm::vec3(0.9, 0.9, 0.9),
       glm::vec3(0.2, 0.2, 0.2),
@@ -544,7 +549,7 @@ void Ningine::processKeyboardInput()
   {
     addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
       5,
-      glm::vec3(dis(gen), dis(gen), dis(gen)),
+      glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
       glm::vec3(0.8, 0.8, 0.8),
       glm::vec3(0.9, 0.9, 0.9),
       glm::vec3(0.2, 0.2, 0.2),
@@ -560,7 +565,7 @@ void Ningine::processKeyboardInput()
   {
     addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
       5,
-      glm::vec3(dis(gen), dis(gen), dis(gen)),
+      glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
       glm::vec3(0.8, 0.8, 0.8),
       glm::vec3(0.9, 0.9, 0.9),
       glm::vec3(0.2, 0.2, 0.2),
@@ -576,7 +581,7 @@ void Ningine::processKeyboardInput()
   {
     addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
       5,
-      glm::vec3(dis(gen), dis(gen), dis(gen)),
+      glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
       glm::vec3(0.8, 0.8, 0.8),
       glm::vec3(0.9, 0.9, 0.9),
       glm::vec3(0.2, 0.2, 0.2),
@@ -595,7 +600,7 @@ void Ningine::processKeyboardInput()
     {
       addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
         5,
-        glm::vec3(dis(gen), dis(gen), dis(gen)),
+        glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
         glm::vec3(0.8, 0.8, 0.8),
         glm::vec3(0.9, 0.9, 0.9),
         glm::vec3(0.2, 0.2, 0.2),
@@ -625,7 +630,7 @@ void Ningine::processKeyboardInput()
     {
       addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
         5,
-        glm::vec3(dis(gen), dis(gen), dis(gen)),
+        glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
         glm::vec3(0.8, 0.8, 0.8),
         glm::vec3(0.9, 0.9, 0.9),
         glm::vec3(0.2, 0.2, 0.2),
@@ -655,7 +660,7 @@ void Ningine::processKeyboardInput()
     {
       addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
         5,
-        glm::vec3(dis(gen), dis(gen), dis(gen)),
+        glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
         glm::vec3(0.8, 0.8, 0.8),
         glm::vec3(0.9, 0.9, 0.9),
         glm::vec3(0.2, 0.2, 0.2),

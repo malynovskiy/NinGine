@@ -32,6 +32,7 @@ class Ningine
 {
   GLFWwindow *window;
 
+  std::random_device randGen;
   std::uniform_real_distribution<float> randDistribution;
 
   GLShaderProgram program;
@@ -85,6 +86,7 @@ private:
     float refractiveIndex);
 
   float calculateDist(float fov);
+  float calculateFOV(glm::vec2 a, glm::vec2 b, glm::vec2 c);
 
 public:
   bool init();
