@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <iomanip>
-
+#include <cassert>
 #include "OpenCLUtility.hpp"
 
 #define PI 3.14159265358979
@@ -86,10 +86,11 @@ bool Ningine::init()
   // TODO: Rework for to be customizable
   screenDistance = calculateDist(60);
 
+  camPos = { screenWidth / 2.0f, screenHeight / 2.0f, 0.0f };
+
   // main sphere with movement
   spherePos = glm::vec3((screenWidth / 2.0) - 33, (screenHeight / 2.0) - 15, 70);
 
-  camPos = { screenWidth / 2.0f, screenHeight / 2.0f, 0.0f };
 
   std::cout << "screenDist\t" << screenDistance << "\n";
 
@@ -115,19 +116,52 @@ int Ningine::run()
   return 0;
 }
 
-void Ningine::display() {}
+void Ningine::display()
+{
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-void Ningine::processEvents() {}
+  glUseProgram(program.handle());
+
+  screenPlane.render(textureID);
+
+  clContext.clearBuffers();
+  clContext.createBuffer(
+    CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float) * spheres.size(), spheres.data());
+
+  // temporal lighting
+  float lighting[6] = { 0.8, 0.8, 0.8, 0.9, 0.9, 0.9 };
+  clContext.createBuffer(
+    CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float) * 6, &lighting[0]);
+
+  clContext.setKernelArgs(0, screenImage);
+  clContext.setKernelArgs(1, camPos);
+  clContext.setKernelArgs(2, screenDistance);
+  clContext.setKernelArgs(3, clContext.getBuffer(0));
+  clContext.setKernelArgs(4, numberOfSpheres);
+  clContext.setKernelArgs(5, clContext.getBuffer(1));
+
+  screenRange = cl::NDRange(screenWidth, screenHeight);
+
+  queue = cl::CommandQueue(clContext.getContext(), clContext.getDevice());
+  std::vector<cl::Memory> images(1, screenImage);
+
+  // tell openGL to let openCL use the memory
+  queue.enqueueAcquireGLObjects(&images, nullptr);
+  queue.enqueueNDRangeKernel(clContext.getKernel(), 0, screenRange);
+  // give the memory back to openGL
+  queue.enqueueReleaseGLObjects(&images, nullptr);
+
+  glUseProgram(0);// turn off the current shader
+}
+
+void Ningine::processEvents()
+{
+  glfwPollEvents();
+}
 
 void Ningine::createScreenImage()
 {
-  GLubyte *image = NULL;
-
-  int width, height;
-  bool hasAlpha;
-
   initGLTexture();
-
   initCLContext();
 }
 
@@ -235,6 +269,8 @@ void Ningine::addSphere(glm::vec3 position,
   spheres.push_back(refractiveIndex);
 
   numberOfSpheres++;
+
+  assert(spheres.size() / numberOfSpheres == attrsPerSphere);
 }
 
 // basic scene with some spheres

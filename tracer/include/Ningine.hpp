@@ -36,6 +36,8 @@ class Ningine
 
   cl::ImageGL screenImage;
   float screenDistance;
+  cl::NDRange screenRange;
+  cl::CommandQueue queue;
 
   GLuint textureID;
 
@@ -46,10 +48,9 @@ class Ningine
   static int screenHeight;
   static std::map<int, bool> keyMap;
 
-  glm::vec3 spherePos;
-
   cl_float3 camPos;
 
+  glm::vec3 spherePos;
 private:
   void initKeyMappings();
   void initGLTexture();
