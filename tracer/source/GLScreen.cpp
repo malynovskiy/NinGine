@@ -85,7 +85,6 @@ void GLScreen::constructGeometry(GLShaderProgram *shaderProgram, const uint widt
 
   glGenBuffers(3, m_vboID);
 
-
   GLuint spHandle = shaderProgram->handle();
   GLint uniformLocation{};
   

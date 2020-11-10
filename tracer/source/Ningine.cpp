@@ -41,9 +41,9 @@ bool Ningine::createGLContext()
   glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
   // window mode without borders
-  window = glfwCreateWindow(mode->width, mode->height, "Realtime ratracing test", monitor, nullptr);
+  window = glfwCreateWindow(screenWidth, screenHeight, "Realtime ratracing test", nullptr, nullptr);
 	
-  // FULL-SCREEN mode below
+  // FULL-SCREEN mode banned for now
   //window = glfwCreateWindow(screenWidth, screenHeight, "Real-Time Ray-Tracing test", glfwGetPrimaryMonitor(), nullptr);
   if (window == nullptr)
   {
@@ -195,7 +195,7 @@ bool Ningine::initCLContext()
     (cl_context_properties)lPlatform(),
     0 };
 
-  clContext.init("shaders/OpenCL/raytracer.cl", contextProperties);
+  clContext.init("../../../source/shaders/OpenCL/raytracer.cl", contextProperties);
 
   error = CL_SUCCESS;
   screenImage = cl::ImageGL(clContext.getContext(), CL_MEM_WRITE_ONLY, GL_TEXTURE_2D, 0, textureID, &error);
@@ -300,6 +300,8 @@ void Ningine::addSphere(glm::vec3 position,
 // basic scene with some spheres
 void Ningine::createSpheres()
 {
+  numberOfSpheres = 0;
+
   addSphere(glm::vec3(620, 360, 70),
     15,
     glm::vec3(1, 1, 1),

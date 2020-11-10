@@ -63,7 +63,8 @@ bool GLShaderProgram::load(const std::string name, std::string vertexFileName, s
 
 GLuint GLShaderProgram::createShader(std::string fileName, GLenum type, GLint &success)
 {
-  const char *source_cstr = readfromFile(fileName).c_str();
+  fileName = readfromFile(fileName);
+  const char *source_cstr = fileName.c_str();
 
   unsigned int shader = glCreateShader(type);
   glShaderSource(shader, 1, &source_cstr, nullptr);

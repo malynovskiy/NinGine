@@ -21,8 +21,8 @@ namespace ningine
 {
 
 constexpr char glShaderProgramName[] = "BasicView";
-constexpr char vertexShaderName[] = "shaders/GLSL/basic.vert";
-constexpr char fragmentShaderName[] = "shaders/GLSL/basic.frag";
+constexpr char vertexShaderName[] = "../../../source/shaders/GLSL/basic.vert";
+constexpr char fragmentShaderName[] = "../../../source/shaders/GLSL/basic.frag";
 
 // start coodinate for the first sphere that could be added in runtime
 constexpr glm::vec3 start_sphere_pos = glm::vec3(607, 345, 70);
