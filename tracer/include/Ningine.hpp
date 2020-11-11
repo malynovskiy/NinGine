@@ -61,7 +61,7 @@ class Ningine
   const u_int attrsPerSphere = 20;
 
 private:
-  void initKeyMappings();
+  void initKeyboardMappings();
   void initGLTexture();
   bool initCLContext();
 

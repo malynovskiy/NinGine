@@ -83,7 +83,7 @@ bool Ningine::init()
 
   screenPlane.constructGeometry(&program, screenWidth, screenHeight);
 
-  initKeyMappings();
+  initKeyboardMappings();
 
   glEnable(GL_DEPTH_TEST);
 
@@ -392,7 +392,7 @@ void Ningine::createSpheres()
   spheres.shrink_to_fit();
 }
 
-void Ningine::initKeyMappings()
+void Ningine::initKeyboardMappings()
 {
   keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_1, false));
   keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_2, false));
