@@ -21,7 +21,10 @@ void GLScreen::render(GLuint texID)
     return;
   }
 
-  glUniformMatrix4fv(glGetUniformLocation(program->handle(), "ModelViewMatrix"), 1, GL_FALSE, glm::value_ptr(matrix));
+  glUniformMatrix4fv(glGetUniformLocation(program->handle(), "ModelViewMatrix"),
+    1,
+    GL_FALSE,
+    glm::value_ptr(matrix));
 
   // start rendering
   glBindVertexArray(m_vaoID);// select VAO
@@ -33,7 +36,9 @@ void GLScreen::render(GLuint texID)
 
   glBindVertexArray(0);
 }
-void GLScreen::constructGeometry(GLShaderProgram *shaderProgram, const uint width, const uint height)
+
+void GLScreen::constructGeometry(
+  GLShaderProgram *shaderProgram, const uint width, const uint height)
 {
   setShaderProgram(shaderProgram);
   float a{}, b{};
@@ -87,10 +92,11 @@ void GLScreen::constructGeometry(GLShaderProgram *shaderProgram, const uint widt
 
   GLuint spHandle = shaderProgram->handle();
   GLint uniformLocation{};
-  
+
   // VERTEX POSITIONS DATA
   glBindBuffer(GL_ARRAY_BUFFER, m_vboID[0]);
-  glBufferData(GL_ARRAY_BUFFER, numOfVertices * 3 * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+  glBufferData(
+    GL_ARRAY_BUFFER, numOfVertices * 3 * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
   uniformLocation = glGetAttribLocation(spHandle, "in_Position");
   glVertexAttribPointer(uniformLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
   glEnableVertexAttribArray(uniformLocation);
@@ -104,7 +110,8 @@ void GLScreen::constructGeometry(GLShaderProgram *shaderProgram, const uint widt
 
   // TEXTURE COORDS DATA
   glBindBuffer(GL_ARRAY_BUFFER, m_vboID[2]);
-  glBufferData(GL_ARRAY_BUFFER, numOfVertices * 2 * sizeof(GLfloat), textureCoords.data(), GL_STATIC_DRAW);
+  glBufferData(
+    GL_ARRAY_BUFFER, numOfVertices * 2 * sizeof(GLfloat), textureCoords.data(), GL_STATIC_DRAW);
   uniformLocation = glGetAttribLocation(spHandle, "in_TexCoord");
   glVertexAttribPointer(uniformLocation, 2, GL_FLOAT, GL_FALSE, 0, 0);
   glEnableVertexAttribArray(uniformLocation);
@@ -114,8 +121,10 @@ void GLScreen::constructGeometry(GLShaderProgram *shaderProgram, const uint widt
   // INDICES
   glGenBuffers(1, &m_iboID);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_iboID);
-  glBufferData(
-    GL_ELEMENT_ARRAY_BUFFER, numOfTriangleIndices * 3 * sizeof(unsigned int), trIndices.data(), GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+    numOfTriangleIndices * 3 * sizeof(unsigned int),
+    trIndices.data(),
+    GL_STATIC_DRAW);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
   glEnableVertexAttribArray(0);
