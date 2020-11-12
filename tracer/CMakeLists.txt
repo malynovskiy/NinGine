@@ -35,6 +35,7 @@ target_sources(${PROJECT_NAME}
 	PRIVATE
 		include/Vector.hpp
 		include/Material.hpp
+		include/Light.hpp
 		include/Sphere.hpp
 
 		source/CLError.cpp
