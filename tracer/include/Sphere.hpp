@@ -1,6 +1,6 @@
 #pragma once
 #include "Vector.hpp"
-#include "Material"
+#include "Material.hpp"
 
 namespace ningine
 {

@@ -195,7 +195,7 @@ bool Ningine::initCLContext()
     (cl_context_properties)lPlatform(),
     0 };
 
-  clContext.init("../../../source/shaders/OpenCL/raytracer.cl", contextProperties);
+  clContext.init(raytracer_kernel_path, contextProperties);
 
   error = CL_SUCCESS;
   screenImage = cl::ImageGL(clContext.getContext(), CL_MEM_WRITE_ONLY, GL_TEXTURE_2D, 0, textureID, &error);
@@ -297,101 +297,137 @@ void Ningine::addSphere(glm::vec3 position,
   assert(spheres.size() / numberOfSpheres == attrsPerSphere);
 }
 
+void Ningine::addSphere(const Sphere& sphere)
+{
+  spheres.push_back(sphere.center.x);
+  spheres.push_back(sphere.center.y);
+  spheres.push_back(sphere.center.z);
+
+  spheres.push_back(sphere.radius);
+
+  spheres.push_back(sphere.material.diffuse_color.x);
+  spheres.push_back(sphere.material.diffuse_color.y);
+  spheres.push_back(sphere.material.diffuse_color.z);
+
+  spheres.push_back(sphere.material.albedo.x);
+  spheres.push_back(sphere.material.albedo.y);
+  spheres.push_back(sphere.material.albedo.z);
+  spheres.push_back(sphere.material.albedo.w);
+  
+  spheres.push_back(sphere.material.specular_exponent);
+  spheres.push_back(sphere.material.refractive_index);
+
+  numberOfSpheres++;
+
+  assert(spheres.size() / numberOfSpheres == attrsPerSphere);
+}
 // basic scene with some spheres
-void Ningine::createSpheres()
+
+void Ningine::createSpheres() 
 {
   numberOfSpheres = 0;
 
-  addSphere(glm::vec3(620, 360, 70),
-    15,
-    glm::vec3(1, 1, 1),
-    glm::vec3(0.8, 0.8, 0.8),
-    glm::vec3(0.9, 0.9, 0.9),
-    glm::vec3(0.2, 0.2, 0.2),
-    glm::vec3(0.8, 0.8, 0.8),
-    glm::vec3(0.9, 0.9, 0.9),
-    50,
-    0.50f,
-    0.3f,
-    0.8f);
-
-  addSphere(glm::vec3(668, 341, 100),
-    15,
-    glm::vec3(1, 0, 0),
-    glm::vec3(0.8, 0.8, 0.8),
-    glm::vec3(0.9, 0.9, 0.9),
-    glm::vec3(0.2, 0.2, 0.2),
-    glm::vec3(0.8, 0.8, 0.8),
-    glm::vec3(0.9, 0.9, 0.9),
-    50,
-    0.90f,
-    1.0f,
-    0.7f);
-  addSphere(glm::vec3(632, 374, 110),
-    5,
-    glm::vec3(0, 1, 0),
-    glm::vec3(0.8, 0.8, 0.8),
-    glm::vec3(0.9, 0.9, 0.9),
-    glm::vec3(0.2, 0.2, 0.2),
-    glm::vec3(0.8, 0.8, 0.8),
-    glm::vec3(0.9, 0.9, 0.9),
-    50,
-    0.90f,
-    1.0f,
-    0.7f);
-  addSphere(glm::vec3(646, 354, 107),
-    7,
-    glm::vec3(0, 0, 1),
-    glm::vec3(0.8, 0.8, 0.8),
-    glm::vec3(0.9, 0.9, 0.9),
-    glm::vec3(0.2, 0.2, 0.2),
-    glm::vec3(0.8, 0.8, 0.8),
-    glm::vec3(0.9, 0.9, 0.9),
-    50,
-    0.90f,
-    1.0f,
-    0.7f);
-
-  addSphere(glm::vec3(618, 348, 100),
-    5,
-    glm::vec3(1, 1, 0),
-    glm::vec3(0.8, 0.8, 0.8),
-    glm::vec3(0.9, 0.9, 0.9),
-    glm::vec3(0.2, 0.2, 0.2),
-    glm::vec3(0.8, 0.8, 0.8),
-    glm::vec3(0.9, 0.9, 0.9),
-    50,
-    0.90f,
-    1.0f,
-    0.7f);
-  addSphere(glm::vec3(602, 369, 115),
-    10,
-    glm::vec3(0, 1, 1),
-    glm::vec3(0.8, 0.8, 0.8),
-    glm::vec3(0.9, 0.9, 0.9),
-    glm::vec3(0.2, 0.2, 0.2),
-    glm::vec3(0.8, 0.8, 0.8),
-    glm::vec3(0.9, 0.9, 0.9),
-    50,
-    0.90f,
-    1.0f,
-    0.7f);
-  addSphere(glm::vec3(663, 371, 120),
-    20,
-    glm::vec3(1, 0, 1),
-    glm::vec3(0.8, 0.8, 0.8),
-    glm::vec3(0.9, 0.9, 0.9),
-    glm::vec3(0.2, 0.2, 0.2),
-    glm::vec3(0.8, 0.8, 0.8),
-    glm::vec3(0.9, 0.9, 0.9),
-    50,
-    0.90f,
-    1.0f,
-    0.7f);
+  addSphere(Sphere(math::Vec3f(620, 360, 70), 10, materials::ivory));
+  addSphere(Sphere(math::Vec3f(668, 341, 100), 15, materials::glass));
+  addSphere(Sphere(math::Vec3f(632, 374, 110), 20, materials::red_rubber));
+  addSphere(Sphere(math::Vec3f(646, 354, 107), 7, materials::mirror));
 
   spheres.shrink_to_fit();
 }
 
+//void Ningine::createSpheres()
+//{
+//  numberOfSpheres = 0;
+//
+//  addSphere(glm::vec3(620, 360, 70),
+//    15,
+//    glm::vec3(1, 1, 1),
+//    glm::vec3(0.8, 0.8, 0.8),
+//    glm::vec3(0.9, 0.9, 0.9),
+//    glm::vec3(0.2, 0.2, 0.2),
+//    glm::vec3(0.8, 0.8, 0.8),
+//    glm::vec3(0.9, 0.9, 0.9),
+//    50,
+//    0.50f,
+//    0.3f,
+//    0.8f);
+//
+//  addSphere(glm::vec3(668, 341, 100),
+//    15,
+//    glm::vec3(1, 0, 0),
+//    glm::vec3(0.8, 0.8, 0.8),
+//    glm::vec3(0.9, 0.9, 0.9),
+//    glm::vec3(0.2, 0.2, 0.2),
+//    glm::vec3(0.8, 0.8, 0.8),
+//    glm::vec3(0.9, 0.9, 0.9),
+//    50,
+//    0.90f,
+//    1.0f,
+//    0.7f);
+//  addSphere(glm::vec3(632, 374, 110),
+//    5,
+//    glm::vec3(0, 1, 0),
+//    glm::vec3(0.8, 0.8, 0.8),
+//    glm::vec3(0.9, 0.9, 0.9),
+//    glm::vec3(0.2, 0.2, 0.2),
+//    glm::vec3(0.8, 0.8, 0.8),
+//    glm::vec3(0.9, 0.9, 0.9),
+//    50,
+//    0.90f,
+//    1.0f,
+//    0.7f);
+//  addSphere(glm::vec3(646, 354, 107),
+//    7,
+//    glm::vec3(0, 0, 1),
+//    glm::vec3(0.8, 0.8, 0.8),
+//    glm::vec3(0.9, 0.9, 0.9),
+//    glm::vec3(0.2, 0.2, 0.2),
+//    glm::vec3(0.8, 0.8, 0.8),
+//    glm::vec3(0.9, 0.9, 0.9),
+//    50,
+//    0.90f,
+//    1.0f,
+//    0.7f);
+//
+//  addSphere(glm::vec3(618, 348, 100),
+//    5,
+//    glm::vec3(1, 1, 0),
+//    glm::vec3(0.8, 0.8, 0.8),
+//    glm::vec3(0.9, 0.9, 0.9),
+//    glm::vec3(0.2, 0.2, 0.2),
+//    glm::vec3(0.8, 0.8, 0.8),
+//    glm::vec3(0.9, 0.9, 0.9),
+//    50,
+//    0.90f,
+//    1.0f,
+//    0.7f);
+//  addSphere(glm::vec3(602, 369, 115),
+//    10,
+//    glm::vec3(0, 1, 1),
+//    glm::vec3(0.8, 0.8, 0.8),
+//    glm::vec3(0.9, 0.9, 0.9),
+//    glm::vec3(0.2, 0.2, 0.2),
+//    glm::vec3(0.8, 0.8, 0.8),
+//    glm::vec3(0.9, 0.9, 0.9),
+//    50,
+//    0.90f,
+//    1.0f,
+//    0.7f);
+//  addSphere(glm::vec3(663, 371, 120),
+//    20,
+//    glm::vec3(1, 0, 1),
+//    glm::vec3(0.8, 0.8, 0.8),
+//    glm::vec3(0.9, 0.9, 0.9),
+//    glm::vec3(0.2, 0.2, 0.2),
+//    glm::vec3(0.8, 0.8, 0.8),
+//    glm::vec3(0.9, 0.9, 0.9),
+//    50,
+//    0.90f,
+//    1.0f,
+//    0.7f);
+//
+//  spheres.shrink_to_fit();
+//}
 void Ningine::initKeyboardMappings()
 {
   keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_1, false));

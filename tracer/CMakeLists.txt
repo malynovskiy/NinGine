@@ -32,12 +32,11 @@ target_link_libraries(${PROJECT_NAME}
 
 target_sources(${PROJECT_NAME}
 	PUBLIC
-	PRIVATE
 		include/Vector.hpp
 		include/Material.hpp
 		include/Light.hpp
 		include/Sphere.hpp
-
+	PRIVATE
 		source/CLError.cpp
 		source/CLWrapper.cpp
 		source/GLScreen.cpp
