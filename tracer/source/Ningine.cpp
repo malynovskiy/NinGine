@@ -42,9 +42,10 @@ bool Ningine::createGLContext()
 
   // window mode without borders
   window = glfwCreateWindow(screenWidth, screenHeight, "Realtime ratracing test", nullptr, nullptr);
-	
+
   // FULL-SCREEN mode banned for now
-  //window = glfwCreateWindow(screenWidth, screenHeight, "Real-Time Ray-Tracing test", glfwGetPrimaryMonitor(), nullptr);
+  // window = glfwCreateWindow(screenWidth, screenHeight, "Real-Time Ray-Tracing test",
+  // glfwGetPrimaryMonitor(), nullptr);
   if (window == nullptr)
   {
     std::cerr << "Error, failed to create glfw window!\n";
@@ -90,13 +91,16 @@ bool Ningine::init()
   createSpheres();
   createScreenImage();
 
-  // pushing our spheres data to the common OpenCL buffer
-  clContext.createBuffer(
-    CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float) * spheres.size(), spheres.data());
+  // pushing our spheres data to the OpenCL buffer
+  clContext.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
+    sizeof(float) * spheres.size(),
+    spheres.data());
 
-  // mock ligting for now
-  float lighting[6] = { 0.8, 0.8, 0.8, 0.9, 0.9, 0.9 };
-  clContext.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float) * 6, lighting);
+  createLighting();
+  // pushing our lighting data to the OpenCL buffer
+  clContext.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
+    sizeof(float) * lightSources.size(),
+    lightSources.data());
 
   // TODO: Rework for to be customizable
   screenDistance = calculateDist(60);
@@ -160,13 +164,13 @@ void Ningine::display()
   screenPlane.render(textureID);
 
   clContext.clearBuffers();
-  clContext.createBuffer(
-    CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float) * spheres.size(), spheres.data());
+  clContext.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
+    sizeof(float) * spheres.size(),
+    spheres.data());
 
-  // temporal lighting
-  float lighting[6] = { 0.8, 0.8, 0.8, 0.9, 0.9, 0.9 };
-  clContext.createBuffer(
-    CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float) * 6, &lighting[0]);
+  clContext.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
+    sizeof(float) * lightSources.size(),
+    lightSources.data());
 
   clContext.setKernelArgs(0, screenImage);
   clContext.setKernelArgs(1, camPos);
@@ -174,6 +178,7 @@ void Ningine::display()
   clContext.setKernelArgs(3, clContext.getBuffer(0));
   clContext.setKernelArgs(4, numberOfSpheres);
   clContext.setKernelArgs(5, clContext.getBuffer(1));
+  clContext.setKernelArgs(6, numberOfLightSources);
 
   screenRange = cl::NDRange(screenWidth, screenHeight);
 
@@ -217,7 +222,8 @@ bool Ningine::initCLContext()
   clContext.init(raytracer_kernel_path, contextProperties);
 
   error = CL_SUCCESS;
-  screenImage = cl::ImageGL(clContext.getContext(), CL_MEM_WRITE_ONLY, GL_TEXTURE_2D, 0, textureID, &error);
+  screenImage =
+    cl::ImageGL(clContext.getContext(), CL_MEM_WRITE_ONLY, GL_TEXTURE_2D, 0, textureID, &error);
 
   if (error != CL_SUCCESS)
   {
@@ -316,7 +322,7 @@ void Ningine::addSphere(glm::vec3 position,
   assert(spheres.size() / numberOfSpheres == attrsPerSphere);
 }
 
-void Ningine::addSphere(const Sphere& sphere)
+void Ningine::pushBackSphere(const Sphere &sphere)
 {
   spheres.push_back(sphere.center.x);
   spheres.push_back(sphere.center.y);
@@ -332,7 +338,7 @@ void Ningine::addSphere(const Sphere& sphere)
   spheres.push_back(sphere.material.albedo.y);
   spheres.push_back(sphere.material.albedo.z);
   spheres.push_back(sphere.material.albedo.w);
-  
+
   spheres.push_back(sphere.material.specular_exponent);
   spheres.push_back(sphere.material.refractive_index);
 
@@ -340,21 +346,34 @@ void Ningine::addSphere(const Sphere& sphere)
 
   assert(spheres.size() / numberOfSpheres == attrsPerSphere);
 }
+
+void Ningine::pushBackLightSource(const LightSource &lightSource)
+{
+  lightSources.push_back(lightSource.position.x);
+  lightSources.push_back(lightSource.position.y);
+  lightSources.push_back(lightSource.position.z);
+
+  lightSources.push_back(lightSource.intensity);
+
+  numberOfLightSources++;
+  assert(lightSources.size() / numberOfLightSources == attrsPerLightSource);
+}
+
 // basic scene with some spheres
 
-void Ningine::createSpheres() 
+void Ningine::createSpheres()
 {
   numberOfSpheres = 0;
 
-  addSphere(Sphere(math::Vec3f(620, 360, 70), 10, materials::ivory));
-  addSphere(Sphere(math::Vec3f(668, 341, 100), 15, materials::glass));
-  addSphere(Sphere(math::Vec3f(632, 374, 110), 20, materials::red_rubber));
-  addSphere(Sphere(math::Vec3f(646, 354, 107), 7, materials::mirror));
+  pushBackSphere(Sphere(math::Vec3f(620, 360, 70), 10, materials::ivory));
+  pushBackSphere(Sphere(math::Vec3f(668, 341, 100), 15, materials::glass));
+  pushBackSphere(Sphere(math::Vec3f(632, 374, 110), 20, materials::red_rubber));
+  pushBackSphere(Sphere(math::Vec3f(646, 354, 107), 7, materials::mirror));
 
   spheres.shrink_to_fit();
 }
 
-//void Ningine::createSpheres()
+// void Ningine::createSpheres()
 //{
 //  numberOfSpheres = 0;
 //
@@ -447,6 +466,17 @@ void Ningine::createSpheres()
 //
 //  spheres.shrink_to_fit();
 //}
+
+void Ningine::createLighting()
+{
+  numberOfLightSources = 0;
+
+  // probably need more intensity
+  pushBackLightSource(LightSource(math::Vec3f(640, 1000, 60), 1.5f));
+
+  spheres.shrink_to_fit();
+}
+
 void Ningine::initKeyboardMappings()
 {
   keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_1, false));

@@ -27,7 +27,7 @@ constexpr char glShaderProgramName[] = "BasicView";
 constexpr char vertexShaderName[] = "../../../source/shaders/GLSL/basic.vert";
 constexpr char fragmentShaderName[] = "../../../source/shaders/GLSL/basic.frag";
 
-constexpr char raytracer_kernel_path[] = "../../../source/shaders/OpenCL/raytracer.cl";
+constexpr char raytracer_kernel_path[] = "../../../source/shaders/OpenCL/testRayTracer.cl";
 
 // start coodinate for the first sphere that could be added in runtime
 constexpr glm::vec3 start_sphere_pos = glm::vec3(607, 345, 70);
@@ -66,7 +66,9 @@ class Ningine
   // coordinates for adding new spheres in run-time
   glm::vec3 curr_coordinate;
   glm::vec3 spherePos;
+
   const u_int attrsPerSphere = 13;
+  const u_int attrsPerLightSource = 4;
 
 private:
   void initKeyboardMappings();
@@ -93,9 +95,9 @@ private:
     float reflective,
     float opacity,
     float refractiveIndex);
-  void addSphere(const Sphere &sphere);
-  
-  void addLightSource(const LightSource& lightSource);
+
+  void pushBackSphere(const Sphere &sphere);
+  void pushBackLightSource(const LightSource &lightSource);
 
   float calculateDist(float fov);
   float calculateFOV(glm::vec2 a, glm::vec2 b, glm::vec2 c);
