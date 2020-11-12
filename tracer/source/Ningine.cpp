@@ -111,7 +111,8 @@ bool Ningine::init()
   std::cout << "screenDist\t" << screenDistance << "\n";
 
   std::cout << "FOV:\t"
-            << calculateFOV(glm::vec2(640, 0), glm::vec2(0, screenDistance), glm::vec2(1280, screenDistance));
+            << calculateFOV(
+                 glm::vec2(640, 0), glm::vec2(0, screenDistance), glm::vec2(1280, screenDistance));
   std::cout << (char)167 << "\n";
 
   glfwSwapInterval(1);
@@ -126,10 +127,28 @@ int Ningine::run()
     display();
     glfwSwapBuffers(window);
     processEvents();
+
+    printFrameRate();
   }
 
   glfwTerminate();
   return 0;
+}
+
+void Ningine::printFrameRate()
+{
+  static float framesPerSecond = 0.0f;
+  static int fps;
+  static float lastTime = 0.0f;
+  float currentTime = GetTickCount() * 0.001f;
+  ++framesPerSecond;
+  std::cout << "FPS: " << fps << '\n';
+  if (currentTime - lastTime > 1.0f)
+  {
+    lastTime = currentTime;
+    fps = (int)framesPerSecond;
+    framesPerSecond = 0;
+  }
 }
 
 void Ningine::display()
@@ -759,7 +778,7 @@ void Ningine::processKeyboardInput()
   }
 
   // TODO: Output things on the window
-  std::cout << "Number of spheres\t" << numberOfSpheres << "\n";
+  //std::cout << "Number of spheres\t" << numberOfSpheres << "\n";
   if (!spheres.empty())
   {
     spheres.at((0 * attrsPerSphere) + 0) = spherePos.x;

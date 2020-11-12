@@ -29,10 +29,13 @@ struct Material
 // few Material presets
 namespace materials
 {
-  constexpr Material ivory(Vec3f(0.4f, 0.4f, 0.3f), Vec4f(0.6f, 0.3f, 0.1f, 0.0f), 50.0f, 1.0f);
-  constexpr Material glass(Vec3f(0.6f, 0.7f, 0.8f), Vec4f(0.0f, 0.5f, 0.1f, 0.8f), 125.0f, 1.5f);
-  constexpr Material red_rubber(Vec3f(0.3f, 0.1f, 0.1f), Vec4f(0.9f, 0.1f, 0.0f, 0.0f), 10.0f, 1.0f);
-  constexpr Material mirror(Vec3f(1.0f, 1.0f, 1.0f), Vec4f(0.0f, 10.0f, 0.8f, 0.0f), 1425.0f, 1.0f);
-}
-
+  const Material ivory(
+    math::Vec3f(0.4f, 0.4f, 0.3f), math::Vec4f(0.6f, 0.3f, 0.1f, 0.0f), 50.0f, 1.0f);
+  const Material glass(
+    math::Vec3f(0.6f, 0.7f, 0.8f), math::Vec4f(0.0f, 0.5f, 0.1f, 0.8f), 125.0f, 1.5f);
+  const Material red_rubber(
+    math::Vec3f(0.3f, 0.1f, 0.1f), math::Vec4f(0.9f, 0.1f, 0.0f, 0.0f), 10.0f, 1.0f);
+  const Material mirror(
+    math::Vec3f(1.0f, 1.0f, 1.0f), math::Vec4f(0.0f, 10.0f, 0.8f, 0.0f), 1425.0f, 1.0f);
+}// namespace materials
 }// namespace ningine
