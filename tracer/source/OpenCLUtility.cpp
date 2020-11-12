@@ -100,7 +100,8 @@ Program getProgram(Context pContext, std::string file, cl_int &error)
   Program ret_val;
   error = 0;
   std::ifstream sourceFile(file.c_str());
-  std::string sourceCode(std::istreambuf_iterator<char>(sourceFile), (std::istreambuf_iterator<char>()));
+  std::string sourceCode(
+    std::istreambuf_iterator<char>(sourceFile), (std::istreambuf_iterator<char>()));
 
   return ret_val;
 }

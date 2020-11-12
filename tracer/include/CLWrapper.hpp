@@ -22,14 +22,21 @@ public:
 
   inline void clearBuffers() { memBuff.clear(); }
 
-  inline void createBuffer(cl_mem_flags flags, ::size_t size, void *host_ptr = nullptr, cl_int *err = nullptr)
+  inline void createBuffer(
+    cl_mem_flags flags, ::size_t size, void *host_ptr = nullptr, cl_int *err = nullptr)
   {
     memBuff.push_back(cl::Buffer(context, flags, size, host_ptr, err));
   }
 
-  inline void createKernel(std::string name, cl_int *err = nullptr) { kernel = cl::Kernel(program, name.c_str(), err); }
+  inline void createKernel(std::string name, cl_int *err = nullptr)
+  {
+    kernel = cl::Kernel(program, name.c_str(), err);
+  }
 
-  template<typename T> inline void setKernelArgs(cl_uint index, const T &value) { kernel.setArg(index, value); }
+  template<typename T> inline void setKernelArgs(cl_uint index, const T &value)
+  {
+    kernel.setArg(index, value);
+  }
 
   inline const cl::Program &getProgram() const { return program; }
   inline const cl::Context &getContext() const { return context; }

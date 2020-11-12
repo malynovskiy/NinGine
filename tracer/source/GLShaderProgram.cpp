@@ -8,11 +8,15 @@ namespace ningine
 inline std::string readfromFile(const std::string &filePath)
 {
   std::ifstream file(filePath);
-  std::string content(std::istreambuf_iterator<char>(file.rdbuf()), std::istreambuf_iterator<char>());
+  std::string content(
+    std::istreambuf_iterator<char>(file.rdbuf()), std::istreambuf_iterator<char>());
   return content;
 }
 
-GLShaderProgram::GLShaderProgram() : m_name(""), m_vertexShader(0), m_fragmentShader(0), m_program(0) {}
+GLShaderProgram::GLShaderProgram()
+  : m_name(""), m_vertexShader(0), m_fragmentShader(0), m_program(0)
+{
+}
 
 GLShaderProgram::~GLShaderProgram()
 {
@@ -22,7 +26,8 @@ GLShaderProgram::~GLShaderProgram()
   glDeleteProgram(m_program);
 }
 
-bool GLShaderProgram::load(const std::string name, std::string vertexFileName, std::string fragmentFileName)
+bool GLShaderProgram::load(
+  const std::string name, std::string vertexFileName, std::string fragmentFileName)
 {
   m_name = name;
   GLint success = 0;
@@ -78,7 +83,8 @@ GLuint GLShaderProgram::createShader(std::string fileName, GLenum type, GLint &s
     glGetShaderInfoLog(shader, 512, nullptr, infoLog);
     char *shaderType = (type == GL_VERTEX_SHADER) ? "vertex" : "fragment";
     std::cerr << std::endl
-              << "Error compiling GLSL " << shaderType << " shader: '" << fileName << "'" << std::endl
+              << "Error compiling GLSL " << shaderType << " shader: '" << fileName << "'"
+              << std::endl
               << std::endl;
     std::cerr << "Shader info log:" << std::endl << infoLog << std::endl;
 
