@@ -10,11 +10,11 @@
 namespace ningine
 {
 
-// int Ningine::screenWidth = 1920;
-// int Ningine::screenHeight = 1080;
+int Ningine::screenWidth = 1920;
+int Ningine::screenHeight = 1080;
 // for test purposes lower reso
-int Ningine::screenWidth = 1366;
-int Ningine::screenHeight = 768;
+// int Ningine::screenWidth = 1366;
+// int Ningine::screenHeight = 768;
 
 std::map<int, bool> Ningine::keyMap;
 
@@ -32,7 +32,15 @@ bool Ningine::createGLContext()
   // TODO: probably the next hint will be useful for fps capabilities
   glfwWindowHint(GLFW_REFRESH_RATE, GLFW_DONT_CARE);
 
-  GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+  int numOfMonitors{};
+  GLFWmonitor **monitors;
+  if ((monitors = glfwGetMonitors(&numOfMonitors)) == nullptr)
+  {
+    std::cerr << "Error, something went wrong, GLFW haven't found any monitors!\n";
+    glfwTerminate();
+    return false;
+  }
+  GLFWmonitor* monitor = numOfMonitors == 2? monitors[1] : monitors[0];
   const GLFWvidmode *mode = glfwGetVideoMode(monitor);
 
   glfwWindowHint(GLFW_RED_BITS, mode->redBits);
@@ -41,7 +49,7 @@ bool Ningine::createGLContext()
   glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
   // window mode without borders
-  window = glfwCreateWindow(screenWidth, screenHeight, "Realtime ratracing test", nullptr, nullptr);
+  window = glfwCreateWindow(screenWidth, screenHeight, "Realtime ratracing test", monitor, nullptr);
 
   // FULL-SCREEN mode banned for now
   // window = glfwCreateWindow(screenWidth, screenHeight, "Real-Time Ray-Tracing test",
@@ -115,8 +123,9 @@ bool Ningine::init()
   std::cout << "screenDist\t" << screenDistance << "\n";
 
   std::cout << "FOV:\t"
-            << calculateFOV(
-                 glm::vec2(640, 0), glm::vec2(0, screenDistance), glm::vec2(1280, screenDistance));
+            << calculateFOV(glm::vec2(screenHeight, 0),
+                 glm::vec2(0, screenDistance),
+                 glm::vec2(screenWidth, screenDistance));
   std::cout << (char)167 << "\n";
 
   glfwSwapInterval(1);
