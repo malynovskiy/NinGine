@@ -62,7 +62,7 @@ class Ningine
   static std::map<int, bool> keyMap;
 
   cl_float3 camPos;
-
+  cl_float3 coordinateBasis;
   // coordinates for adding new spheres in run-time
   glm::vec3 curr_coordinate;
   glm::vec3 spherePos;

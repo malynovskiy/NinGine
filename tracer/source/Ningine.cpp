@@ -51,9 +51,6 @@ bool Ningine::createGLContext()
   // window mode without borders
   window = glfwCreateWindow(screenWidth, screenHeight, "Realtime ratracing test", monitor, nullptr);
 
-  // FULL-SCREEN mode banned for now
-  // window = glfwCreateWindow(screenWidth, screenHeight, "Real-Time Ray-Tracing test",
-  // glfwGetPrimaryMonitor(), nullptr);
   if (window == nullptr)
   {
     std::cerr << "Error, failed to create glfw window!\n";
@@ -96,7 +93,16 @@ bool Ningine::init()
 
   glEnable(GL_DEPTH_TEST);
 
+  camPos = { screenWidth / 2.0f, screenHeight / 2.0f, 0.0f };
+  coordinateBasis = camPos;
+
   createSpheres();
+
+  //TODO: Replace this code later to a more robust approach of moving "lead" sphere
+  spherePos.x = spheres.at(0);
+  spherePos.y = spheres.at(1);
+  spherePos.z = spheres.at(2);
+
   createScreenImage();
 
   // pushing our spheres data to the OpenCL buffer
@@ -112,11 +118,6 @@ bool Ningine::init()
 
   // TODO: Rework for to be customizable
   screenDistance = calculateDist(60);
-
-  camPos = { screenWidth / 2.0f, screenHeight / 2.0f, 0.0f };
-
-  // main sphere with movement
-  spherePos = glm::vec3((screenWidth / 2.0) - 33, (screenHeight / 2.0) - 15, 70);
 
   curr_coordinate = start_sphere_pos;
 
@@ -282,55 +283,6 @@ void Ningine::initGLTexture()
   glUniform1i(glGetUniformLocation(program.handle(), "tex"), 0);
 }
 
-// Pushes sphere data into the common buffer the will be passed into OpenCL kernels
-void Ningine::addSphere(glm::vec3 position,
-  float radius,
-  glm::vec3 color,
-  glm::vec3 lightAmbiant,
-  glm::vec3 lightSpecular,
-  glm::vec3 materialAmbiant,
-  glm::vec3 materialDiffuse,
-  glm::vec3 materialSpecular,
-  float materialShinyness,
-  float reflectiveIndex,
-  float opacity,
-  float refractiveIndex)
-{
-  spheres.push_back(position.x);
-  spheres.push_back(position.y);
-  spheres.push_back(position.z);
-
-  spheres.push_back(radius);
-
-  spheres.push_back(color.r);
-  spheres.push_back(color.g);
-  spheres.push_back(color.b);
-
-  spheres.push_back(materialAmbiant.r);
-  spheres.push_back(materialAmbiant.g);
-  spheres.push_back(materialAmbiant.b);
-
-  spheres.push_back(materialDiffuse.r);
-  spheres.push_back(materialDiffuse.g);
-  spheres.push_back(materialDiffuse.b);
-
-  spheres.push_back(materialSpecular.r);
-  spheres.push_back(materialSpecular.g);
-  spheres.push_back(materialSpecular.b);
-
-  spheres.push_back(materialShinyness);
-
-  spheres.push_back(reflectiveIndex);
-
-  spheres.push_back(opacity);
-
-  spheres.push_back(refractiveIndex);
-
-  numberOfSpheres++;
-
-  assert(spheres.size() / numberOfSpheres == attrsPerSphere);
-}
-
 void Ningine::pushBackSphere(const Sphere &sphere)
 {
   spheres.push_back(sphere.center.x);
@@ -369,121 +321,30 @@ void Ningine::pushBackLightSource(const LightSource &lightSource)
 }
 
 // basic scene with some spheres
-
 void Ningine::createSpheres()
 {
+  using math::Vec3f;
   numberOfSpheres = 0;
 
-  pushBackSphere(Sphere(math::Vec3f(620, 360, 70), 10, materials::ivory));
-  pushBackSphere(Sphere(math::Vec3f(668, 341, 100), 15, materials::glass));
-  pushBackSphere(Sphere(math::Vec3f(632, 374, 110), 20, materials::red_rubber));
-  pushBackSphere(Sphere(math::Vec3f(646, 354, 107), 7, materials::mirror));
+  const Vec3f basis(coordinateBasis.x, coordinateBasis.y, coordinateBasis.z);
+ 
+  pushBackSphere(Sphere(basis + Vec3f(5, 0, 10 + 40 - 30), 2, materials::ivory));
+  pushBackSphere(Sphere(basis + Vec3f(-1.0, -1.5, 12 + 40), 2, materials::glass));
+  pushBackSphere(Sphere(basis + Vec3f(1.5, -0.5, 18 + 40), 3, materials::red_rubber));
+  pushBackSphere(Sphere(basis + Vec3f(7, 5, 18 + 50), 4, materials::mirror));
 
   spheres.shrink_to_fit();
 }
-
-// void Ningine::createSpheres()
-//{
-//  numberOfSpheres = 0;
-//
-//  addSphere(glm::vec3(620, 360, 70),
-//    15,
-//    glm::vec3(1, 1, 1),
-//    glm::vec3(0.8, 0.8, 0.8),
-//    glm::vec3(0.9, 0.9, 0.9),
-//    glm::vec3(0.2, 0.2, 0.2),
-//    glm::vec3(0.8, 0.8, 0.8),
-//    glm::vec3(0.9, 0.9, 0.9),
-//    50,
-//    0.50f,
-//    0.3f,
-//    0.8f);
-//
-//  addSphere(glm::vec3(668, 341, 100),
-//    15,
-//    glm::vec3(1, 0, 0),
-//    glm::vec3(0.8, 0.8, 0.8),
-//    glm::vec3(0.9, 0.9, 0.9),
-//    glm::vec3(0.2, 0.2, 0.2),
-//    glm::vec3(0.8, 0.8, 0.8),
-//    glm::vec3(0.9, 0.9, 0.9),
-//    50,
-//    0.90f,
-//    1.0f,
-//    0.7f);
-//  addSphere(glm::vec3(632, 374, 110),
-//    5,
-//    glm::vec3(0, 1, 0),
-//    glm::vec3(0.8, 0.8, 0.8),
-//    glm::vec3(0.9, 0.9, 0.9),
-//    glm::vec3(0.2, 0.2, 0.2),
-//    glm::vec3(0.8, 0.8, 0.8),
-//    glm::vec3(0.9, 0.9, 0.9),
-//    50,
-//    0.90f,
-//    1.0f,
-//    0.7f);
-//  addSphere(glm::vec3(646, 354, 107),
-//    7,
-//    glm::vec3(0, 0, 1),
-//    glm::vec3(0.8, 0.8, 0.8),
-//    glm::vec3(0.9, 0.9, 0.9),
-//    glm::vec3(0.2, 0.2, 0.2),
-//    glm::vec3(0.8, 0.8, 0.8),
-//    glm::vec3(0.9, 0.9, 0.9),
-//    50,
-//    0.90f,
-//    1.0f,
-//    0.7f);
-//
-//  addSphere(glm::vec3(618, 348, 100),
-//    5,
-//    glm::vec3(1, 1, 0),
-//    glm::vec3(0.8, 0.8, 0.8),
-//    glm::vec3(0.9, 0.9, 0.9),
-//    glm::vec3(0.2, 0.2, 0.2),
-//    glm::vec3(0.8, 0.8, 0.8),
-//    glm::vec3(0.9, 0.9, 0.9),
-//    50,
-//    0.90f,
-//    1.0f,
-//    0.7f);
-//  addSphere(glm::vec3(602, 369, 115),
-//    10,
-//    glm::vec3(0, 1, 1),
-//    glm::vec3(0.8, 0.8, 0.8),
-//    glm::vec3(0.9, 0.9, 0.9),
-//    glm::vec3(0.2, 0.2, 0.2),
-//    glm::vec3(0.8, 0.8, 0.8),
-//    glm::vec3(0.9, 0.9, 0.9),
-//    50,
-//    0.90f,
-//    1.0f,
-//    0.7f);
-//  addSphere(glm::vec3(663, 371, 120),
-//    20,
-//    glm::vec3(1, 0, 1),
-//    glm::vec3(0.8, 0.8, 0.8),
-//    glm::vec3(0.9, 0.9, 0.9),
-//    glm::vec3(0.2, 0.2, 0.2),
-//    glm::vec3(0.8, 0.8, 0.8),
-//    glm::vec3(0.9, 0.9, 0.9),
-//    50,
-//    0.90f,
-//    1.0f,
-//    0.7f);
-//
-//  spheres.shrink_to_fit();
-//}
 
 void Ningine::createLighting()
 {
   numberOfLightSources = 0;
 
-  // probably need more intensity
-  pushBackLightSource(LightSource(math::Vec3f(640, 1000, 60), 1.5f));
+  const math::Vec3f basis(coordinateBasis.x, coordinateBasis.y, coordinateBasis.z);
 
-  spheres.shrink_to_fit();
+  // probably need more intensity
+  pushBackLightSource(LightSource(basis + math::Vec3f(-20.0f, 20.0f, 20.0f), 3.5f));
+  lightSources.shrink_to_fit();
 }
 
 void Ningine::initKeyboardMappings()
@@ -555,18 +416,18 @@ void Ningine::processKeyboardInput()
   if (keyMap.at(GLFW_KEY_DOWN))
     spherePos.z -= 0.1f;
 
-  if (keyMap.at(GLFW_KEY_LEFT_SHIFT))
+  if (keyMap.at(GLFW_KEY_PAGE_DOWN))
     spherePos.y -= 0.1f;
 
-  if (keyMap.at(GLFW_KEY_SPACE))
+  if (keyMap.at(GLFW_KEY_PAGE_UP))
     spherePos.y += 0.1f;
 
 
   if (keyMap.at(GLFW_KEY_W))
-    camPos.z -= 0.5f;
+    camPos.z += 0.5f;
 
   if (keyMap.at(GLFW_KEY_S))
-    camPos.z += 0.5f;
+    camPos.z -= 0.5f;
 
   if (keyMap.at(GLFW_KEY_A))
     camPos.x -= 0.3f;
@@ -574,11 +435,12 @@ void Ningine::processKeyboardInput()
   if (keyMap.at(GLFW_KEY_D))
     camPos.x += 0.3f;
 
-  if (keyMap.at(GLFW_KEY_PAGE_UP))
-    camPos.y += 0.4f;
+  if (keyMap.at(GLFW_KEY_LEFT_SHIFT))
+    camPos.y -= 0.3f;
 
-  if (keyMap.at(GLFW_KEY_PAGE_DOWN))
-    camPos.y -= 0.4f;
+  if (keyMap.at(GLFW_KEY_SPACE))
+    camPos.y += 0.3f;
+
 
   if (keyMap.at(GLFW_KEY_BACKSPACE))
   {
