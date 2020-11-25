@@ -1,45 +1,58 @@
 #define SPHERE_DATA_SIZE 13
-#define BACKGROUND_COLOR (float4)(0.2, 0.7, 0.87, 1)
+#define LIGHT_DATA_SIZE 4
+#define BACKGROUND_COLOR (float3)(0.2, 0.7, 0.87)
+#define epsilon 1e-3f
 
-#define get_val(i, offset) ((i * SPHERE_DATA_SIZE) + offset)
+#define get_index_s(i, offset) ((i * SPHERE_DATA_SIZE) + offset)
+#define get_index_l(i, offset) ((i * LIGHT_DATA_SIZE) + offset)
 
-#define sphere_pos_x(i) (get_val(i, 0))
-#define sphere_pos_y(i) (get_val(i, 1))
-#define sphere_pos_z(i) (get_val(i, 2))
+#define light_pos_x_i(i) (get_index_l(i, 0))
+#define light_pos_y_i(i) (get_index_l(i, 1))
+#define light_pos_z_i(i) (get_index_l(i, 2))
 
-#define sphere_radius(i) (get_val(i, 3))
+#define sphere_pos_x_i(i) (get_index_s(i, 0))
+#define sphere_pos_y_i(i) (get_index_s(i, 1))
+#define sphere_pos_z_i(i) (get_index_s(i, 2))
 
-#define sphere_color_x(i) (get_val(i, 4))
-#define sphere_color_y(i) (get_val(i, 5))
-#define sphere_color_z(i) (get_val(i, 6))
+#define sphere_radius_i(i) (get_index_s(i, 3))
 
-#define sphere_albedo_x(i) (get_val(i, 7))
-#define sphere_albedo_y(i) (get_val(i, 8))
-#define sphere_albedo_z(i) (get_val(i, 9))
-#define sphere_albedo_w(i) (get_val(i, 10))
+#define sphere_color_x_i(i) (get_index_s(i, 4))
+#define sphere_color_y_i(i) (get_index_s(i, 5))
+#define sphere_color_z_i(i) (get_index_s(i, 6))
 
-#define sphere_specular(i) (get_val(i, 11))
-#define sphere_refractive(i) (get_val(i, 12))
+#define sphere_albedo_x_i(i) (get_index_s(i, 7))
+#define sphere_albedo_y_i(i) (get_index_s(i, 8))
+#define sphere_albedo_z_i(i) (get_index_s(i, 9))
+#define sphere_albedo_w_i(i) (get_index_s(i, 10))
 
-#define sphere_pos_vec3(i) ((float3)(spheresData[sphere_pos_x(i)], \
-      spheresData[sphere_pos_y(i)], \
-      spheresData[sphere_pos_z(i)]))
+#define sphere_specular_i(i) (get_index_s(i, 11))
+#define sphere_refractive_i(i) (get_index_s(i, 12))
 
-#define sphere_color_vec3(i) ((float3)(spheresData[sphere_color_x(i)], \
-      spheresData[sphere_color_y(i)], \
-      spheresData[sphere_color_z(i)]))
+#define sphere_pos_vec3(i)                  \
+  ((float3)(spheresData[sphere_pos_x_i(i)], \
+    spheresData[sphere_pos_y_i(i)],         \
+    spheresData[sphere_pos_z_i(i)]))
 
-#define sphere_albedo_vec4(i) ((float4)(spheresData[sphere_albedo_x(i)], \
-      spheresData[sphere_albedo_y(i)], \
-      spheresData[sphere_albedo_z(i)], \
-      spheresData[sphere_albedo_w(i)]))
+#define sphere_radius(i) (spheresData[sphere_radius_i(i)])
 
-//#define normalize(x) ({ x / norm(x); })
+#define sphere_color_vec3(i)                  \
+  ((float3)(spheresData[sphere_color_x_i(i)], \
+    spheresData[sphere_color_y_i(i)],         \
+    spheresData[sphere_color_z_i(i)]))
 
-// inline float norm(float3 &vec)
-// {
-//   return sqrt((vec.x * vec.x) + (vec.y * vec.y) + (vec.z * vec.z));
-// }
+#define sphere_albedo_vec4(i)                  \
+  ((float4)(spheresData[sphere_albedo_x_i(i)], \
+    spheresData[sphere_albedo_y_i(i)],         \
+    spheresData[sphere_albedo_z_i(i)],         \
+    spheresData[sphere_albedo_w_i(i)]))
+
+#define sphere_specular(i) (spheresData[sphere_specular_i(i)])
+#define sphere_refractive(i) (spheresData[sphere_refractive_i(i)])
+
+#define light_pos_vec3(i)                   \
+  ((float3)(lightingData[light_pos_x_i(i)], \
+    lightingData[light_pos_y_i(i)],         \
+    lightingData[light_pos_z_i(i)]))
 
 struct Material
 {
@@ -51,12 +64,57 @@ struct Material
 
 typedef struct Material Material;
 
-void place_material(Material *material, __global float *spheresData, int index) 
+void material_init(Material *material)
+{
+  material->diffuse_color = 0;
+  material->albedo = (float4)(1.0f, 0.0f, 0.0f, 0.0f);
+  material->specular_exponent = 0;
+  material->refractive_index = 1.0f;
+}
+
+void place_material(Material *material, __global float *spheresData, int index)
 {
   material->diffuse_color = sphere_color_vec3(index);
   material->albedo = sphere_albedo_vec4(index);
   material->specular_exponent = sphere_specular(index);
-  material->refractive_index = sphere_refractive(index);
+  // material->refractive_index = sphere_refractive(index);
+  material->refractive_index = spheresData[(index * SPHERE_DATA_SIZE) + 12];
+}
+
+float3 refract(const float3 *direction, const float3 *normal, float *refractive_index)
+{
+  // cosine of insidence angle
+  float cosi = -max(-1.0f, min(1.0f, dot(*direction, *normal)));
+  float etai = 1;
+  float etat = *refractive_index;
+  float3 n = *normal;
+  if (cosi < 0)
+  {
+    cosi = -cosi;
+
+    // swap
+    etat = etai;
+    etai = *refractive_index;
+
+    n = -n;
+  }
+  // probably should use fraction here
+  float eta = etai / etat;
+  float k = 1.0f - eta * eta * (1.0f - cosi * cosi);
+
+  if (k < 0)
+    return (float3)(1, 0, 0);
+  else
+    return *direction * eta + n * (eta * cosi - sqrt(k));
+}
+
+// possible optimization here:
+//    pass already created vector by pointer,
+//    and only calculate here
+float3 reflect(const float3 *direction, const float3 *normal)
+{
+  float3 res = *direction - *normal * 2.0f * dot(*direction, *normal);
+  return res;
 }
 
 bool sphere_ray_intersect(float3 *origin,

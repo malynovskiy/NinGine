@@ -343,7 +343,8 @@ void Ningine::createLighting()
   const math::Vec3f basis(coordinateBasis.x, coordinateBasis.y, coordinateBasis.z);
 
   // probably need more intensity
-  pushBackLightSource(LightSource(basis + math::Vec3f(-20.0f, 20.0f, 20.0f), 3.5f));
+  pushBackLightSource(LightSource(basis + math::Vec3f(-20.0f, 30.0f, 20.0f), 3.5f));
+  pushBackLightSource(LightSource(basis + math::Vec3f(20.0f, 20.0f, 30.0f), 1.5f));
   lightSources.shrink_to_fit();
 }
 
