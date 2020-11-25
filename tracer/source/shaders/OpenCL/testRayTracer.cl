@@ -77,8 +77,7 @@ void place_material(Material *material, __global float *spheresData, int index)
   material->diffuse_color = sphere_color_vec3(index);
   material->albedo = sphere_albedo_vec4(index);
   material->specular_exponent = sphere_specular(index);
-  // material->refractive_index = sphere_refractive(index);
-  material->refractive_index = spheresData[(index * SPHERE_DATA_SIZE) + 12];
+  material->refractive_index = sphere_refractive(index);
 }
 
 float3 refract(const float3 *direction, const float3 *normal, float *refractive_index)
@@ -150,58 +149,7 @@ bool sphere_ray_intersect(float3 *origin,
   return true;
 }
 
-bool triangle_ray_intersect(float *origin,
-  float3 *direction,
-  float3 vert0,
-  float3 vert1,
-  float3 vert2,
-  float3 *N,
-  float *triangle_dist)
-{
-  float3 edge0 = vert1 - vert0;
-  float3 edge1 = vert2 - vert0;
-  *N = cross(edge0, edge1);
-
-  float NdotRayDir = dot(*N, *direction);
-  if (fabs(NdotRayDir) < epsilon)
-    return false;
-
-  float area2 = length(*N);
-  float d = dot(*N, vert0);
-
-  float t = (dot(*N, *origin) + d) / NdotRayDir;
-  if (t < 0)
-    return false;
-
-  float3 P = t * *direction + *origin;
-  float3 C;
-
-  // edge 0
-  float3 vp0 = P - vert0;
-  C = cross(edge0, vp0);
-  if (dot(*N, C) < 0)
-    return false;
-
-  // edge 1
-  edge0 = vert2 - vert1;
-  vp0 = P - vert1;
-  C = cross(edge0, vp0);
-  if (dot(*N, C) < 0)
-    return false;
-
-  // edge 2
-  edge0 = vert0 - vert2;
-  vp0 = P - vert2;
-  C = cross(edge0, vp0);
-  if (dot(*N, C) < 0)
-    return false;
-
-  *triangle_dist = t;
-
-  return true;
-}
-
-float triangle_intersection(
+float triangle_ray_intersect(
   const float3 *orig, const float3 *dir, const float3 *v0, const float3 *v1, const float3 *v2)
 {
   float3 e1 = *v1 - *v0;
@@ -282,7 +230,7 @@ bool scene_intersect(float3 *origin,
   const float3 vert1 = (float3)(945.0f, 535.0f, 10.0f);
   const float3 vert2 = (float3)(955.0f, 535.0f, 10.0f);
   float t = 0;
-  if ((t = triangle_intersection(origin, direction, &vert0, &vert1, &vert2)) > 0 && t < spheres_dist)
+  if ((t = triangle_ray_intersect(origin, direction, &vert0, &vert1, &vert2)) > 0 && t < spheres_dist)
   {
     triangle_dist = t;
     const float3 e1 = vert1 - vert0;
