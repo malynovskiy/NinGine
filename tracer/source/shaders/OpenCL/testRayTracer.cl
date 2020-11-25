@@ -120,26 +120,35 @@ float3 reflect(const float3 *direction, const float3 *normal)
 bool sphere_ray_intersect(float3 *origin,
   float3 *direction,
   float3 *spherePos,
-  float sphereRadius,
-  float *intersectionDistance)
+  float radius,
+  float *dist)
 {
   // vector from ray's origin to the center of sphere
   float3 L = *spherePos - *origin;
-  
-  const float projectionLength = dot(L, *direction);
-  const float d2 = dot(L, L) - projectionLength * projectionLength;
 
-  const float r2 = sphereRadius * sphereRadius;
+  const float projLenght = dot(L, *direction);
+  const float d2 = dot(L, L) - projLenght * projLenght;
+
+  const float r2 = radius * radius;
   // whether the ray and sphere intersect
   if (d2 > r2)
     return false;
 
   float thc = sqrt(r2 - d2);
   // distance to the first point on the sphere
-  *intersectionDistance = projectionLength - thc;
+  *dist = projLenght - thc;
 
   // distance to the second point on the sphere
-  float t1 = projectionLength + thc;
+  float t1 = projLenght + thc;
+
+  if (*dist < 0)
+    *dist = t1;
+
+  if (*dist < 0)
+    return false;
+
+  return true;
+}
 
   if (*intersectionDistance < 0)
     *intersectionDistance = t1;
@@ -258,31 +267,15 @@ __kernel void raytracer(__write_only image2d_t image,
   float screenDistance,
   __global float *spheresData,
   int numSpheres,
-  __global float *lighting,
+  __global float *lightingData,
   int numLightSources)
 {
-  int2 pos = (int2)(get_global_id(0), get_global_id(1));
-
-  float3 dir = (float3)(pos.x, pos.y, screenDistance);
+  const int2 pos = (int2)(get_global_id(0), get_global_id(1));
+  float3 dir = (float3)(pos.x + 0.5, pos.y + 0.5, screenDistance);
   dir -= cameraPos;
   dir = normalize(dir);
+  float3 color =
+    cast_ray(&cameraPos, &dir, spheresData, numSpheres, lightingData, numLightSources, 0);
 
-  float4 color = cast_ray(&cameraPos, &dir, spheresData, numSpheres, lighting, numLightSources, 0);
-
-  write_imagef(image, pos, color);
+  write_imagef(image, pos, (float4)(color, 1));
 }
-
-// float4 calculatePixelColor(float3 *cameraPos,
-//   float screenDistance,
-//   int2 *pixelPos,
-//   __global float *spheresData,
-//   int numSpheres,
-//   __global float *lighting)
-// {
-//   float3 dir = (float3)(pixelPos->x, pixelPos->y, screenDistance);
-
-//   dir -= *cameraPos;
-//   dir = normalize(dir);
-
-//   return cast_ray(cameraPos, &dir, spheresData, numSpheres, lighting, 0);
-// }
