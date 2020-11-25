@@ -150,13 +150,103 @@ bool sphere_ray_intersect(float3 *origin,
   return true;
 }
 
-  if (*intersectionDistance < 0)
-    *intersectionDistance = t1;
+bool triangle_ray_intersect(float *origin,
+  float3 *direction,
+  float3 vert0,
+  float3 vert1,
+  float3 vert2,
+  float3 *N,
+  float *triangle_dist)
+{
+  float3 edge0 = vert1 - vert0;
+  float3 edge1 = vert2 - vert0;
+  *N = cross(edge0, edge1);
 
-  if (*intersectionDistance < 0)
+  float NdotRayDir = dot(*N, *direction);
+  if (fabs(NdotRayDir) < epsilon)
     return false;
 
+  float area2 = length(*N);
+  float d = dot(*N, vert0);
+
+  float t = (dot(*N, *origin) + d) / NdotRayDir;
+  if (t < 0)
+    return false;
+
+  float3 P = t * *direction + *origin;
+  float3 C;
+
+  // edge 0
+  float3 vp0 = P - vert0;
+  C = cross(edge0, vp0);
+  if (dot(*N, C) < 0)
+    return false;
+
+  // edge 1
+  edge0 = vert2 - vert1;
+  vp0 = P - vert1;
+  C = cross(edge0, vp0);
+  if (dot(*N, C) < 0)
+    return false;
+
+  // edge 2
+  edge0 = vert0 - vert2;
+  vp0 = P - vert2;
+  C = cross(edge0, vp0);
+  if (dot(*N, C) < 0)
+    return false;
+
+  *triangle_dist = t;
+
   return true;
+}
+
+float triangle_intersection(
+  const float3 *orig, const float3 *dir, const float3 *v0, const float3 *v1, const float3 *v2)
+{
+  float3 e1 = *v1 - *v0;
+  float3 e2 = *v2 - *v0;
+
+  float3 pvec = cross(*dir, e2);
+  float det = dot(e1, pvec);
+
+  if (det < epsilon && det > -epsilon)
+  {
+    return 0;
+  }
+
+  const float inv_det = 1.0f / det;
+  float3 tvec = *orig - *v0;
+  float u = dot(tvec, pvec) * inv_det;
+  if (u < 0 || u > 1)
+  {
+    return 0;
+  }
+
+  float3 qvec = cross(tvec, e1);
+  float v = dot(*dir, qvec) * inv_det;
+  if (v < 0 || u + v > 1)
+  {
+    return 0;
+  }
+  return dot(e2, qvec) * inv_det;
+}
+
+bool plane_ray_intersect(
+  const float3 *N, const float3 p0, const float3 *orig, const float3 *dir, float *dist)
+{
+  const float denom = dot(*N, *dir);
+  if (fabs(denom) < 1e-3f)
+    return false;
+
+  float3 p0orig = p0 - *orig;
+  float t = dot(p0orig, *N) / denom;
+  if (t >= 0)
+  {
+    *dist = t;
+    return true;
+  }
+  return false;
 }
 
 bool scene_intersect(float3 *origin,
@@ -168,14 +258,12 @@ bool scene_intersect(float3 *origin,
   Material *material)
 {
   float spheres_dist = FLT_MAX;
-
   for (int i = 0; i < numSpheres; i++)
   {
     float dist_i;
 
     float3 spherePos = sphere_pos_vec3(i);
-
-    if (sphere_ray_intersect(origin, direction, &spherePos, spheresData[sphere_radius(i)], &dist_i)
+    if (sphere_ray_intersect(origin, direction, &spherePos, sphere_radius(i), &dist_i)
         && dist_i < spheres_dist)
     {
       spheres_dist = dist_i;
@@ -188,78 +276,114 @@ bool scene_intersect(float3 *origin,
     }
   }
 
-  return spheres_dist;
-  // CHECKBOARD DROPPED FOR NOW
+  float triangle_dist = FLT_MAX;
 
-  // float checkerboard_dist = FLT_MAX;
-  // if (fabs(direction.y) > 1e-3)
-  // {
-  //   float d = -(origin.y + 4) / direction.y;
-  //   math::Vec3f pt = origin + direction * d;
-  //   if (d > 0 && fabs(pt.x) < 10 && pt.z < -10 && pt.z > -30 && d < spheres_dist)
-  //   {
-  //     checkerboard_dist = d;
-  //     hit = pt;
-  //     normal = math::Vec3f(0.0f, 1.0f, 0.0f);
-  //     material.diffuse_color = (int(.5 * hit.x + 1000) + int(.5 * hit.z)) & 1
-  //                                ? math::Vec3f(1, 1, 1)
-  //                                : math::Vec3f(1, .7, .3);
-  //     material.diffuse_color = material.diffuse_color * .3;
-  //   }
-  // }
+  const float3 vert0 = (float3)(950.0f, 550.0f, 15.0f);
+  const float3 vert1 = (float3)(945.0f, 535.0f, 10.0f);
+  const float3 vert2 = (float3)(955.0f, 535.0f, 10.0f);
+  float t = 0;
+  if ((t = triangle_intersection(origin, direction, &vert0, &vert1, &vert2)) > 0 && t < spheres_dist)
+  {
+    triangle_dist = t;
+    const float3 e1 = vert1 - vert0;
+    const float3 e2 = vert2 - vert0;
+    *normal = normalize(cross(e1, e2));
+    *hit = *origin + *direction * t;
+    place_material(material, spheresData, 1);
+  }
 
-  // return std::min(spheres_dist, checkerboard_dist) < 1000;
+  float plane_dist = FLT_MAX;
+
+  float3 N = (float3)(0.0f, 1.0f, 0.0f);
+  if (plane_ray_intersect(&N, (float3)(960.0f, 535.0f, 10.0f), origin, direction, &plane_dist)
+      && plane_dist < spheres_dist && plane_dist < triangle_dist)
+  {
+    *hit = *origin + *direction * plane_dist;
+    *normal = N;
+    material->diffuse_color = (float3)(0.1f, 0.7f, 0.3f);
+    material->diffuse_color = material->diffuse_color * 0.3f;
+  }
+
+  return min(spheres_dist, min(triangle_dist, plane_dist)) < 1000;
 }
 
-float4 cast_ray(float3 *origin,
+float3 cast_ray(float3 *origin,
   float3 *direction,
   __global float *spheresData,
   int numSpheres,
-  __global float *lighting,
+  __global float *lightingData,
   int numLightSources,
   int depth)
 {
   // intersection point and normal in that point
   float3 point, normal;
   Material material;
+  material_init(&material);
 
-  if (/*depth > 2
-      || */!scene_intersect(origin, direction, spheresData, numSpheres, &point, &normal, &material))
+  if (depth > 3
+      || !scene_intersect(origin, direction, spheresData, numSpheres, &point, &normal, &material))
     return BACKGROUND_COLOR;
-  return (float4)(material.diffuse_color, 1);
 
-  // float3 reflect_dir = reflect(direction, normal).normalize();
-  // float3 refract_dir = refract(direction, normal, material.refractive_index).normalize();
+  float3 reflect_dir = normalize(reflect(direction, &normal));
+  float3 refract_dir = normalize(refract(direction, &normal, &(material.refractive_index)));
 
-  // Vec3f reflect_origin = reflect_dir * normal < 0 ? point - normal * 1e-3 : point + normal * 1e-3;
-  // Vec3f refract_origin = refract_dir * normal < 0 ? point - normal * 1e-3 : point + normal * 1e-3;
+  float3 reflect_origin =
+    dot(reflect_dir, normal) < 0 ? point - normal * epsilon : point + normal * epsilon;
+  float3 refract_origin =
+    dot(refract_dir, normal) < 0 ? point - normal * epsilon : point + normal * epsilon;
 
-  // Vec3f reflect_color = cast_ray(reflect_origin, reflect_dir, spheres, lightSources, depth + 1);
-  // Vec3f refract_color = cast_ray(refract_origin, refract_dir, spheres, lightSources, depth + 1);
+  float3 reflect_color = 0;
+  float3 refract_color = 0;
+  if (material.albedo.z != 0.0f)
+    reflect_color = cast_ray(&reflect_origin,
+      &reflect_dir,
+      spheresData,
+      numSpheres,
+      lightingData,
+      numLightSources,
+      depth + 1);
 
-  // float diffuse_light_intensity{}, specular_light_intensity{};
-  // for (const auto &lightSrc : lightSources)
-  // {
-  //   Vec3f ld = lightSrc.position - point;
-  //   float light_distance = ld.norm();
-  //   Vec3f light_dir = ld.normalize();
+  if (material.albedo.w != 0.0f)
+    refract_color = cast_ray(&refract_origin,
+      &refract_dir,
+      spheresData,
+      numSpheres,
+      lightingData,
+      numLightSources,
+      depth + 1);
 
-  //   Vec3f shadow_orig = light_dir * normal < 0 ? point - normal * 1e-3 : point + normal * 1e-3;
-  //   Vec3f shadow_pt, shadow_n;
-  //   Material tmpMaterial;
+  float diffuse_light_intensity = 0;
+  float specular_light_intensity = 0;
+  for (int j = 0; j < numLightSources; ++j)
+  {
+    // prabably should create the same structure, like for materials
+    float3 ld = light_pos_vec3(j) - point;
+    float light_distance = length(ld);
+    float3 light_dir = normalize(ld);
 
-  //   if (scene_intersect(shadow_orig, light_dir, spheres, shadow_pt, shadow_n, tmpMaterial)
-  //       && (shadow_pt - shadow_orig).norm() < light_distance)
-  //     continue;
+    float3 shadow_orig = 0;
+    if (dot(light_dir, normal) < 0)
+      shadow_orig = point - normal * epsilon;
+    else
+      shadow_orig = point + normal * epsilon;
 
-  //   diffuse_light_intensity += lightSrc.intensity * std::max(0.0f, light_dir * normal);
-  //   specular_light_intensity +=
-  //     powf(std::max(0.0f, reflect(light_dir, normal) * direction), material.specular_exponent)
-  //     * lightSrc.intensity;
-  // }
-  // return material.diffuse_color * diffuse_light_intensity * material.albedo[0]
-  //        + Vec3f(1.0f, 1.0f, 1.0f) * specular_light_intensity * material.albedo[1]
-  //        + reflect_color * material.albedo[2] + refract_color * material.albedo[3];
+    float3 shadow_pt, shadow_n;
+    Material tmpMaterial;
+
+    if (scene_intersect(
+          &shadow_orig, &light_dir, spheresData, numSpheres, &shadow_pt, &shadow_n, &tmpMaterial)
+        && length(shadow_pt - shadow_orig) < light_distance)
+      continue;
+
+    diffuse_light_intensity += lightingData[get_index_l(j, 3)] * max(0.0f, dot(light_dir, normal));
+    specular_light_intensity +=
+      pow(max(0.0f, dot(reflect(&light_dir, &normal), *direction)), material.specular_exponent)
+      * lightingData[get_index_l(j, 3)];
+  }
+
+  return (float3)(material.diffuse_color * diffuse_light_intensity * material.albedo.x
+                  + (float3)(1.0f, 1.0f, 1.0f) * specular_light_intensity * material.albedo.y
+                  + reflect_color * material.albedo.z + refract_color * material.albedo.w);
 }
 
 __kernel void raytracer(__write_only image2d_t image,
