@@ -116,11 +116,8 @@ float3 reflect(const float3 *direction, const float3 *normal)
   return res;
 }
 
-bool sphere_ray_intersect(float3 *origin,
-  float3 *direction,
-  float3 *spherePos,
-  float radius,
-  float *dist)
+bool sphere_ray_intersect(
+  float3 *origin, float3 *direction, float3 *spherePos, float radius, float *dist)
 {
   // vector from ray's origin to the center of sphere
   float3 L = *spherePos - *origin;
@@ -149,8 +146,13 @@ bool sphere_ray_intersect(float3 *origin,
   return true;
 }
 
-float triangle_ray_intersect(
-  const float3 *orig, const float3 *dir, const float3 *v0, const float3 *v1, const float3 *v2)
+float triangle_ray_intersect(const float3 *orig,
+  const float3 *dir,
+  const float3 *v0,
+  const float3 *v1,
+  const float3 *v2,
+  float3 *n,
+  float *t)
 {
   float3 e1 = *v1 - *v0;
   float3 e2 = *v2 - *v0;
@@ -159,29 +161,30 @@ float triangle_ray_intersect(
   float det = dot(e1, pvec);
 
   if (det < epsilon && det > -epsilon)
-  {
-    return 0;
-  }
+    return false;
 
   const float inv_det = 1.0f / det;
   float3 tvec = *orig - *v0;
   float u = dot(tvec, pvec) * inv_det;
   if (u < 0 || u > 1)
-  {
-    return 0;
-  }
+    return false;
 
   float3 qvec = cross(tvec, e1);
   float v = dot(*dir, qvec) * inv_det;
   if (v < 0 || u + v > 1)
-  {
-    return 0;
-  }
-  return dot(e2, qvec) * inv_det;
+    return false;
+
+  const float dist = dot(e2, qvec) * inv_det;
+  if (dist < 0)
+    return false;
+
+  *n = normalize(cross(e1, e2));
+  *t = dist;
+  return true;
 }
 
 bool plane_ray_intersect(
-  const float3 *N, const float3 p0, const float3 *orig, const float3 *dir, float *dist)
+  const float3 *orig, const float3 *dir, const float3 p0, const float3 *N, float *dist)
 {
   const float denom = dot(*N, *dir);
   if (fabs(denom) < 1e-3f)
@@ -205,6 +208,7 @@ bool scene_intersect(float3 *origin,
   float3 *normal,
   Material *material)
 {
+  float resDist = FLT_MAX;
   float spheres_dist = FLT_MAX;
   for (int i = 0; i < numSpheres; i++)
   {
@@ -223,6 +227,7 @@ bool scene_intersect(float3 *origin,
       place_material(material, spheresData, i);
     }
   }
+  resDist = spheres_dist;
 
   float triangle_dist = FLT_MAX;
 
@@ -230,29 +235,29 @@ bool scene_intersect(float3 *origin,
   const float3 vert1 = (float3)(945.0f, 535.0f, 10.0f);
   const float3 vert2 = (float3)(955.0f, 535.0f, 10.0f);
   float t = 0;
-  if ((t = triangle_ray_intersect(origin, direction, &vert0, &vert1, &vert2)) > 0 && t < spheres_dist)
+  float3 N;
+  if (triangle_ray_intersect(origin, direction, &vert0, &vert1, &vert2, &N, &t) && t < resDist)
   {
     triangle_dist = t;
-    const float3 e1 = vert1 - vert0;
-    const float3 e2 = vert2 - vert0;
-    *normal = normalize(cross(e1, e2));
+    *normal = N;
     *hit = *origin + *direction * t;
     place_material(material, spheresData, 1);
   }
-
+  resDist = min(resDist, triangle_dist);
+  
   float plane_dist = FLT_MAX;
-
-  float3 N = (float3)(0.0f, 1.0f, 0.0f);
-  if (plane_ray_intersect(&N, (float3)(960.0f, 535.0f, 10.0f), origin, direction, &plane_dist)
-      && plane_dist < spheres_dist && plane_dist < triangle_dist)
+  N = (float3)(0.0f, 1.0f, 0.0f);
+  if (plane_ray_intersect(origin, direction, (float3)(960.0f, 535.0f, 10.0f), &N, &t)
+      && t < resDist)
   {
+    plane_dist = t;
     *hit = *origin + *direction * plane_dist;
     *normal = N;
     material->diffuse_color = (float3)(0.1f, 0.7f, 0.3f);
     material->diffuse_color = material->diffuse_color * 0.3f;
   }
 
-  return min(spheres_dist, min(triangle_dist, plane_dist)) < 1000;
+  return min(resDist, plane_dist) < 1000;
 }
 
 float3 cast_ray(float3 *origin,
