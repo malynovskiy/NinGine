@@ -97,8 +97,9 @@ bool Ningine::init()
   coordinateBasis = camPos;
 
   createSpheres();
+  createLighting();
 
-  //TODO: Replace this code later to a more robust approach of moving "lead" sphere
+  // TODO: Replace this code later to a more robust approach of moving "lead" sphere
   spherePos.x = spheres.at(0);
   spherePos.y = spheres.at(1);
   spherePos.z = spheres.at(2);
@@ -110,7 +111,6 @@ bool Ningine::init()
     sizeof(float) * spheres.size(),
     spheres.data());
 
-  createLighting();
   // pushing our lighting data to the OpenCL buffer
   clContext.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
     sizeof(float) * lightSources.size(),
@@ -327,7 +327,7 @@ void Ningine::createSpheres()
   numberOfSpheres = 0;
 
   const Vec3f basis(coordinateBasis.x, coordinateBasis.y, coordinateBasis.z);
- 
+
   pushBackSphere(Sphere(basis + Vec3f(5, 0, 10 + 40 - 30), 2, materials::ivory));
   pushBackSphere(Sphere(basis + Vec3f(-1.0, -1.5, 12 + 40), 2, materials::glass));
   pushBackSphere(Sphere(basis + Vec3f(1.5, -0.5, 18 + 40), 3, materials::red_rubber));
@@ -350,6 +350,7 @@ void Ningine::createLighting()
 
 void Ningine::initKeyboardMappings()
 {
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_0, false));
   keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_1, false));
   keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_2, false));
   keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_3, false));
@@ -359,6 +360,10 @@ void Ningine::initKeyboardMappings()
   keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_7, false));
   keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_8, false));
   keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_9, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_DIVIDE, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_MULTIPLY, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_ADD, false));
+  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_SUBTRACT, false));
   keyMap.insert(std::pair<int, bool>(GLFW_KEY_LEFT_SHIFT, false));
   keyMap.insert(std::pair<int, bool>(GLFW_KEY_RIGHT_SHIFT, false));
   keyMap.insert(std::pair<int, bool>(GLFW_KEY_BACKSPACE, false));
@@ -442,250 +447,150 @@ void Ningine::processKeyboardInput()
   if (keyMap.at(GLFW_KEY_SPACE))
     camPos.y += 0.3f;
 
-
-  if (keyMap.at(GLFW_KEY_BACKSPACE))
+  if (keyMap.at(GLFW_KEY_KP_0))
   {
-    if (numberOfSpheres > 0)
-    {
-      spheres.pop_back();
-      numberOfSpheres--;
-      curr_coordinate.x -= spheres_offset.x;
-    }
-    if (!(keyMap.at(GLFW_KEY_LEFT_SHIFT) || keyMap.at(GLFW_KEY_RIGHT_SHIFT)))
-    {
-      keyMap.at(GLFW_KEY_BACKSPACE) = false;
-    }
+    spheres.at((1 * attrsPerSphere) + 7) += 0.01;
+    std::cout << "albedo.x: " << spheres.at((1 * attrsPerSphere) + 7) << '\n';
   }
-
-  if (keyMap.at(GLFW_KEY_DELETE))
-  {
-    if (numberOfSpheres > 0)
-    {
-      spheres.clear();
-      numberOfSpheres = 0;
-      curr_coordinate = start_sphere_pos;
-    }
-  }
-
   if (keyMap.at(GLFW_KEY_KP_1))
   {
-    addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
-      5,
-      glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
-      glm::vec3(0.8, 0.8, 0.8),
-      glm::vec3(0.9, 0.9, 0.9),
-      glm::vec3(0.2, 0.2, 0.2),
-      glm::vec3(0.8, 0.8, 0.8),
-      glm::vec3(0.9, 0.9, 0.9),
-      50,
-      0.0f,
-      1.0f,
-      1.0f);
-    keyMap.at(GLFW_KEY_KP_1) = false;
-    curr_coordinate.x += spheres_offset.x;
+    spheres.at((1 * attrsPerSphere) + 7) -= 0.01;
+    std::cout << "albedo.x: " << spheres.at((1 * attrsPerSphere) + 7) << '\n';
   }
   if (keyMap.at(GLFW_KEY_KP_2))
   {
-    // randGenerator.seed(time(NULL));
-    addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
-      5,
-      glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
-      glm::vec3(0.8, 0.8, 0.8),
-      glm::vec3(0.9, 0.9, 0.9),
-      glm::vec3(0.2, 0.2, 0.2),
-      glm::vec3(0.8, 0.8, 0.8),
-      glm::vec3(0.9, 0.9, 0.9),
-      50,
-      0.0f,
-      0.5f,
-      1.0f);
-    keyMap.at(GLFW_KEY_KP_2) = false;
-    curr_coordinate.x += spheres_offset.x;
+    spheres.at((1 * attrsPerSphere) + 8) += 0.01;
+    std::cout << "albedo.y: " << spheres.at((1 * attrsPerSphere) + 8) << '\n';
   }
   if (keyMap.at(GLFW_KEY_KP_3))
   {
-    addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
-      5,
-      glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
-      glm::vec3(0.8, 0.8, 0.8),
-      glm::vec3(0.9, 0.9, 0.9),
-      glm::vec3(0.2, 0.2, 0.2),
-      glm::vec3(0.8, 0.8, 0.8),
-      glm::vec3(0.9, 0.9, 0.9),
-      50,
-      1.0f,
-      1.0f,
-      1.0f);
-    keyMap.at(GLFW_KEY_KP_3) = false;
-    curr_coordinate.x += spheres_offset.x;
+    spheres.at((1 * attrsPerSphere) + 8) -= 0.01;
+    std::cout << "albedo.y: " << spheres.at((1 * attrsPerSphere) + 8) << '\n';
   }
   if (keyMap.at(GLFW_KEY_KP_4))
   {
-    addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
-      5,
-      glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
-      glm::vec3(0.8, 0.8, 0.8),
-      glm::vec3(0.9, 0.9, 0.9),
-      glm::vec3(0.2, 0.2, 0.2),
-      glm::vec3(0.8, 0.8, 0.8),
-      glm::vec3(0.9, 0.9, 0.9),
-      50,
-      0.0f,
-      1.0f,
-      1.0f);
-    curr_coordinate.x += spheres_offset.x;
+    spheres.at((1 * attrsPerSphere) + 9) += 0.01;
+    std::cout << "albedo.z: " << spheres.at((1 * attrsPerSphere) + 9) << '\n';
   }
   if (keyMap.at(GLFW_KEY_KP_5))
   {
-    addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
-      5,
-      glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
-      glm::vec3(0.8, 0.8, 0.8),
-      glm::vec3(0.9, 0.9, 0.9),
-      glm::vec3(0.2, 0.2, 0.2),
-      glm::vec3(0.8, 0.8, 0.8),
-      glm::vec3(0.9, 0.9, 0.9),
-      50,
-      0.0f,
-      0.5f,
-      1.0f);
-    curr_coordinate.x += spheres_offset.x;
+    spheres.at((1 * attrsPerSphere) + 9) -= 0.01;
+    std::cout << "albedo.z: " << spheres.at((1 * attrsPerSphere) + 9) << '\n';
   }
   if (keyMap.at(GLFW_KEY_KP_6))
   {
-    addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
-      5,
-      glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
-      glm::vec3(0.8, 0.8, 0.8),
-      glm::vec3(0.9, 0.9, 0.9),
-      glm::vec3(0.2, 0.2, 0.2),
-      glm::vec3(0.8, 0.8, 0.8),
-      glm::vec3(0.9, 0.9, 0.9),
-      50,
-      1.0f,
-      1.0f,
-      1.0f);
-    curr_coordinate.x += spheres_offset.x;
+    spheres.at((1 * attrsPerSphere) + 10) += 0.01;
+    std::cout << "albedo.w: " << spheres.at((1 * attrsPerSphere) + 10) << '\n';
   }
   if (keyMap.at(GLFW_KEY_KP_7))
   {
-    keyMap.at(GLFW_KEY_KP_7) = false;
-    for (int i = 0; i < 100; i++)
-    {
-      addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
-        5,
-        glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
-        glm::vec3(0.8, 0.8, 0.8),
-        glm::vec3(0.9, 0.9, 0.9),
-        glm::vec3(0.2, 0.2, 0.2),
-        glm::vec3(0.8, 0.8, 0.8),
-        glm::vec3(0.9, 0.9, 0.9),
-        50,
-        0.0f,
-        1.0f,
-        1.0f);
-      curr_coordinate.x += spheres_offset.x;
-      if (curr_coordinate.x > ((screenWidth / 2.0f) + 30))
-      {
-        curr_coordinate.x = (screenWidth / 2.0f) - 33;
-        curr_coordinate.y += spheres_offset.y;
-        if (curr_coordinate.y > ((screenHeight / 2.0f) + 15))
-        {
-          curr_coordinate.y = (screenHeight / 2.0f) - 15;
-          curr_coordinate.z += spheres_offset.z;
-        }
-      }
-    }
+    spheres.at((1 * attrsPerSphere) + 10) -= 0.01;
+    std::cout << "albedo.w: " << spheres.at((1 * attrsPerSphere) + 10) << '\n';
   }
   if (keyMap.at(GLFW_KEY_KP_8))
   {
-    keyMap.at(GLFW_KEY_KP_8) = false;
-    for (int i = 0; i < 100; i++)
-    {
-      addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
-        5,
-        glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
-        glm::vec3(0.8, 0.8, 0.8),
-        glm::vec3(0.9, 0.9, 0.9),
-        glm::vec3(0.2, 0.2, 0.2),
-        glm::vec3(0.8, 0.8, 0.8),
-        glm::vec3(0.9, 0.9, 0.9),
-        50,
-        0.0f,
-        0.5f,
-        1.0f);
-      curr_coordinate.x += spheres_offset.x;
-      if (curr_coordinate.x > ((screenWidth / 2.0f) + 30))
-      {
-        curr_coordinate.x = (screenWidth / 2.0f) - 33;
-        curr_coordinate.y += spheres_offset.y;
-        if (curr_coordinate.y > ((screenHeight / 2.0f) + 15))
-        {
-          curr_coordinate.y = (screenHeight / 2.0f) - 15;
-          curr_coordinate.z += spheres_offset.z;
-        }
-      }
-    }
+    spheres.at((1 * attrsPerSphere) + 11) += 1;
+    std::cout << "specular: " << spheres.at((1 * attrsPerSphere) + 11) << '\n';
   }
   if (keyMap.at(GLFW_KEY_KP_9))
   {
-    keyMap.at(GLFW_KEY_KP_9) = false;
-    for (int i = 0; i < 100; i++)
-    {
-      addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
-        5,
-        glm::vec3(randDistribution(randGen), randDistribution(randGen), randDistribution(randGen)),
-        glm::vec3(0.8, 0.8, 0.8),
-        glm::vec3(0.9, 0.9, 0.9),
-        glm::vec3(0.2, 0.2, 0.2),
-        glm::vec3(0.8, 0.8, 0.8),
-        glm::vec3(0.9, 0.9, 0.9),
-        50,
-        1.0f,
-        1.0f,
-        1.0f);
-      curr_coordinate.x += spheres_offset.x;
-      if (curr_coordinate.x > ((screenWidth / 2.0f) + 30))
-      {
-        curr_coordinate.x = (screenWidth / 2.0f) - 33;
-        curr_coordinate.y += spheres_offset.y;
-        if (curr_coordinate.y > ((screenHeight / 2.0f) + 15))
-        {
-          curr_coordinate.y = (screenHeight / 2.0f) - 15;
-          curr_coordinate.z += spheres_offset.z;
-        }
-      }
-    }
+    spheres.at((1 * attrsPerSphere) + 11) -= 1;
+    std::cout << "specular: " << spheres.at((1 * attrsPerSphere) + 11) << '\n';
+  }
+  if (keyMap.at(GLFW_KEY_KP_DIVIDE))
+  {
+    spheres.at((1 * attrsPerSphere) + 12) += 0.01;
+    std::cout << "refractive: " << spheres.at((1 * attrsPerSphere) + 12) << '\n';
+  }
+  if (keyMap.at(GLFW_KEY_KP_MULTIPLY))
+  {
+    spheres.at((1 * attrsPerSphere) + 12) -= 0.01;
+    std::cout << "refractive: " << spheres.at((1 * attrsPerSphere) + 12) << '\n';
   }
 
-  if (curr_coordinate.x > ((screenWidth / 2.0f) + 30))
-  {
-    curr_coordinate.x = (screenWidth / 2.0f) - 33;
-    curr_coordinate.y += spheres_offset.y;
-    if (curr_coordinate.y > ((screenHeight / 2.0f) + 15))
-    {
-      curr_coordinate.y = (screenHeight / 2.0f) - 15;
-      curr_coordinate.z += spheres_offset.z;
-    }
-  }
-  if (curr_coordinate.x < ((screenWidth / 2.0f) - 33))
-  {
-    curr_coordinate.x = (screenWidth / 2.0f) + 27;
-    curr_coordinate.y -= spheres_offset.y;
-    if (curr_coordinate.y < ((screenHeight / 2.0f) - 15))
-    {
-      curr_coordinate.y = (screenHeight / 2.0f) + 15;
-      curr_coordinate.z -= spheres_offset.z;
-    }
-  }
+  // if (keyMap.at(GLFW_KEY_BACKSPACE))
+  //{
+  //  if (numberOfSpheres > 0)
+  //  {
+  //    spheres.pop_back();
+  //    numberOfSpheres--;
+  //    curr_coordinate.x -= spheres_offset.x;
+  //  }
+  //  if (!(keyMap.at(GLFW_KEY_LEFT_SHIFT) || keyMap.at(GLFW_KEY_RIGHT_SHIFT)))
+  //  {
+  //    keyMap.at(GLFW_KEY_BACKSPACE) = false;
+  //  }
+  //}
+
+  // if (keyMap.at(GLFW_KEY_DELETE))
+  //{
+  //  if (numberOfSpheres > 0)
+  //  {
+  //    spheres.clear();
+  //    numberOfSpheres = 0;
+  //    curr_coordinate = start_sphere_pos;
+  //  }
+  //}
+  // if (keyMap.at(GLFW_KEY_KP_7))
+  //{
+  //  keyMap.at(GLFW_KEY_KP_7) = false;
+  //  for (int i = 0; i < 100; i++)
+  //  {
+  //    addSphere(glm::vec3(curr_coordinate.x, curr_coordinate.y, curr_coordinate.z),
+  //      5,
+  //      glm::vec3(randDistribution(randGen), randDistribution(randGen),
+  //      randDistribution(randGen)), glm::vec3(0.8, 0.8, 0.8), glm::vec3(0.9, 0.9, 0.9),
+  //      glm::vec3(0.2, 0.2, 0.2),
+  //      glm::vec3(0.8, 0.8, 0.8),
+  //      glm::vec3(0.9, 0.9, 0.9),
+  //      50,
+  //      0.0f,
+  //      1.0f,
+  //      1.0f);
+  //    curr_coordinate.x += spheres_offset.x;
+  //    if (curr_coordinate.x > ((screenWidth / 2.0f) + 30))
+  //    {
+  //      curr_coordinate.x = (screenWidth / 2.0f) - 33;
+  //      curr_coordinate.y += spheres_offset.y;
+  //      if (curr_coordinate.y > ((screenHeight / 2.0f) + 15))
+  //      {
+  //        curr_coordinate.y = (screenHeight / 2.0f) - 15;
+  //        curr_coordinate.z += spheres_offset.z;
+  //      }
+  //    }
+  //  }
+  //}
+  // if (curr_coordinate.x > ((screenWidth / 2.0f) + 30))
+  //{
+  //  curr_coordinate.x = (screenWidth / 2.0f) - 33;
+  //  curr_coordinate.y += spheres_offset.y;
+  //  if (curr_coordinate.y > ((screenHeight / 2.0f) + 15))
+  //  {
+  //    curr_coordinate.y = (screenHeight / 2.0f) - 15;
+  //    curr_coordinate.z += spheres_offset.z;
+  //  }
+  //}
+  // if (curr_coordinate.x < ((screenWidth / 2.0f) - 33))
+  //{
+  //  curr_coordinate.x = (screenWidth / 2.0f) + 27;
+  //  curr_coordinate.y -= spheres_offset.y;
+  //  if (curr_coordinate.y < ((screenHeight / 2.0f) - 15))
+  //  {
+  //    curr_coordinate.y = (screenHeight / 2.0f) + 15;
+  //    curr_coordinate.z -= spheres_offset.z;
+  //  }
+  //}
 
   // TODO: Output things on the window
-  //std::cout << "Number of spheres\t" << numberOfSpheres << "\n";
+  // std::cout << "Number of spheres\t" << numberOfSpheres << "\n";
   if (!spheres.empty())
   {
     spheres.at((0 * attrsPerSphere) + 0) = spherePos.x;
     spheres.at((0 * attrsPerSphere) + 1) = spherePos.y;
     spheres.at((0 * attrsPerSphere) + 2) = spherePos.z;
+
+    /*std::cout << "Sphere pos: (" << spherePos.x << ", " << spherePos.y << ", " << spherePos.z
+              << "\n";*/
   }
 }
 
