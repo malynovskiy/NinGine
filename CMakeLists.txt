@@ -1,20 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
-project(NinGine)
-
-set(MATH_LIB_NAME Math)
-add_subdirectory(source/Math)
+project(Ningine)
 
 add_executable(${PROJECT_NAME})
 
-set(resources_src_dir "${CMAKE_SOURCE_DIR}/resources")
-set(resources_dst_dir "${CMAKE_CURRENT_BINARY_DIR}/resources")
-
-add_custom_command(
-	TARGET ${PROJECT_NAME} POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E create_symlink ${resources_src_dir} ${resources_dst_dir}
-	DEPENDS ${resources_dst_dir}
-	COMMENT "symbolic link resources folder from ${resources_src_dir} to ${resources_dst_dir}"
-)
 if(MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /W4)
 else()
@@ -24,12 +12,7 @@ endif()
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
-
-add_custom_target(copy-files ALL
-	COMMAND ${CMAKE_COMMAND} -E resources
-	${CMAKE_CURRENT_SOURCE_DIR}/resources
-    ${CMAKE_BINARY_DIR}/DESTINATIONDIRECTORY
-    )
+find_package(OpenCL REQUIRED)
 
 target_include_directories(${PROJECT_NAME}
 	PUBLIC
@@ -41,15 +24,24 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
 	PUBLIC
 	PRIVATE
-		${MATH_LIB_NAME}
 		glfw
 		glad::glad
 		glm
+		OpenCL::OpenCL
 )
 
 target_sources(${PROJECT_NAME}
 	PUBLIC
+		include/Vector.hpp
+		include/Material.hpp
+		include/Light.hpp
+		include/Sphere.hpp
 	PRIVATE
-		source/Graphics
-		source/stb_image.cpp
-		ningine.cpp)
+		source/CLError.cpp
+		source/CLWrapper.cpp
+		source/GLScreen.cpp
+		source/GLShaderProgram.cpp
+		source/Ningine.cpp
+		source/OpenCLUtility.cpp
+
+		nintracer.cpp)

@@ -17,12 +17,17 @@
 #include <random>
 #include <map>
 
+#include "Sphere.hpp"
+#include "Light.hpp"
+
 namespace ningine
 {
 
 constexpr char glShaderProgramName[] = "BasicView";
 constexpr char vertexShaderName[] = "../../../source/shaders/GLSL/basic.vert";
 constexpr char fragmentShaderName[] = "../../../source/shaders/GLSL/basic.frag";
+
+constexpr char raytracer_kernel_path[] = "../../../source/shaders/OpenCL/ray_tracer.cl";
 
 // start coodinate for the first sphere that could be added in runtime
 constexpr glm::vec3 start_sphere_pos = glm::vec3(607, 345, 70);
@@ -47,18 +52,23 @@ class Ningine
   GLuint textureID;
 
   std::vector<float> spheres;
+  std::vector<float> lightSources;
+
   int numberOfSpheres;
+  int numberOfLightSources;
 
   static int screenWidth;
   static int screenHeight;
   static std::map<int, bool> keyMap;
 
   cl_float3 camPos;
-
+  cl_float3 coordinateBasis;
   // coordinates for adding new spheres in run-time
   glm::vec3 curr_coordinate;
   glm::vec3 spherePos;
-  const u_int attrsPerSphere = 20;
+
+  const u_int attrsPerSphere = 13;
+  const u_int attrsPerLightSource = 4;
 
 private:
   void initKeyboardMappings();
@@ -68,22 +78,13 @@ private:
   // TODO: Ivestigete whether we can drop the next function
   //      and create some sort of scenes (width preloaded objects)
   void createSpheres();
+  void createLighting();
   void createCLKernels();
 
   void processKeyboardInput();
 
-  void addSphere(glm::vec3 pos,
-    float r,
-    glm::vec3 colour,
-    glm::vec3 lightAmbiant,
-    glm::vec3 lightSpecular,
-    glm::vec3 materialAmbiant,
-    glm::vec3 materialDiffuse,
-    glm::vec3 materialSpecular,
-    float materialShinyness,
-    float reflective,
-    float opacity,
-    float refractiveIndex);
+  void pushBackSphere(const Sphere &sphere);
+  void pushBackLightSource(const LightSource &lightSource);
 
   float calculateDist(float fov);
   float calculateFOV(glm::vec2 a, glm::vec2 b, glm::vec2 c);
@@ -96,6 +97,8 @@ public:
 
   bool createGLContext();
   void createScreenImage();
+
+  void printFrameRate();
 
   static void resize_callback(GLFWwindow *window, int width, int height);
   static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);

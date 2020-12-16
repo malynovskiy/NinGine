@@ -112,7 +112,7 @@ cl::Program CLWrapper::createCLProgram(const std::string &file, cl_context_prope
 
   auto error = program.build("-cl-std=CL1.2");
 
-  if (error == CL_BUILD_PROGRAM_FAILURE)
+  if (error == CL_BUILD_PROGRAM_FAILURE || error == CL_UNKNOWN_BUILD_ERROR)
   {
     size_t logSize;
     clGetProgramBuildInfo(program(), device(), CL_PROGRAM_BUILD_LOG, 0, nullptr, &logSize);
