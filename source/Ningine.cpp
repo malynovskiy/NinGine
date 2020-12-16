@@ -40,7 +40,8 @@ bool Ningine::createGLContext()
     glfwTerminate();
     return false;
   }
-  GLFWmonitor* monitor = numOfMonitors == 2? monitors[1] : monitors[0];
+  // GLFWmonitor *monitor = numOfMonitors == 2 ? monitors[1] : monitors[0];
+  GLFWmonitor *monitor = monitors[1];
   const GLFWvidmode *mode = glfwGetVideoMode(monitor);
 
   glfwWindowHint(GLFW_RED_BITS, mode->redBits);
@@ -98,11 +99,6 @@ bool Ningine::init()
 
   createSpheres();
   createLighting();
-
-  // TODO: Replace this code later to a more robust approach of moving "lead" sphere
-  spherePos.x = spheres.at(0);
-  spherePos.y = spheres.at(1);
-  spherePos.z = spheres.at(2);
 
   createScreenImage();
 
@@ -334,6 +330,11 @@ void Ningine::createSpheres()
   pushBackSphere(Sphere(basis + Vec3f(7, 5, 18 + 50), 4, materials::mirror));
 
   spheres.shrink_to_fit();
+
+  // TODO: Replace this code later to a more robust approach of moving "lead" sphere
+  spherePos.x = spheres.at(0);
+  spherePos.y = spheres.at(1);
+  spherePos.z = spheres.at(2);
 }
 
 void Ningine::createLighting()
