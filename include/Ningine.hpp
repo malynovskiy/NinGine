@@ -78,6 +78,7 @@ private:
   // TODO: Ivestigete whether we can drop the next function
   //      and create some sort of scenes (width preloaded objects)
   void createSpheres();
+  void createTriangles();
   void createLighting();
   void createCLKernels();
 

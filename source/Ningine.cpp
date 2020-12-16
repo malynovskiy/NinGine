@@ -98,6 +98,7 @@ bool Ningine::init()
   coordinateBasis = camPos;
 
   createSpheres();
+  createTriangles();
   createLighting();
 
   createScreenImage();
@@ -335,6 +336,14 @@ void Ningine::createSpheres()
   spherePos.x = spheres.at(0);
   spherePos.y = spheres.at(1);
   spherePos.z = spheres.at(2);
+}
+
+void Ningine::createTriangles() 
+{
+  using math::Vec3f;
+  //numberOfTriangles = 0;
+
+  const Vec3f basis(coordinateBasis.x, coordinateBasis.y, coordinateBasis.z);
 }
 
 void Ningine::createLighting()
