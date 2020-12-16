@@ -83,19 +83,6 @@ private:
 
   void processKeyboardInput();
 
-  void addSphere(glm::vec3 pos,
-    float r,
-    glm::vec3 colour,
-    glm::vec3 lightAmbiant,
-    glm::vec3 lightSpecular,
-    glm::vec3 materialAmbiant,
-    glm::vec3 materialDiffuse,
-    glm::vec3 materialSpecular,
-    float materialShinyness,
-    float reflective,
-    float opacity,
-    float refractiveIndex);
-
   void pushBackSphere(const Sphere &sphere);
   void pushBackLightSource(const LightSource &lightSource);
 

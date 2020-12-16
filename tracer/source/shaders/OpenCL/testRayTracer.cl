@@ -64,6 +64,14 @@ struct Material
 
 typedef struct Material Material;
 
+struct Ray
+{
+  float3 origin;
+  float3 direction
+};
+
+typedef struct Ray Ray;
+
 void material_init(Material *material)
 {
   material->diffuse_color = 0;
@@ -231,9 +239,9 @@ bool scene_intersect(float3 *origin,
 
   float triangle_dist = FLT_MAX;
 
-  const float3 vert0 = (float3)(955.0f, 550.0f, 18.0f);
-  const float3 vert1 = (float3)(950.0f, 535.0f, 13.0f);
-  const float3 vert2 = (float3)(960.0f, 535.0f, 13.0f);
+  float3 vert0 = (float3)(955.0f, 550.0f, 18.0f);
+  float3 vert1 = (float3)(950.0f, 535.0f, 13.0f);
+  float3 vert2 = (float3)(960.0f, 535.0f, 13.0f);
   float t = 0;
   float3 N;
   if (triangle_ray_intersect(origin, direction, &vert0, &vert1, &vert2, &N, &t) && t < resDist)
@@ -242,6 +250,34 @@ bool scene_intersect(float3 *origin,
     *normal = N;
     *hit = *origin + *direction * t;
     place_material(material, spheresData, 1);
+  }
+  resDist = min(resDist, triangle_dist);
+
+  triangle_dist = FLT_MAX;
+  vert0 = (float3)(952.0f, 550.0f, 42.0f);
+  vert1 = (float3)(947.0f, 535.0f, 42.0f);
+  vert2 = (float3)(957.0f, 535.0f, 42.0f);
+  t = 0;
+  if (triangle_ray_intersect(origin, direction, &vert0, &vert1, &vert2, &N, &t) && t < resDist)
+  {
+    triangle_dist = t;
+    *normal = N;
+    *hit = *origin + *direction * t;
+    place_material(material, spheresData, 3);
+  }
+  resDist = min(resDist, triangle_dist);
+
+  triangle_dist = FLT_MAX;
+  vert0 = (float3)(960.0f, 550.0f, 80.0f);
+  vert1 = (float3)(955.0f, 535.0f, 80.0f);
+  vert2 = (float3)(965.0f, 535.0f, 80.0f);
+  t = 0;
+  if (triangle_ray_intersect(origin, direction, &vert0, &vert1, &vert2, &N, &t) && t < resDist)
+  {
+    triangle_dist = t;
+    *normal = N;
+    *hit = *origin + *direction * t;
+    place_material(material, spheresData, 3);
   }
   resDist = min(resDist, triangle_dist);
 
