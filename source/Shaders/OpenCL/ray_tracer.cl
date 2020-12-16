@@ -289,7 +289,11 @@ bool scene_intersect(float3 *origin,
     plane_dist = t;
     *hit = *origin + *direction * plane_dist;
     *normal = N;
-    material->diffuse_color = (float3)(0.1f, 0.7f, 0.3f);
+
+    material->diffuse_color = ((int)(.5 * hit->x + 1000) + (int)(.5 * hit->z)) & 1
+                                ? (float3)(1, 1, 1)
+                                : (float3)(1, .7, .3);
+
     material->diffuse_color = material->diffuse_color * 0.3f;
   }
 
