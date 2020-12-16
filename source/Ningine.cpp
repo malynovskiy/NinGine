@@ -41,7 +41,7 @@ bool Ningine::createGLContext()
     return false;
   }
   // GLFWmonitor *monitor = numOfMonitors == 2 ? monitors[1] : monitors[0];
-  GLFWmonitor *monitor = monitors[1];
+  GLFWmonitor *monitor = monitors[0];
   const GLFWvidmode *mode = glfwGetVideoMode(monitor);
 
   glfwWindowHint(GLFW_RED_BITS, mode->redBits);
@@ -447,67 +447,6 @@ void Ningine::processKeyboardInput()
 
   if (keyMap.at(GLFW_KEY_SPACE))
     camPos.y += 0.3f;
-
-  if (keyMap.at(GLFW_KEY_KP_0))
-  {
-    spheres.at((1 * attrsPerSphere) + 7) += 0.01;
-    std::cout << "albedo.x: " << spheres.at((1 * attrsPerSphere) + 7) << '\n';
-  }
-  if (keyMap.at(GLFW_KEY_KP_1))
-  {
-    spheres.at((1 * attrsPerSphere) + 7) -= 0.01;
-    std::cout << "albedo.x: " << spheres.at((1 * attrsPerSphere) + 7) << '\n';
-  }
-  if (keyMap.at(GLFW_KEY_KP_2))
-  {
-    spheres.at((1 * attrsPerSphere) + 8) += 0.01;
-    std::cout << "albedo.y: " << spheres.at((1 * attrsPerSphere) + 8) << '\n';
-  }
-  if (keyMap.at(GLFW_KEY_KP_3))
-  {
-    spheres.at((1 * attrsPerSphere) + 8) -= 0.01;
-    std::cout << "albedo.y: " << spheres.at((1 * attrsPerSphere) + 8) << '\n';
-  }
-  if (keyMap.at(GLFW_KEY_KP_4))
-  {
-    spheres.at((1 * attrsPerSphere) + 9) += 0.01;
-    std::cout << "albedo.z: " << spheres.at((1 * attrsPerSphere) + 9) << '\n';
-  }
-  if (keyMap.at(GLFW_KEY_KP_5))
-  {
-    spheres.at((1 * attrsPerSphere) + 9) -= 0.01;
-    std::cout << "albedo.z: " << spheres.at((1 * attrsPerSphere) + 9) << '\n';
-  }
-  if (keyMap.at(GLFW_KEY_KP_6))
-  {
-    spheres.at((1 * attrsPerSphere) + 10) += 0.01;
-    std::cout << "albedo.w: " << spheres.at((1 * attrsPerSphere) + 10) << '\n';
-  }
-  if (keyMap.at(GLFW_KEY_KP_7))
-  {
-    spheres.at((1 * attrsPerSphere) + 10) -= 0.01;
-    std::cout << "albedo.w: " << spheres.at((1 * attrsPerSphere) + 10) << '\n';
-  }
-  if (keyMap.at(GLFW_KEY_KP_8))
-  {
-    spheres.at((1 * attrsPerSphere) + 11) += 1;
-    std::cout << "specular: " << spheres.at((1 * attrsPerSphere) + 11) << '\n';
-  }
-  if (keyMap.at(GLFW_KEY_KP_9))
-  {
-    spheres.at((1 * attrsPerSphere) + 11) -= 1;
-    std::cout << "specular: " << spheres.at((1 * attrsPerSphere) + 11) << '\n';
-  }
-  if (keyMap.at(GLFW_KEY_KP_DIVIDE))
-  {
-    spheres.at((1 * attrsPerSphere) + 12) += 0.01;
-    std::cout << "refractive: " << spheres.at((1 * attrsPerSphere) + 12) << '\n';
-  }
-  if (keyMap.at(GLFW_KEY_KP_MULTIPLY))
-  {
-    spheres.at((1 * attrsPerSphere) + 12) -= 0.01;
-    std::cout << "refractive: " << spheres.at((1 * attrsPerSphere) + 12) << '\n';
-  }
 
   // if (keyMap.at(GLFW_KEY_BACKSPACE))
   //{

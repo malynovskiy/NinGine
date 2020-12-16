@@ -105,7 +105,7 @@ float3 refract(const float3 *direction, const float3 *normal, float *refractive_
 
     n = -n;
   }
-  // probably should use fraction here
+  
   float eta = etai / etat;
   float k = 1.0f - eta * eta * (1.0f - cosi * cosi);
 
