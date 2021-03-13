@@ -1,0 +1,5 @@
+language: cpp
+
+os: windows
+
+arch: amd64
