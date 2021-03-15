@@ -1,8 +1,8 @@
-platform:
-  - x64
-
 image:
   - Visual Studio 2019
+
+platform:
+  - x64
 
 configuration:
   - Debug
@@ -11,16 +11,16 @@ configuration:
 clone_folder: c:/projects/NinGine
 
 build_script:
-  - cd c:/projects/NinGine
-  - mkdir build
-  - cd build
-  - cmake -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake c:/projects/NinGine -G "Visual Studio 16"
-  - cmake --build .
+- cd c:/projects/NinGine
+- mkdir build
+- cd build
+- cmake -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake c:/projects/NinGine -G "Visual Studio 16"
+- cmake --build .
 
 install:
-  - cd c:/Tools/vcpkg
-  - vcpkg integrate install
-  - vcpkg install glfw3:x64-windows glad:x64-windows glm:x64-windows opencl:x64-windows
+- cd c:/Tools/vcpkg 
+- vcpkg integrate install
+- vcpkg install glfw3:x64-windows glad:x64-windows glm:x64-windows opencl:x64-windows
 
 cache: c:/tools/vcpkg/installed/
 
