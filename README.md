@@ -1,4 +1,5 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/27urplajamdjcs67?svg=true)](https://ci.appveyor.com/project/malynovskiy/ningine)
+[![Build Status](https://ci.appveyor.com/api/projects/status/lh6a93nw50rxq3f7/branch/master?svg=true)](https://ci.appveyor.com/project/malynovskiy/ningine)
 # NinGine
 
 ## About:
