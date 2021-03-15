@@ -26,7 +26,7 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE
 		glfw
 		glad::glad
-		glm
+		glm::glm
 		OpenCL::OpenCL
 )
 
