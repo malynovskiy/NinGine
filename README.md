@@ -1,3 +1,4 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/27urplajamdjcs67?svg=true)](https://ci.appveyor.com/project/malynovskiy/ningine)
 # NinGine
 
 ## About:
