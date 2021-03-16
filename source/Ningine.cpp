@@ -85,10 +85,10 @@ bool Ningine::init()
 
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-  if (!program.load(glShaderProgramName, vertexShaderName, fragmentShaderName))
+  if (!shaderProgram.load(glShaderProgramName, vertexShaderName, fragmentShaderName))
     std::cerr << "Failed to load a shader program" << std::endl;
 
-  screenPlane.constructGeometry(&program, screenWidth, screenHeight);
+  screenPlane.constructGeometry(&shaderProgram, screenWidth, screenHeight);
 
   initKeyboardMappings();
 
@@ -166,7 +166,7 @@ void Ningine::display()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glUseProgram(program.handle());
+  glUseProgram(shaderProgram.handle());
 
   screenPlane.render(textureID);
 
@@ -189,14 +189,14 @@ void Ningine::display()
 
   screenRange = cl::NDRange(screenWidth, screenHeight);
 
-  queue = cl::CommandQueue(clContext.getContext(), clContext.getDevice());
+  commandQueue = cl::CommandQueue(clContext.getContext(), clContext.getDevice());
   std::vector<cl::Memory> images(1, screenImage);
 
   // tell openGL to let openCL use the memory
-  queue.enqueueAcquireGLObjects(&images, nullptr);
-  queue.enqueueNDRangeKernel(clContext.getKernel(), 0, screenRange);
+  commandQueue.enqueueAcquireGLObjects(&images, nullptr);
+  commandQueue.enqueueNDRangeKernel(clContext.getKernel(), 0, screenRange);
   // give the memory back to openGL
-  queue.enqueueReleaseGLObjects(&images, nullptr);
+  commandQueue.enqueueReleaseGLObjects(&images, nullptr);
 
   glUseProgram(0);// turn off the current shader
 }
@@ -277,7 +277,7 @@ void Ningine::initGLTexture()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16.0f);
 
-  glUniform1i(glGetUniformLocation(program.handle(), "tex"), 0);
+  glUniform1i(glGetUniformLocation(shaderProgram.handle(), "tex"), 0);
 }
 
 void Ningine::pushBackSphere(const Sphere &sphere)

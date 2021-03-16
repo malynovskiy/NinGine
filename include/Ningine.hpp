@@ -35,40 +35,6 @@ constexpr glm::vec3 spheres_offset = glm::vec3(15, 15, 15);
 
 class Ningine
 {
-  GLFWwindow *window;
-
-  std::random_device randGen;
-  std::uniform_real_distribution<float> randDistribution;
-
-  GLShaderProgram program;
-  GLScreen screenPlane;
-  CLWrapper clContext;
-
-  cl::ImageGL screenImage;
-  float screenDistance;
-  cl::NDRange screenRange;
-  cl::CommandQueue queue;
-
-  GLuint textureID;
-
-  std::vector<float> spheres;
-  std::vector<float> lightSources;
-
-  int numberOfSpheres;
-  int numberOfLightSources;
-
-  static int screenWidth;
-  static int screenHeight;
-  static std::map<int, bool> keyMap;
-
-  cl_float3 camPos;
-  cl_float3 coordinateBasis;
-  // coordinates for adding new spheres in run-time
-  glm::vec3 curr_coordinate;
-  glm::vec3 spherePos;
-
-  const u_int attrsPerSphere = 13;
-  const u_int attrsPerLightSource = 4;
 
 private:
   void initKeyboardMappings();
@@ -103,6 +69,50 @@ public:
 
   static void resize_callback(GLFWwindow *window, int width, int height);
   static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+
+private:
+  GLFWwindow *window;
+
+  std::random_device randGen;
+  std::uniform_real_distribution<float> randDistribution;
+
+  GLShaderProgram shaderProgram;
+  GLScreen screenPlane;
+  CLWrapper clContext;
+
+  /* TODO: Move all OpenCL info into separate class -> wrapper for OpenCL context: 
+            maybe we should extend already existed class CLWrapper
+    1) need to be investigated whether we want to putt all OpenCL context info into CLWrapper
+        > if no then create separete class, that would be containing clContext and all related 
+          info*/
+
+  /* TODO: probably some similar stuff, but for OpenGL context */
+  cl::ImageGL screenImage;
+  float screenDistance;
+  cl::NDRange screenRange;
+  cl::CommandQueue commandQueue;
+
+  GLuint textureID;
+
+  std::vector<float> spheres;
+  std::vector<float> lightSources;
+
+  int numberOfSpheres;
+  int numberOfLightSources;
+
+  cl_float3 camPos;
+  cl_float3 coordinateBasis;
+  // coordinates for adding new spheres in run-time
+  glm::vec3 curr_coordinate;
+  glm::vec3 spherePos;
+
+  const float fov = 60.0f;
+  const uint attrsPerSphere = 13;
+  const uint attrsPerLightSource = 4;
+ 
+  static int screenWidth;
+  static int screenHeight;
+  static std::map<int, bool> keyMap;
 };
 
 }// namespace ningine

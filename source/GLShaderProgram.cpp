@@ -66,7 +66,7 @@ bool GLShaderProgram::load(
   return true;
 }
 
-GLuint GLShaderProgram::createShader(std::string fileName, GLenum type, GLint &success)
+int GLShaderProgram::createShader(std::string fileName, GLenum type, GLint &success)
 {
   fileName = readfromFile(fileName);
   const char *source_cstr = fileName.c_str();

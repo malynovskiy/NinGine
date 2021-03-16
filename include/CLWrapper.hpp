@@ -6,17 +6,6 @@ namespace ningine
 {
 class CLWrapper
 {
-  cl::Program program;
-  cl::Context context;
-  cl::Device device;
-
-  std::vector<cl::Buffer> memBuff;
-  cl::Kernel kernel;
-
-  cl::Program createCLProgram(const std::string &file, cl_context_properties *properties = nullptr);
-  void printDeviceInfo(const std::vector<cl::Device> &devices);
-  static std::string parseLog(char *log);
-
 public:
   void init(std::string path, cl_context_properties *properties = nullptr);
 
@@ -43,6 +32,19 @@ public:
   inline const cl::Device &getDevice() const { return device; }
   inline const cl::Buffer &getBuffer(unsigned int i = 0) const { return memBuff[i]; }
   inline const cl::Kernel &getKernel() const { return kernel; }
+
+private:
+  cl::Program createCLProgram(const std::string &file, cl_context_properties *properties = nullptr);
+  void printDeviceInfo(const std::vector<cl::Device> &devices);
+  static std::string parseLog(char *log);
+
+private:
+  cl::Program program;
+  cl::Context context;
+  cl::Device device;
+
+  std::vector<cl::Buffer> memBuff;
+  cl::Kernel kernel;
 };
 
 }// namespace ningine
