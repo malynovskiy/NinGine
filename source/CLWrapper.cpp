@@ -4,30 +4,43 @@
 #include <fstream>
 #include <sstream>
 
-#define kB 1024
-#define MB 1048576
-#define GB 1073741824
+constexpr cl_ulong kB = 1024;
+constexpr cl_ulong MB = 1048576;
+constexpr cl_ulong GB = 1073741824;
 
-#define to_kB(b) (b / 1024.0)
-#define to_MB(b) (to_kB(b) / 1024.0)
-#define to_GB(b) (to_MB(b) / 1024.0)
+constexpr float to_kB(cl_ulong bytes)
+{
+  return bytes / static_cast<float>(kB);
+}
+
+constexpr float to_MB(cl_ulong bytes)
+{
+  return to_kB(bytes) / static_cast<float>(kB);
+}
+
+constexpr float to_GB(cl_ulong bytes)
+{
+  return to_MB(bytes) / static_cast<float>(kB);
+}
 
 namespace ningine
 {
 void CLWrapper::printDeviceInfo(const std::vector<cl::Device> &devices)
 {
+  typedef std::vector<cl::Device>::const_iterator DeviceIterator;
+
   std::cout << "number of devices  \t" << devices.size() << "\n\n";
 
-  int i = 1;
-  for (auto device = devices.begin(); device != devices.end(); device++, i++)
+  size_t i = 1;
+  for (const cl::Device &device : devices) 
   {
-    auto vendor = device->getInfo<CL_DEVICE_VENDOR>();
-    auto version = device->getInfo<CL_DEVICE_VERSION>();
-    auto gmem = device->getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();// in bytes
-    auto lmem = device->getInfo<CL_DEVICE_LOCAL_MEM_SIZE>();// in bytes
-    auto cmem = device->getInfo<CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE>();// in bytes
+    const std::string vendor = device.getInfo<CL_DEVICE_VENDOR>();
+    const std::string version = device.getInfo<CL_DEVICE_VERSION>();
+    const cl_ulong gmem = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();// in bytes
+    const cl_ulong lmem = device.getInfo<CL_DEVICE_LOCAL_MEM_SIZE>();// in bytes
+    const cl_ulong cmem = device.getInfo<CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE>();// in bytes
 
-    std::cout << "Device:         \t" << i << "\n";
+    std::cout << "Device:         \t" << i++ << "\n";
     std::cout << "Vendor:         \t" << vendor << "\n";
     std::cout << "Version:        \t" << version << "\n";
     std::cout << "Global Memory:  \t" << to_GB(gmem) << " GB\n";
