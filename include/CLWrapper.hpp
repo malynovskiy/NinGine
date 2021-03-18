@@ -7,6 +7,9 @@ namespace ningine
 class CLWrapper
 {
 public:
+  CLWrapper() {}
+  ~CLWrapper() {}
+
   void init(std::string path, cl_context_properties *properties = nullptr);
 
   inline void clearBuffers() { memBuff.clear(); }

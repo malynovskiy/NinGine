@@ -35,16 +35,23 @@ constexpr glm::vec3 spheres_offset = glm::vec3(15, 15, 15);
 
 class Ningine
 {
+public:
+  Ningine() {};
+  ~Ningine() {}
 
 private:
   void initKeyboardMappings();
   void initGLTexture();
   bool initCLContext();
 
-  // TODO: Ivestigete whether we can drop the next function
-  //      and create some sort of scenes (width preloaded objects)
+  void createScene();
+
   void createSpheres();
   void createTriangles();
+  void createPlanes();
+
+  void spheresMove();
+
   void createLighting();
   void createCLKernels();
 

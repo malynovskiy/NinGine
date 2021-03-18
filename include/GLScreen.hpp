@@ -15,6 +15,9 @@ constexpr int NumberOfTriangleIndices = 6;
 
 class GLScreen
 {
+public:
+  GLScreen();
+  ~GLScreen() {}
 
   inline void setShaderProgram(GLShaderProgram *shaderProgram) { program = shaderProgram; }
 

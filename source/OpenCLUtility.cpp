@@ -11,13 +11,13 @@ namespace ningine
 
 Platform getPlatform(std::string pName, cl_int &error)
 {
-  Platform ret_val;
+  Platform ret_val{};
   error = 0;
   try
   {
     std::vector<Platform> platforms;
     Platform::get(&platforms);
-    int found = -1;
+    __int64 found = -1;
     for (PlatformIter it = platforms.begin(); it < platforms.end(); ++it)
     {
       std::string temp = it->getInfo<CL_PLATFORM_NAME>();
