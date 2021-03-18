@@ -244,7 +244,7 @@ bool scene_intersect(float3 *origin,
   float3 vert2 = (float3)(960.0f, 535.0f, 13.0f);
   float t = 0;
   float3 N;
-  if (triangle_ray_intersect(origin, direction, &vert0, &vert1, &vert2, &N, &t) && t < resDist)
+  /*if (triangle_ray_intersect(origin, direction, &vert0, &vert1, &vert2, &N, &t) && t < resDist)
   {
     triangle_dist = t;
     *normal = N;
@@ -268,9 +268,9 @@ bool scene_intersect(float3 *origin,
   resDist = min(resDist, triangle_dist);
 
   triangle_dist = FLT_MAX;
-  vert0 = (float3)(960.0f, 550.0f, 80.0f);
-  vert1 = (float3)(955.0f, 535.0f, 80.0f);
-  vert2 = (float3)(965.0f, 535.0f, 80.0f);
+  vert0 = (float3)(23 + 955.0f, 550.0f, 80.0f);
+  vert1 = (float3)(23 + 955.0f, 535.0f, 80.0f);
+  vert2 = (float3)(23 + 965.0f, 535.0f, 70.0f);
   t = 0;
   if (triangle_ray_intersect(origin, direction, &vert0, &vert1, &vert2, &N, &t) && t < resDist)
   {
@@ -280,6 +280,20 @@ bool scene_intersect(float3 *origin,
     place_material(material, spheresData, 3);
   }
   resDist = min(resDist, triangle_dist);
+
+  triangle_dist = FLT_MAX;
+  vert0 = (float3)(23 + 955.0f, 550.0f, 80.0f);
+  vert1 = (float3)(23 + 965.0f, 550.0f, 70.0f);
+  vert2 = (float3)(23 + 965.0f, 535.0f, 70.0f);
+  t = 0;
+  if (triangle_ray_intersect(origin, direction, &vert0, &vert1, &vert2, &N, &t) && t < resDist)
+  {
+    triangle_dist = t;
+    *normal = N;
+    *hit = *origin + *direction * t;
+    place_material(material, spheresData, 3);
+  }
+  resDist = min(resDist, triangle_dist);*/
 
   float plane_dist = FLT_MAX;
   N = (float3)(0.0f, 1.0f, 0.0f);

@@ -18,6 +18,13 @@ int Ningine::screenHeight = 1080;
 
 std::map<int, bool> Ningine::keyMap;
 
+// Ningine::Ningine()
+//   : window(nullptr), randGen(), randDistribution(), shaderProgram(), screenPlane(), clContext(),
+//     screenImage(), screenRange(), commandQueue()
+// {
+
+// }
+
 bool Ningine::createGLContext()
 {
   if (!glfwInit())
@@ -27,9 +34,7 @@ bool Ningine::createGLContext()
     return false;
   }
 
-  // TODO: verify do we need the next hint at all?
   glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-  // TODO: probably the next hint will be useful for fps capabilities
   glfwWindowHint(GLFW_REFRESH_RATE, GLFW_DONT_CARE);
 
   int numOfMonitors{};
@@ -40,7 +45,7 @@ bool Ningine::createGLContext()
     glfwTerminate();
     return false;
   }
-  // GLFWmonitor *monitor = numOfMonitors == 2 ? monitors[1] : monitors[0];
+
   GLFWmonitor *monitor = monitors[0];
   const GLFWvidmode *mode = glfwGetVideoMode(monitor);
 
@@ -50,7 +55,7 @@ bool Ningine::createGLContext()
   glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
   // window mode without borders
-  window = glfwCreateWindow(screenWidth, screenHeight, "Realtime ratracing test", monitor, nullptr);
+  window = glfwCreateWindow(screenWidth, screenHeight, "Ningine Ray-Tracing", monitor, nullptr);
 
   if (window == nullptr)
   {
@@ -68,6 +73,11 @@ bool Ningine::createGLContext()
     return false;
   }
 
+  glfwSetWindowSizeCallback(window, resize_callback);
+  glfwSetKeyCallback(window, key_callback);
+
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
   std::cout << "OpenGL version is: " << glGetString(GL_VERSION) << '\n';
 
   return true;
@@ -80,11 +90,6 @@ bool Ningine::init()
 
   randDistribution = std::uniform_real_distribution<float>(0.0f, 1.0f);
 
-  glfwSetWindowSizeCallback(window, resize_callback);
-  glfwSetKeyCallback(window, key_callback);
-
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
   if (!shaderProgram.load(glShaderProgramName, vertexShaderName, fragmentShaderName))
     std::cerr << "Failed to load a shader program" << std::endl;
 
@@ -94,13 +99,7 @@ bool Ningine::init()
 
   glEnable(GL_DEPTH_TEST);
 
-  camPos = { screenWidth / 2.0f, screenHeight / 2.0f, 0.0f };
-  coordinateBasis = camPos;
-
-  createSpheres();
-  createTriangles();
-  createLighting();
-
+  createScene();
   createScreenImage();
 
   // pushing our spheres data to the OpenCL buffer
@@ -114,16 +113,12 @@ bool Ningine::init()
     lightSources.data());
 
   // TODO: Rework for to be customizable
-  screenDistance = calculateDist(60);
-
+  screenDistance = calculateDist(fov);
   curr_coordinate = start_sphere_pos;
 
   std::cout << "screenDist\t" << screenDistance << "\n";
 
-  std::cout << "FOV:\t"
-            << calculateFOV(glm::vec2(screenHeight, 0),
-                 glm::vec2(0, screenDistance),
-                 glm::vec2(screenWidth, screenDistance));
+  std::cout << "FOV:\t" << fov;
   std::cout << (char)167 << "\n";
 
   glfwSwapInterval(1);
@@ -139,6 +134,8 @@ int Ningine::run()
     glfwSwapBuffers(window);
     processEvents();
 
+    spheresMove();
+    
     printFrameRate();
   }
 
@@ -325,10 +322,41 @@ void Ningine::createSpheres()
 
   const Vec3f basis(coordinateBasis.x, coordinateBasis.y, coordinateBasis.z);
 
-  pushBackSphere(Sphere(basis + Vec3f(5, 0, 10 + 40 - 30), 2, materials::ivory));
-  pushBackSphere(Sphere(basis + Vec3f(-1.0, -1.5, 12 + 40), 2, materials::glass));
+  pushBackSphere(Sphere(basis + Vec3f(5, 0, 10 + 10), 2, materials::ivory));
+  // pushBackSphere(Sphere(basis + Vec3f(-1.0, -1.5, 12 + 40), 2, materials::thin_glass));
+
   pushBackSphere(Sphere(basis + Vec3f(1.5, -0.5, 18 + 40), 3, materials::red_rubber));
   pushBackSphere(Sphere(basis + Vec3f(7, 5, 18 + 50), 4, materials::mirror));
+
+  // 3
+  pushBackSphere(Sphere(basis + Vec3f(20, -1.0, 80),
+    4,
+    Material(math::Vec3f(0.0f, 0.0f, 0.0f), math::Vec4f(0.9f, 0.1f, 0.0f, 0.0f), 5.0f, 1.0f)));
+  // 4
+  pushBackSphere(Sphere(basis + Vec3f(26, 1, 45),
+    2,
+    Material(math::Vec3f(0.0f, 0.99f, 0.2f), math::Vec4f(0.9f, 0.1f, 0.0f, 0.0f), 5.0f, 1.0f)));
+  // 5
+  pushBackSphere(Sphere(basis + Vec3f(32, -0.5, 60),
+    2.5,
+    Material(math::Vec3f(0.1f, 0.1f, 0.99f), math::Vec4f(0.9f, 0.1f, 0.0f, 0.0f), 5.0f, 1.0f)));
+
+  // pushBackSphere(Sphere(basis + Vec3f(1.5, -0.5, 18 + 40),
+  //  1,
+  //  Material(math::Vec3f(0.72f, 0.08f, 0.99f), math::Vec4f(0.9f, 0.1f, 0.0f, 0.0f), 5.0f, 1.0f)));
+
+  // pushBackSphere(Sphere(basis + Vec3f(1.5, -0.5, 18 + 40),
+  //  4,
+  //  Material(math::Vec3f(0.99f, 0.08f, 0.6f), math::Vec4f(0.9f, 0.1f, 0.0f, 0.0f), 5.0f, 1.0f)));
+
+  // pushBackSphere(Sphere(basis + Vec3f(1.5, -0.5, 18 + 40),
+  //  3,
+  //  Material(math::Vec3f(0.22f, 0.58f, 0.55f), math::Vec4f(0.9f, 0.1f, 0.0f, 0.0f), 5.0f, 1.0f)));
+
+  // pushBackSphere(Sphere(basis + Vec3f(1.5, -0.5, 18 + 40),
+  //  4,
+  //  Material(math::Vec3f(0.93f, 0.46f, 0.23f), math::Vec4f(0.9f, 0.1f, 0.0f, 0.0f), 5.0f, 1.0f)));
+
 
   spheres.shrink_to_fit();
 
@@ -338,10 +366,10 @@ void Ningine::createSpheres()
   spherePos.z = spheres.at(2);
 }
 
-void Ningine::createTriangles() 
+void Ningine::createTriangles()
 {
   using math::Vec3f;
-  //numberOfTriangles = 0;
+  // numberOfTriangles = 0;
 
   const Vec3f basis(coordinateBasis.x, coordinateBasis.y, coordinateBasis.z);
 }
@@ -356,6 +384,16 @@ void Ningine::createLighting()
   pushBackLightSource(LightSource(basis + math::Vec3f(-20.0f, 30.0f, 20.0f), 3.5f));
   pushBackLightSource(LightSource(basis + math::Vec3f(20.0f, 20.0f, 30.0f), 1.5f));
   lightSources.shrink_to_fit();
+}
+
+void Ningine::createScene()
+{
+  camPos = { screenWidth / 2.0f, screenHeight / 2.0f, 0.0f };
+  coordinateBasis = camPos;
+
+  createSpheres();
+  createTriangles();
+  createLighting();
 }
 
 void Ningine::initKeyboardMappings()
@@ -540,6 +578,18 @@ void Ningine::processKeyboardInput()
 
     /*std::cout << "Sphere pos: (" << spherePos.x << ", " << spherePos.y << ", " << spherePos.z
               << "\n";*/
+  }
+}
+
+void Ningine::spheresMove() 
+{
+  if (!spheres.empty())
+  {
+    float t = GetTickCount() * 0.001f;
+    spheres.at((3 * attrsPerSphere) + 2) += sin(t);
+    spheres.at((4 * attrsPerSphere) + 2) -= 1- sin(t);
+    spheres.at((5 * attrsPerSphere) + 2) += 1- sin(t);
+    std::cout << sin(GetTickCount() * 0.001f) << std::endl;
   }
 }
 
