@@ -27,16 +27,16 @@ GLShaderProgram::~GLShaderProgram()
 }
 
 bool GLShaderProgram::load(
-  const std::string name, std::string vertexFileName, std::string fragmentFileName)
+  const std::string name, std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
 {
   m_name = name;
   GLint success = 0;
 
-  m_vertexShader = createShader(vertexFileName, GL_VERTEX_SHADER, success);
+  m_vertexShader = createShader(vertexShaderFilePath, GL_VERTEX_SHADER, success);
   if (!success)
     return false;
 
-  m_fragmentShader = createShader(fragmentFileName, GL_FRAGMENT_SHADER, success);
+  m_fragmentShader = createShader(fragmentShaderFilePath, GL_FRAGMENT_SHADER, success);
   if (!success)
     return false;
 
@@ -54,8 +54,9 @@ bool GLShaderProgram::load(
     glGetProgramInfoLog(m_program, 512, nullptr, infoLog);
 
     std::cerr << std::endl << "Error linking GLSL shaders into a shader program." << std::endl;
-    std::cerr << "GLSL vertex shader: '" << vertexFileName << "'" << std::endl;
-    std::cerr << "GLSL fragment shader: '" << fragmentFileName << "'" << std::endl << std::endl;
+    std::cerr << "GLSL vertex shader: '" << vertexShaderFilePath << "'" << std::endl;
+    std::cerr << "GLSL fragment shader: '" << fragmentShaderFilePath << "'" << std::endl
+              << std::endl;
     std::cerr << "Program info log:" << std::endl << infoLog << std::endl;
 
     return false;
@@ -66,10 +67,9 @@ bool GLShaderProgram::load(
   return true;
 }
 
-int GLShaderProgram::createShader(std::string fileName, GLenum type, GLint &success)
+int GLShaderProgram::createShader(const std::string &filePath, GLenum type, GLint &success)
 {
-  fileName = readfromFile(fileName);
-  const char *source_cstr = fileName.c_str();
+  const char *source_cstr = (readfromFile(filePath)).c_str();
 
   unsigned int shader = glCreateShader(type);
   glShaderSource(shader, 1, &source_cstr, nullptr);
@@ -83,7 +83,7 @@ int GLShaderProgram::createShader(std::string fileName, GLenum type, GLint &succ
     glGetShaderInfoLog(shader, 512, nullptr, infoLog);
     char *shaderType = (type == GL_VERTEX_SHADER) ? "vertex" : "fragment";
     std::cerr << std::endl
-              << "Error compiling GLSL " << shaderType << " shader: '" << fileName << "'"
+              << "Error compiling GLSL " << shaderType << " shader: '" << filePath << "'"
               << std::endl
               << std::endl;
     std::cerr << "Shader info log:" << std::endl << infoLog << std::endl;
