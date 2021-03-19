@@ -41,12 +41,11 @@ void GLScreen::constructGeometry(
   GLShaderProgram *shaderProgram, const uint width, const uint height)
 {
   setShaderProgram(shaderProgram);
-  float a{}, b{};
+  uint min{}, max{};
+  max = std::max(width, height);
+  min = max == width ? height : width;
 
-  a = std::max(width, height);
-  b = a == width ? height : width;
-
-  const float ratio = b / a;
+  const float ratio = static_cast<float>(min) / static_cast<float>(max);
 
   vertices = { 
   // --X-- --Y--  --Z--

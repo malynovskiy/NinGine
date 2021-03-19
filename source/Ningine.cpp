@@ -62,7 +62,7 @@ bool Ningine::createGLContext()
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
   {
     std::cerr << "Error, failed to load the GLAD!\n";
-    glfwTerminate;
+    glfwTerminate();
     return false;
   }
 
@@ -241,12 +241,12 @@ float Ningine::calculateFOV(glm::vec2 a, glm::vec2 b, glm::vec2 c)
 {
   glm::vec2 v1 = glm::normalize(b - a);
   glm::vec2 v2 = glm::normalize(c - a);
-  return (acos(glm::dot(v1, v2)) * 180 / PI);
+  return static_cast<float>(acos(glm::dot(v1, v2)) * 180 / PI);
 }
 
-float Ningine::calculateDist(float fov)
+float Ningine::calculateDist(float fieldOfView)
 {
-  return (screenWidth / 2.0f) / tan(fov / 2.0 * PI / 180.0f);
+  return static_cast<float>((screenWidth / 2.0f) / tan(fieldOfView / 2.0 * PI / 180.0f));
 }
 
 void Ningine::createCLKernels()
