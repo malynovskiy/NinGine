@@ -24,6 +24,7 @@ Ningine - is the game engine project, created and developed in educational purpo
 	vcpkg install glm:x64-windows
 
 *5) Install Clang-Format extension for your IDE
+
 **Linux:**
 
  - WIP
