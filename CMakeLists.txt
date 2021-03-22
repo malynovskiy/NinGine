@@ -36,6 +36,9 @@ target_sources(${PROJECT_NAME}
 		include/Material.hpp
 		include/Light.hpp
 		include/Sphere.hpp
+		include/OpenGLContext.hpp
+		include/Scene.hpp
+		include/Utility.hpp
 	PRIVATE
 		source/CLError.cpp
 		source/CLWrapper.cpp
@@ -43,5 +46,7 @@ target_sources(${PROJECT_NAME}
 		source/GLShaderProgram.cpp
 		source/Ningine.cpp
 		source/OpenCLUtility.cpp
+		source/OpenGLContext.cpp
+		source/Scene.cpp
 
 		nintracer.cpp)

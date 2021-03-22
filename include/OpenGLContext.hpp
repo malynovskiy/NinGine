@@ -30,6 +30,9 @@ namespace ningine
   
     bool init();
 
+    uint getWindowHeight() { return windowHeight; }
+    uint getWindowWidth() { return windowWidth; }
+
   private:
     bool createContext();
     bool constructShaders();

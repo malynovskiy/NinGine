@@ -1,15 +1,12 @@
 #pragma once
 
+#include "Utility.hpp"
 #include "GLShaderProgram.hpp"
 #include <glm/glm.hpp>
 #include <vector>
 
-
 namespace ningine
 {
-typedef std::vector<float> vecf;
-typedef unsigned int uint;
-
 constexpr int NumberOfVertexCoords = 12;
 constexpr int NumberOfTriangleIndices = 6;
 
