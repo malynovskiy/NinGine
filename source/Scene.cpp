@@ -13,15 +13,23 @@ Scene::Scene(const float3 CameraPosition, const float3 CoordinateBasis)
 {
 }
 
-Scene &Scene::operator=(const Scene &other)
+Scene &Scene::operator=(Scene &&other) noexcept
 {
   if (this == &other)
     return *this;
-}
 
-Scene &Scene::operator=(Scene &&other) noexcept
-{
-  // TODO: insert return statement here
+  m_spheres = std::exchange(other.m_spheres, nullptr);
+  m_light_sources = std::exchange(other.m_light_sources, nullptr);
+
+  coordinateBasis = std::exchange(other.coordinateBasis, nullptr);
+  cameraPosition = std::exchange(other.cameraPosition, nullptr);
+
+  numberOfSpheres = other.numberOfSpheres;
+  numberOfLightSources = other.numberOfLightSources;
+
+  fov = other.fov;
+
+  return *this;
 }
 
 void Scene::create()

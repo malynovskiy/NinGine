@@ -12,8 +12,7 @@ class Scene
 public:
   Scene();
   Scene(const float3 CameraPosition, const float3 CoordinateBasis);
-  //Scene &operator=(const Scene &other);
-  //Scene &operator=(Scene &&other) noexcept;
+  Scene &operator=(Scene &&other) noexcept;
   ~Scene() {}
 
   void create();
