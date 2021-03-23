@@ -13,10 +13,12 @@ constexpr char FragmentShaderPath[] = "../../../source/shaders/GLSL/basic.frag";
 
 namespace ningine
 {
+typedef std::pair<int, bool> KeyPair;
+
 std::map<int, bool> OpenGLContext::keyMap;
 
 OpenGLContext::OpenGLContext()
-  : m_window(nullptr), m_shaderProgram(), m_screenPlane(), windowHeight{}, windowWidth{}
+  : m_window(nullptr), m_shaderProgram(), m_screenPlane(), windowSize(DefaultWindowSize), textureID(0)
 {
 }
 
@@ -28,11 +30,13 @@ bool OpenGLContext::init()
   if (!constructShaders())
     return false;
 
-  m_screenPlane.constructGeometry(&m_shaderProgram, windowWidth, windowHeight);
+  m_screenPlane.constructGeometry(&m_shaderProgram, windowSize.x, windowSize.y);
 
   initKeyMappings();
 
   glEnable(GL_DEPTH_TEST);
+  
+  return true;
 }
 
 bool OpenGLContext::createContext()
@@ -68,8 +72,7 @@ bool OpenGLContext::createContext()
   // window mode without borders
   m_window = glfwCreateWindow(mode->width, mode->height, WindowName, monitor, nullptr);
 
-  windowHeight = mode->height;
-  windowWidth = mode->width;
+  windowSize = { mode->width, mode->height };
 
   if (m_window == nullptr)
   {
@@ -108,43 +111,63 @@ bool OpenGLContext::constructShaders()
   return true;
 }
 
-void OpenGLContext::initKeyMappings()
+void OpenGLContext::initTexture()
 {
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_0, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_1, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_2, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_3, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_4, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_5, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_6, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_7, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_8, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_9, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_DIVIDE, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_MULTIPLY, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_ADD, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_SUBTRACT, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_LEFT_SHIFT, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_RIGHT_SHIFT, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_BACKSPACE, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_DELETE, false));
+  // allocate the space for the window texture
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_A, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_D, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_W, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_S, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_LEFT_SHIFT, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_SPACE, false));
+  glGenTextures(1, &textureID);
+  glBindTexture(GL_TEXTURE_2D, textureID);
 
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_UP, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_DOWN, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_LEFT, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_RIGHT, false));
+  const int screenDim = std::max(windowSize.x, windowSize.y);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenDim, screenDim, 0, GL_RGB, GL_FLOAT, nullptr);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16.0f);
 
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_PAGE_DOWN, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_PAGE_UP, false));
+  glUniform1i(glGetUniformLocation(m_shaderProgram.handle(), "tex"), 0);
 }
 
+void OpenGLContext::initKeyMappings()
+{
+  keyMap.insert(KeyPair(GLFW_KEY_KP_0, false));
+  keyMap.insert(KeyPair(GLFW_KEY_KP_1, false));
+  keyMap.insert(KeyPair(GLFW_KEY_KP_2, false));
+  keyMap.insert(KeyPair(GLFW_KEY_KP_3, false));
+  keyMap.insert(KeyPair(GLFW_KEY_KP_4, false));
+  keyMap.insert(KeyPair(GLFW_KEY_KP_5, false));
+  keyMap.insert(KeyPair(GLFW_KEY_KP_6, false));
+  keyMap.insert(KeyPair(GLFW_KEY_KP_7, false));
+  keyMap.insert(KeyPair(GLFW_KEY_KP_8, false));
+  keyMap.insert(KeyPair(GLFW_KEY_KP_9, false));
+  keyMap.insert(KeyPair(GLFW_KEY_KP_DIVIDE, false));
+  keyMap.insert(KeyPair(GLFW_KEY_KP_MULTIPLY, false));
+  keyMap.insert(KeyPair(GLFW_KEY_KP_ADD, false));
+  keyMap.insert(KeyPair(GLFW_KEY_KP_SUBTRACT, false));
+  keyMap.insert(KeyPair(GLFW_KEY_LEFT_SHIFT, false));
+  keyMap.insert(KeyPair(GLFW_KEY_RIGHT_SHIFT, false));
+  keyMap.insert(KeyPair(GLFW_KEY_BACKSPACE, false));
+  keyMap.insert(KeyPair(GLFW_KEY_DELETE, false));
+
+  keyMap.insert(KeyPair(GLFW_KEY_A, false));
+  keyMap.insert(KeyPair(GLFW_KEY_D, false));
+  keyMap.insert(KeyPair(GLFW_KEY_W, false));
+  keyMap.insert(KeyPair(GLFW_KEY_S, false));
+  keyMap.insert(KeyPair(GLFW_KEY_LEFT_SHIFT, false));
+  keyMap.insert(KeyPair(GLFW_KEY_SPACE, false));
+
+  keyMap.insert(KeyPair(GLFW_KEY_UP, false));
+  keyMap.insert(KeyPair(GLFW_KEY_DOWN, false));
+  keyMap.insert(KeyPair(GLFW_KEY_LEFT, false));
+  keyMap.insert(KeyPair(GLFW_KEY_RIGHT, false));
+
+  keyMap.insert(KeyPair(GLFW_KEY_PAGE_DOWN, false));
+  keyMap.insert(KeyPair(GLFW_KEY_PAGE_UP, false));
+}
+
+// TODO: investigate whether we need resize callback at all
 void OpenGLContext::resize_callback(GLFWwindow *window, int width, int height)
 {
   glViewport(0, 0, width, height);

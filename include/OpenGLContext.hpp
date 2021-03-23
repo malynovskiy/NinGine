@@ -14,42 +14,42 @@
 
 #include <map>
 
-constexpr char* WindowName = "Ningine Ray-Tracing";
-
-namespace
-{
-}
 
 namespace ningine
 {
-  class OpenGLContext
-  {
-  public:
-    OpenGLContext();
-    ~OpenGLContext() {}
-  
-    bool init();
+constexpr char *WindowName = "Ningine Ray-Tracing";
+constexpr uint2 DefaultWindowSize = { 1366, 768 };
 
-    uint getWindowHeight() { return windowHeight; }
-    uint getWindowWidth() { return windowWidth; }
+class OpenGLContext
+{
+public:
+  OpenGLContext();
+  ~OpenGLContext() {}
 
-  private:
-    bool createContext();
-    bool constructShaders();
-    void initKeyMappings();
+  bool init();
+  void initTexture();
 
-  public:
-    static void resize_callback(GLFWwindow *window, int width, int height);
-    static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+  uint getWindowHeight() { return windowSize.y; }
+  uint getWindowWidth() { return windowSize.x; }
 
-  private:
-    static std::map<int, bool> keyMap;
+private:
+  bool createContext();
+  bool constructShaders();
+  void initKeyMappings();
 
-  private:
-    GLFWwindow *m_window;
-    GLShaderProgram m_shaderProgram;
-    GLScreen m_screenPlane;
+public:
+  static void resize_callback(GLFWwindow *window, int width, int height);
+  static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
-    uint windowHeight, windowWidth;
-  };
+private:
+  static std::map<int, bool> keyMap;
+
+private:
+  GLFWwindow *m_window;
+  GLShaderProgram m_shaderProgram;
+  GLScreen m_screenPlane;
+
+  uint textureID;
+  uint2 windowSize;
+};
 }// namespace ningine
