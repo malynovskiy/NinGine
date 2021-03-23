@@ -11,11 +11,10 @@ class Scene
 {
 public:
   Scene();
-  Scene(const float3 CameraPosition, const float3 CoordinateBasis);
   Scene &operator=(Scene &&other) noexcept;
   ~Scene() {}
 
-  void create();
+  void create(const float3 &CameraPosition, const float3 &CoordinateBasis);
 
 private:
   void createObjects();

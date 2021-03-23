@@ -8,11 +8,6 @@ Scene::Scene() : cameraPosition(), coordinateBasis(), fov(DefaultFieldOfView)
   coordinateBasis = cameraPosition = float3{ 0.0f, 0.0f, 0.0f };
 }
 
-Scene::Scene(const float3 CameraPosition, const float3 CoordinateBasis)
-  : cameraPosition(CameraPosition), coordinateBasis(CoordinateBasis), fov(DefaultFieldOfView)
-{
-}
-
 Scene &Scene::operator=(Scene &&other) noexcept
 {
   if (this == &other)
@@ -32,8 +27,11 @@ Scene &Scene::operator=(Scene &&other) noexcept
   return *this;
 }
 
-void Scene::create()
+void Scene::create(const float3 &CameraPosition, const float3 &CoordinateBasis)
 {
+  cameraPosition = CameraPosition;
+  coordinateBasis = CoordinateBasis;
+
   createObjects();
   createLighting();
 }
