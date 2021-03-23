@@ -3,7 +3,9 @@
 
 namespace ningine
 {
-Scene::Scene() : cameraPosition(), coordinateBasis(), fov(DefaultFieldOfView)
+Scene::Scene()
+  : cameraPosition(), coordinateBasis(), fov(DefaultFieldOfView), numberOfLightSources(0),
+    numberOfSpheres(0)
 {
   coordinateBasis = cameraPosition = float3{ 0.0f, 0.0f, 0.0f };
 }
@@ -13,11 +15,11 @@ Scene &Scene::operator=(Scene &&other) noexcept
   if (this == &other)
     return *this;
 
-  m_spheres = std::exchange(other.m_spheres, nullptr);
-  m_light_sources = std::exchange(other.m_light_sources, nullptr);
+  m_spheres = std::exchange(other.m_spheres, {});
+  m_light_sources = std::exchange(other.m_light_sources, {});
 
-  coordinateBasis = std::exchange(other.coordinateBasis, nullptr);
-  cameraPosition = std::exchange(other.cameraPosition, nullptr);
+  coordinateBasis = std::exchange(other.coordinateBasis, {});
+  cameraPosition = std::exchange(other.cameraPosition, {});
 
   numberOfSpheres = other.numberOfSpheres;
   numberOfLightSources = other.numberOfLightSources;
@@ -88,9 +90,9 @@ void Scene::createSpheres()
   m_spheres.shrink_to_fit();
 
   // TODO: Replace this code later to a more robust approach of moving "lead" sphere
-  spherePos.x = spheres.at(0);
+  /*spherePos.x = spheres.at(0);
   spherePos.y = spheres.at(1);
-  spherePos.z = spheres.at(2);
+  spherePos.z = spheres.at(2);*/
 }
 
 void Scene::createTriangles()

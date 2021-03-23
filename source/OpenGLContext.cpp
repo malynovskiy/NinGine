@@ -72,7 +72,7 @@ bool OpenGLContext::createContext()
   // window mode without borders
   m_window = glfwCreateWindow(mode->width, mode->height, WindowName, monitor, nullptr);
 
-  windowSize = { mode->width, mode->height };
+  windowSize = { static_cast<uint>(mode->width), static_cast<uint>(mode->height) };
 
   if (m_window == nullptr)
   {
