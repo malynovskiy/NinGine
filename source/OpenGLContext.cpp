@@ -111,7 +111,7 @@ bool OpenGLContext::constructShaders()
   return true;
 }
 
-void OpenGLContext::initTexture()
+uint OpenGLContext::initTexture()
 {
   // allocate the space for the window texture
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -128,6 +128,8 @@ void OpenGLContext::initTexture()
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16.0f);
 
   glUniform1i(glGetUniformLocation(m_shaderProgram.handle(), "tex"), 0);
+  
+  return textureID;
 }
 
 void OpenGLContext::initKeyMappings()

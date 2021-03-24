@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Utility.hpp"
+#include "NingineInit.hpp"
 #include "GLShaderProgram.hpp"
 #include <glm/glm.hpp>
 #include <vector>

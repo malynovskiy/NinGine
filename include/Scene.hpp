@@ -1,5 +1,5 @@
 #pragma once
-#include "Utility.hpp"
+#include "NingineInit.hpp"
 #include "Sphere.hpp"
 #include "Light.hpp"
 

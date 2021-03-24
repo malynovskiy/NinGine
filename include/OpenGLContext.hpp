@@ -27,10 +27,12 @@ public:
   ~OpenGLContext() {}
 
   bool init();
-  void initTexture();
+  uint initTexture();
 
   uint getWindowHeight() { return windowSize.y; }
   uint getWindowWidth() { return windowSize.x; }
+
+  GLFWwindow *getWindowHandle() { return m_window; }
 
 private:
   bool createContext();

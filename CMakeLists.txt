@@ -38,7 +38,9 @@ target_sources(${PROJECT_NAME}
 		include/Sphere.hpp
 		include/OpenGLContext.hpp
 		include/Scene.hpp
-		include/Utility.hpp
+		include/OpenCLContext.hpp
+		include/NingineInit.hpp
+		
 	PRIVATE
 		source/CLError.cpp
 		source/CLWrapper.cpp
@@ -47,6 +49,7 @@ target_sources(${PROJECT_NAME}
 		source/Ningine.cpp
 		source/OpenCLUtility.cpp
 		source/OpenGLContext.cpp
+		source/OpenCLContext.cpp
 		source/Scene.cpp
 
 		nintracer.cpp)
