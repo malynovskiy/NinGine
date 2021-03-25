@@ -9,13 +9,17 @@ Ningine - is the game engine project, created and developed in educational purpo
 
 0) Download & Install Visual Studio 19
 1) Download & Install CMake
-2) Download & Install vcpkg -> https://github.com/microsoft/vcpkg
+2) Install *vcpkg*
+```cmd
+> git clone https://github.com/microsoft/vcpkg
+> ./vcpkg/bootstrap-vcpkg.sh
+```
 
 	2.1) (Not required but very handy) Add vcpkg folder to PATH environment variable
 3) Open the project with Visual Studio and configure CMake toolchain file:
 	
 	a) Open CMake Settings Editor
-	b) Under CMake toolchain file, add the path to the vcpkg toolchain file:
+	b) Under CMake 	toolchain file, add the path to the vcpkg toolchain file:
 		[vcpkg root]/scripts/buildsystems/vcpkg.cmake
 4) Install all required packadges with vcpkg
 	
@@ -23,12 +27,24 @@ Ningine - is the game engine project, created and developed in educational purpo
 > vcpkg install glfw:x64-windows
 > vcpkg install glad:x64-windows
 > vcpkg install glm:x64-windows
+> vcpkg install opencl:x64-windows
 ```
 
-5) Install Clang-Format extension for your IDE
-
 ### Linux:
-- WIP
+
+1) Install CMake
+2) Install *vcpkg*
+```bash
+$ git clone https://github.com/microsoft/vcpkg
+$ ./vcpkg/bootstrap-vcpkg.sh
+```
+3) Install all required packadges with vcpkg
+```bash
+$ ./[vcpkg root]/vcpkg install glfw3:x64-linux
+$ ./[vcpkg root]/vcpkg install glad:x64-linux
+$ ./[vcpkg root]/vcpkg install glm:x64-linux
+$ ./[vcpkg root]/vcpkg install opencl:x64-linux
+```
 
 ### MacOS:
 
@@ -50,4 +66,19 @@ $ ./vcpkg/bootstrap-vcpkg.sh
 $ sudo ./[vcpkg root]/vcpkg install glfw:x64-osx
 $ sudo ./[vcpkg root]/vcpkg install glad:x64-osx
 $ sudo ./[vcpkg root]/vcpkg install glm:x64-osx
+$ sudo ./[vcpkg root]/vcpkg install opencl:x64-osx
 ```
+
+## BUILD:
+
+### Windows:
+
+Open a project with Visual Studio 2019 and build
+
+### Linux:
+
+- WIP
+
+### MacOS:
+
+- WIP
