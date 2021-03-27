@@ -6,6 +6,16 @@
 
 namespace ningine
 {
+constexpr cl_context_properties NativeDisplayProperty = 
+#if defined(WINDOWS) 
+                                                        CL_WGL_HDC_KHR; 
+#elif defined(LINUX)
+                                                        CL_GLX_DISPLAY_KHR;
+#else
+//TODO: Mac version probable should be addressed here
+                                                        0;
+#endif
+
 class OpenCLContext
 {
 public:

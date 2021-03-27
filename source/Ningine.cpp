@@ -4,6 +4,8 @@
 #include <iomanip>
 #include <cassert>
 #include "OpenCLUtility.hpp"
+#include "OpenCLContext.hpp"
+#include "OpenGLContext.hpp"
 
 #define PI 3.14159265358979
 
@@ -218,15 +220,15 @@ bool Ningine::initCLContext()
   cl_int error = CL_SUCCESS;
 
   cl::Platform lPlatform = getPlatform();
-  cl_context_properties contextProperties[] = { CL_GL_CONTEXT_KHR,
-    (cl_context_properties)glfwGetWGLContext(window),
-    CL_WGL_HDC_KHR,
-    (cl_context_properties)GetDC(glfwGetWin32Window(window)),
-    CL_CONTEXT_PLATFORM,
-    (cl_context_properties)lPlatform(),
-    0 };
+  constexpr size_t NumberOfContextProperties = 6 + 1; // + 1 because should terminate with 0 
+  std::array<cl_context_properties, NumberOfContextProperties> contextProperties = {
+    CL_GL_CONTEXT_KHR, OpenGLContext::getPlatformGLNativeContext(window),
+    NativeDisplayProperty, OpenGLContext::getPlatformGLNativeWindow(window),
+    CL_CONTEXT_PLATFORM, (cl_context_properties)lPlatform(),
+    0 
+  };
 
-  clContext.init(raytracer_kernel_path, contextProperties);
+  clContext.init(raytracer_kernel_path, contextProperties.data());
 
   error = CL_SUCCESS;
   screenImage =

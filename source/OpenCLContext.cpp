@@ -12,15 +12,15 @@ int OpenCLContext::init(GLFWwindow *glWindow, const std::string &kernelPath, uin
   cl_int result = CL_SUCCESS;
 
   cl::Platform clPlatform = getPlatform();
-  cl_context_properties contextProperties[] = { CL_GL_CONTEXT_KHR,
-    (cl_context_properties)glfwGetWGLContext(glWindow),
-    CL_WGL_HDC_KHR,
-    (cl_context_properties)GetDC(glfwGetWin32Window(glWindow)),
-    CL_CONTEXT_PLATFORM,
-    (cl_context_properties)clPlatform(),
-    0 };
+  constexpr size_t NumberOfContextProperties = 6 + 1; // + 1 because should terminate with 0 
+  std::array<cl_context_properties, NumberOfContextProperties> contextProperties = {
+    CL_GL_CONTEXT_KHR, OpenGLContext::getPlatformGLNativeContext(glWindow),
+    NativeDisplayProperty, OpenGLContext::getPlatformGLNativeWindow(glWindow),
+    CL_CONTEXT_PLATFORM, (cl_context_properties)clPlatform(),
+    0 
+  };
 
-  m_clWrapper.init(kernelPath, contextProperties);
+  m_clWrapper.init(kernelPath, contextProperties.data());
 
   glScreenImage = cl::ImageGL(
     m_clWrapper.getContext(), CL_MEM_WRITE_ONLY, GL_TEXTURE_2D, 0, glTextureID, &result);
