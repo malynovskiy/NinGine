@@ -77,8 +77,12 @@ Open a project with Visual Studio 2019 and build
 
 ### Linux:
 
-- WIP
-
+Since we are using Cmake + vcpkg we should pass toolchain path for a build
+```bash
+$ mkdir [path to NinGine]/build
+$ cmake -B [path to NinGine]/build -S [path to NinGine] -DCMAKE_TOOLCHAIN_FILE=[path to vcpkg]/scripts/buildsystems/vcpkg.cmake
+$ cmake --build [path to NinGine]/build
+```
 ### MacOS:
 
 - WIP
