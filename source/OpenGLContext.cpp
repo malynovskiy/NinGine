@@ -188,4 +188,39 @@ void OpenGLContext::key_callback(GLFWwindow *window, int key, int scancode, int 
   {
   }
 }
+
+intptr_t OpenGLContext::getPlatformGLNativeContext(GLFWwindow* window)
+{
+  intptr_t nativeContext{};
+  
+  #ifdef WINDOWS
+    nativeContext = (intptr_t)glfwGetWGLContext(window)
+  #endif
+  #ifdef LINUX
+    nativeContext = (intptr_t)glfwGetGLXContext(window);
+  #endif
+  #ifdef MAC
+    nativeContext = (intptr_t)glfwGetNSGLContext(window);
+  #endif
+
+  return nativeContext;
+}
+
+intptr_t OpenGLContext::getPlatformGLNativeWindow(GLFWwindow* window)
+{
+  intptr_t nativeWindow{};
+  
+  #ifdef WINDOWS
+    nativeWindow = (intptr_t)glfwGetWin32Window(window)
+  #endif
+  #ifdef LINUX
+    nativeWindow = (intptr_t)glfwGetGLXWindow(window);
+  #endif
+  #ifdef MAC
+    nativeWindow = (intptr_t)glfwGetCocoa(window);
+  #endif
+
+  return nativeWindow;
+}
+
 }// namespace ningine

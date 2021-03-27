@@ -3,11 +3,26 @@
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+
+#include "NingineInit.hpp"
+
 #ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WGL
 #define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
 #endif
+
+#ifdef LINUX
+#define GLFW_EXPOSE_NATIVE_GLX
+#define GLFW_EXPOSE_NATIVE_X11
+#endif
+
+#ifdef MAC
+// TODO: check whether it's working
+#define GLFW_EXPOSE_NATIVE_NSGL
+#define GLFW_EXPOSE_NATIVE_COCOA
+#endif
+
+#include <GLFW/glfw3native.h>
 
 #include "GLShaderProgram.hpp"
 #include "GLScreen.hpp"
@@ -43,6 +58,8 @@ public:
   static void resize_callback(GLFWwindow *window, int width, int height);
   static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
+  static intptr_t getPlatformGLNativeContext(GLFWwindow *window);
+  static intptr_t getPlatformGLNativeWindow(GLFWwindow *window);
 private:
   static std::map<int, bool> keyMap;
 
