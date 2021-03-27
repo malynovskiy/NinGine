@@ -1,6 +1,5 @@
 #include "OpenCLContext.hpp"
 #include "OpenCLUtility.hpp"
-#include "OpenGLContext.hpp"
 
 #include <iostream>
 

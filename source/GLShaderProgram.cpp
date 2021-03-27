@@ -81,9 +81,9 @@ int GLShaderProgram::createShader(const std::string &filePath, GLenum type, GLin
   if (!success)
   {
     glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-    char *shaderType = (type == GL_VERTEX_SHADER) ? "vertex" : "fragment";
+    const std::string shaderTypeStr = (type == GL_VERTEX_SHADER) ? "vertex" : "fragment";
     std::cerr << std::endl
-              << "Error compiling GLSL " << shaderType << " shader: '" << filePath << "'"
+              << "Error compiling GLSL " << shaderTypeStr << " shader: '" << filePath << "'"
               << std::endl
               << std::endl;
     std::cerr << "Shader info log:" << std::endl << infoLog << std::endl;

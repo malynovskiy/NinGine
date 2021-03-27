@@ -145,7 +145,13 @@ void Ningine::printFrameRate()
   static float framesPerSecond = 0.0f;
   static int fps;
   static float lastTime = 0.0f;
-  float currentTime = GetTickCount() * 0.001f;
+  float currentTime = 0.0f;
+
+  #ifdef WINDOWS
+  currentTime = GetTickCount() * 0.001f;
+  #endif
+  // TODO: Should be addressed Linux and Mac there -> GetTickCount alternative
+
   ++framesPerSecond;
   std::cout << "FPS: " << fps << '\n';
   if (currentTime - lastTime > 1.0f)
@@ -582,11 +588,16 @@ void Ningine::spheresMove()
 {
   if (!spheres.empty())
   {
-    float t = GetTickCount() * 0.001f;
-    spheres.at((3 * attrsPerSphere) + 2) += sin(t);
-    spheres.at((4 * attrsPerSphere) + 2) -= 1- sin(t);
-    spheres.at((5 * attrsPerSphere) + 2) += 1- sin(t);
-    std::cout << sin(GetTickCount() * 0.001f) << std::endl;
+    float t = 0.001f;
+#ifdef WINDOWS
+    t *= GetTickCount();
+#endif
+    // TODO: Should be addressed Linux and Mac there -> GetTickCount alternative
+    const float sint = sin(t); 
+    spheres.at((3 * attrsPerSphere) + 2) += sint;
+    spheres.at((4 * attrsPerSphere) + 2) -= 1- sint;
+    spheres.at((5 * attrsPerSphere) + 2) += 1- sint;
+    std::cout << sint << std::endl;
   }
 }
 

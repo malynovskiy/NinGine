@@ -18,7 +18,7 @@ public:
   bool load(const std::string name, std::string vertexFileName, std::string fragmentFileName);
 
 private:
-  int GLShaderProgram::createShader(const std::string &fileName, GLenum type, GLint &success);
+  int createShader(const std::string &fileName, GLenum type, GLint &success);
 
   std::string shaderInfoLog(const GLuint shader) const;
   std::string programInfoLog(const GLuint program) const;

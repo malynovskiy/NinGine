@@ -1,4 +1,5 @@
 #include "OpenCLUtility.hpp"
+#include "NingineInit.hpp"
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -17,7 +18,8 @@ Platform getPlatform(std::string pName, cl_int &error)
   {
     std::vector<Platform> platforms;
     Platform::get(&platforms);
-    __int64 found = -1;
+    
+    int64 found = -1;
     for (PlatformIter it = platforms.begin(); it < platforms.end(); ++it)
     {
       std::string temp = it->getInfo<CL_PLATFORM_NAME>();

@@ -1,5 +1,8 @@
+#pragma once
+
 #include "CLWrapper.hpp"
 #include "NingineInit.hpp"
+#include "OpenGLContext.hpp"
 
 namespace ningine
 {

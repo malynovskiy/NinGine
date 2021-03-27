@@ -90,6 +90,7 @@ cl::Program CLWrapper::createCLProgram(const std::string &file, cl_context_prope
   for (int i = 0; i < 40; i++) std::cout << "-";
   std::cout << "\n";
 
+  // TODO: check whether we could replace code below with already implemented utility "getPlatform()"
   std::vector<cl::Platform> platforms;
   cl::Platform::get(&platforms);
 
