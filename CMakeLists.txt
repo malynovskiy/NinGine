@@ -32,24 +32,24 @@ target_link_libraries(${PROJECT_NAME}
 
 target_sources(${PROJECT_NAME}
 	PUBLIC
+		include/NingineInit.hpp
+		include/OpenGLContextWrapper.hpp
+		include/OpenCLContextWrapper.hpp
 		include/Vector.hpp
 		include/Material.hpp
 		include/Light.hpp
 		include/Sphere.hpp
-		include/OpenGLContext.hpp
 		include/Scene.hpp
-		include/OpenCLContext.hpp
-		include/NingineInit.hpp
 		
 	PRIVATE
-		source/CLError.cpp
+		source/Ningine.cpp
+		source/OpenGLContextWrapper.cpp
+		source/OpenCLContextWrapper.cpp
+		source/OpenCLUtility.cpp
 		source/CLWrapper.cpp
+		source/CLError.cpp
 		source/GLScreen.cpp
 		source/GLShaderProgram.cpp
-		source/Ningine.cpp
-		source/OpenCLUtility.cpp
-		source/OpenGLContext.cpp
-		source/OpenCLContext.cpp
 		source/Scene.cpp
 
 		nintracer.cpp)

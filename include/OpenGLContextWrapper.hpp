@@ -6,7 +6,7 @@
 
 #include "NingineInit.hpp"
 
-#ifdef _WIN32
+#ifdef WINDOWS
 #define GLFW_EXPOSE_NATIVE_WGL
 #define GLFW_EXPOSE_NATIVE_WIN32
 #endif
@@ -35,11 +35,11 @@ namespace ningine
 constexpr char *WindowName = "Ningine Ray-Tracing";
 constexpr uint2 DefaultWindowSize = { 1366, 768 };
 
-class OpenGLContext
+class OpenGLContextWrapper
 {
 public:
-  OpenGLContext();
-  ~OpenGLContext() {}
+  OpenGLContextWrapper();
+  ~OpenGLContextWrapper() {}
 
   bool init();
   uint initTexture();

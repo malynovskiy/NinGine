@@ -1,11 +1,12 @@
 #include "Ningine.hpp"
 
+#include "OpenCLUtility.hpp"
+#include "OpenCLContextWrapper.hpp"
+#include "OpenGLContextWrapper.hpp"
+
 #include <iostream>
 #include <iomanip>
 #include <cassert>
-#include "OpenCLUtility.hpp"
-#include "OpenCLContext.hpp"
-#include "OpenGLContext.hpp"
 
 #define PI 3.14159265358979
 
@@ -222,8 +223,8 @@ bool Ningine::initCLContext()
   cl::Platform clPlatform = getPlatform();
 
   ContextProperties contextProperties = {
-    CL_GL_CONTEXT_KHR, OpenGLContext::getPlatformGLNativeContext(window),
-    NativeDisplayProperty, OpenGLContext::getPlatformGLNativeWindow(window),
+    CL_GL_CONTEXT_KHR, OpenGLContextWrapper::getPlatformGLNativeContext(window),
+    NativeDisplayProperty, OpenGLContextWrapper::getPlatformGLNativeWindow(window),
     CL_CONTEXT_PLATFORM, (cl_context_properties)clPlatform(),
     0 };
 

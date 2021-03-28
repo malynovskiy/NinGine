@@ -2,7 +2,7 @@
 
 #include "CLWrapper.hpp"
 #include "NingineInit.hpp"
-#include "OpenGLContext.hpp"
+#include "OpenGLContextWrapper.hpp"
 
 namespace ningine
 {
@@ -16,11 +16,11 @@ constexpr cl_context_properties NativeDisplayProperty =
                                                         0;
 #endif
 
-class OpenCLContext
+class OpenCLContextWrapper
 {
 public:
-  OpenCLContext();
-  ~OpenCLContext() {}
+  OpenCLContextWrapper();
+  ~OpenCLContextWrapper() {}
 
   int init(GLFWwindow *glWindow, const std::string &kernelPath, uint glTextureID);
 

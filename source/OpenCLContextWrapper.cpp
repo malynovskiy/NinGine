@@ -1,20 +1,20 @@
-#include "OpenCLContext.hpp"
+#include "OpenCLContextWrapper.hpp"
 #include "OpenCLUtility.hpp"
 
 #include <iostream>
 
 namespace ningine
 {
-OpenCLContext::OpenCLContext() {}
+OpenCLContextWrapper::OpenCLContextWrapper() {}
 
-int OpenCLContext::init(GLFWwindow *glWindow, const std::string &kernelPath, uint glTextureID)
+int OpenCLContextWrapper::init(GLFWwindow *glWindow, const std::string &kernelPath, uint glTextureID)
 {
   cl_int result = CL_SUCCESS;
 
   cl::Platform clPlatform = getPlatform();
   ContextProperties contextProperties = {
-    CL_GL_CONTEXT_KHR, OpenGLContext::getPlatformGLNativeContext(glWindow),
-    NativeDisplayProperty, OpenGLContext::getPlatformGLNativeWindow(glWindow),
+    CL_GL_CONTEXT_KHR, OpenGLContextWrapper::getPlatformGLNativeContext(glWindow),
+    NativeDisplayProperty, OpenGLContextWrapper::getPlatformGLNativeWindow(glWindow),
     CL_CONTEXT_PLATFORM, (cl_context_properties)clPlatform(),
     0 
   };

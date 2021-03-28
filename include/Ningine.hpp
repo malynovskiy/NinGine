@@ -1,24 +1,13 @@
 #pragma once
-
 #include <glad/glad.h>
 
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-#ifdef WINDOWS
-#define GLFW_EXPOSE_NATIVE_WGL
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
-#endif
-
-#include "GLShaderProgram.hpp"
-#include "GLScreen.hpp"
-#include "CLWrapper.hpp"
+#include "OpenGLContextWrapper.hpp"
+#include "OpenCLContextWrapper.hpp"
 
 #include <random>
 #include <map>
 
-#include "Sphere.hpp"
-#include "Light.hpp"
+#include "Scene.hpp"
 
 namespace ningine
 {
