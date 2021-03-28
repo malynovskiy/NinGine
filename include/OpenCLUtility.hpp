@@ -15,6 +15,8 @@
 
 namespace ningine
 {
+typedef std::vector<cl_context_properties> ContextProperties;
+
 static const std::string NVIDIA_PLATFORM = "NVIDIA";
 static const std::string AMD_PLATFORM = "AMD";
 static const std::string INTEL_PLATFORM = "Intel";

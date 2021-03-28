@@ -3,16 +3,12 @@
 #include <vector>
 #include "CLWrapper.hpp"
 
-#ifdef __WIN64
-    #define WINDOWS
-#endif
-
-#ifdef __linux__
-    #define LINUX
-#endif
-
-#ifdef __MACH__
-    #define MAC
+#if defined(_WIN32)
+  #define WINDOWS
+#elif defined(__linux__)
+  #define LINUX
+#elif defined(__MACH__)
+  #define MAC
 #endif
 
 namespace ningine

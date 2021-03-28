@@ -219,14 +219,13 @@ bool Ningine::initCLContext()
 {
   cl_int error = CL_SUCCESS;
 
-  cl::Platform lPlatform = getPlatform();
-  constexpr size_t NumberOfContextProperties = 6 + 1; // + 1 because should terminate with 0 
-  std::array<cl_context_properties, NumberOfContextProperties> contextProperties = {
+  cl::Platform clPlatform = getPlatform();
+
+  ContextProperties contextProperties = {
     CL_GL_CONTEXT_KHR, OpenGLContext::getPlatformGLNativeContext(window),
     NativeDisplayProperty, OpenGLContext::getPlatformGLNativeWindow(window),
-    CL_CONTEXT_PLATFORM, (cl_context_properties)lPlatform(),
-    0 
-  };
+    CL_CONTEXT_PLATFORM, (cl_context_properties)clPlatform(),
+    0 };
 
   clContext.init(raytracer_kernel_path, contextProperties.data());
 

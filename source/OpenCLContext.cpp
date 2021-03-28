@@ -12,8 +12,7 @@ int OpenCLContext::init(GLFWwindow *glWindow, const std::string &kernelPath, uin
   cl_int result = CL_SUCCESS;
 
   cl::Platform clPlatform = getPlatform();
-  constexpr size_t NumberOfContextProperties = 6 + 1; // + 1 because should terminate with 0 
-  std::array<cl_context_properties, NumberOfContextProperties> contextProperties = {
+  ContextProperties contextProperties = {
     CL_GL_CONTEXT_KHR, OpenGLContext::getPlatformGLNativeContext(glWindow),
     NativeDisplayProperty, OpenGLContext::getPlatformGLNativeWindow(glWindow),
     CL_CONTEXT_PLATFORM, (cl_context_properties)clPlatform(),

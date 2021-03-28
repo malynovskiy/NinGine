@@ -5,10 +5,10 @@
 #include <fstream>
 
 using namespace cl;
-typedef std::vector<Platform>::iterator PlatformIter;
 
 namespace ningine
 {
+typedef std::vector<Platform>::iterator PlatformIter;
 
 Platform getPlatform(std::string pName, cl_int &error)
 {

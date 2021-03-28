@@ -189,38 +189,38 @@ void OpenGLContext::key_callback(GLFWwindow *window, int key, int scancode, int 
   }
 }
 
-intptr_t OpenGLContext::getPlatformGLNativeContext(GLFWwindow* window)
+intptr_t OpenGLContext::getPlatformGLNativeContext(GLFWwindow *window)
 {
   intptr_t nativeContext{};
-  
-  #if defined(WINDOWS)
-    nativeContext = reinterpret_cast<intptr_t>(glfwGetWGLContext(window));
-  #elif defined(LINUX)
-    nativeContext = reinterpret_cast<intptr_t>(glfwGetGLXContext(window));
-  #elif defined(MAC)
-    nativeContext = reinterpret_cast<intptr_t>(glfwGetNSGLContext(window));
-  #else
-    nativeContext = 0;
-    assert(false);
-  #endif
+
+#if defined(WINDOWS)
+  nativeContext = reinterpret_cast<intptr_t>(glfwGetWGLContext(window));
+#elif defined(LINUX)
+  nativeContext = reinterpret_cast<intptr_t>(glfwGetGLXContext(window));
+#elif defined(MAC)
+  nativeContext = reinterpret_cast<intptr_t>(glfwGetNSGLContext(window));
+#else
+  nativeContext = 0;
+  assert(false);
+#endif
 
   return nativeContext;
 }
 
-intptr_t OpenGLContext::getPlatformGLNativeWindow(GLFWwindow* window)
+intptr_t OpenGLContext::getPlatformGLNativeWindow(GLFWwindow *window)
 {
   intptr_t nativeWindow{};
-  
-  #if defined(WINDOWS)
-    nativeWindow = static_cast<intptr_t>(glfwGetWin32Window(window));
-  #elif defined(LINUX)
-    nativeWindow = static_cast<intptr_t>(glfwGetGLXWindow(window));
-  #elif defined(MAC)
-    nativeWindow = static_cast<intptr_t>(glfwGetCocoa(window));
-  #else
-    nativeWindow = 0;
-    assert(false);
-  #endif
+
+#if defined(WINDOWS)
+  nativeWindow = reinterpret_cast<intptr_t>(GetDC(glfwGetWin32Window(window)));
+#elif defined(LINUX)
+  nativeWindow = static_cast<intptr_t>(glfwGetGLXWindow(window));
+#elif defined(MAC)
+  nativeWindow = static_cast<intptr_t>(glfwGetCocoa(window));
+#else
+  nativeWindow = 0;
+  assert(false);
+#endif
 
   return nativeWindow;
 }
