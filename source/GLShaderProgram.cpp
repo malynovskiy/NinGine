@@ -27,9 +27,9 @@ GLShaderProgram::~GLShaderProgram()
 }
 
 bool GLShaderProgram::load(
-  const std::string name, std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
+   std::string name, std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
 {
-  m_name = name;
+  m_name = std::move(name);
   GLint success = 0;
 
   m_vertexShader = createShader(vertexShaderFilePath, GL_VERTEX_SHADER, success);
@@ -69,7 +69,8 @@ bool GLShaderProgram::load(
 
 int GLShaderProgram::createShader(const std::string &filePath, GLenum type, GLint &success)
 {
-  const char *source_cstr = (readfromFile(filePath)).c_str();
+  const std::string fileContent = std::move(readfromFile(filePath));
+  const char *source_cstr = fileContent.c_str();
 
   unsigned int shader = glCreateShader(type);
   glShaderSource(shader, 1, &source_cstr, nullptr);
