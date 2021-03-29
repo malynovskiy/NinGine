@@ -16,16 +16,20 @@ public:
 
   void create(const float3 &CameraPosition, const float3 &CoordinateBasis);
 
+  vecf& getObjects();
+  vecf& getLights();
+
+  void putSphere(const Sphere &sphere);
+  void putLightSource(const LightSource &lightSource);
 private:
   void createObjects();
   void createSpheres();
   void createTriangles();
   void createLighting();
   
-  void putSphere(const Sphere &sphere);
-  void putLightSource(const LightSource &lightSource);
-
 private:
+// for now we are storing scene data just as a vectors of floats
+// TODO: should be revisited at some point
   vecf m_spheres;
   vecf m_light_sources;
 

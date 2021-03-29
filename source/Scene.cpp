@@ -38,6 +38,16 @@ void Scene::create(const float3 &CameraPosition, const float3 &CoordinateBasis)
   createLighting();
 }
 
+vecf& Scene::getObjects()
+{
+  return m_spheres;
+}
+
+vecf& Scene::getLights()
+{
+  return m_light_sources;
+}
+
 void Scene::createObjects()
 {
   createSpheres();
