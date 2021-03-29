@@ -24,6 +24,9 @@ public:
 
   int init(GLFWwindow *glWindow, const std::string &kernelPath, uint glTextureID);
 
+  // temporary stub for now
+  void createBuffer(vecf &data);
+
 private:
   CLWrapper m_clWrapper;
 

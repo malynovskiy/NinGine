@@ -92,7 +92,9 @@ bool OpenGLContextWrapper::createContext()
 
   glfwSetWindowSizeCallback(m_window, resize_callback);
   glfwSetKeyCallback(m_window, key_callback);
-
+  glfwSwapInterval(1);
+  resize_callback(m_window, windowSize.x, windowSize.y);
+  
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
   std::cout << "OpenGL version is: " << glGetString(GL_VERSION) << '\n';

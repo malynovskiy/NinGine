@@ -34,4 +34,11 @@ int OpenCLContextWrapper::init(GLFWwindow *glWindow, const std::string &kernelPa
 
   return result;
 }
+
+void OpenCLContextWrapper::createBuffer(vecf &data) 
+{
+  m_clWrapper.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
+    sizeof(float) * data.size(),
+    data.data());
+}
 }// namespace ningine
