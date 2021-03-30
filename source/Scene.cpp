@@ -1,6 +1,8 @@
 #include "Scene.hpp"
 #include "Vector.hpp"
 
+#include <iostream>
+
 namespace ningine
 {
 Scene::Scene()
@@ -29,13 +31,24 @@ Scene &Scene::operator=(Scene &&other) noexcept
   return *this;
 }
 
-void Scene::create(const float3 &CameraPosition, const float3 &CoordinateBasis)
+void Scene::create(const float3 &CameraPosition, const float3 &CoordinateBasis, uint2 windowSize)
 {
   cameraPosition = CameraPosition;
   coordinateBasis = CoordinateBasis;
 
   createObjects();
   createLighting();
+
+  screenDistance = calcScreenDistance(fov, windowSize);
+
+  // TODO: should be printed only for Debug build
+  std::cout << "screenDist\t" << screenDistance << '\n';
+  /*std::cout << "FOV:\t"
+            << calcFOV(glm::vec2(screenHeight, 0),
+                 glm::vec2(0, screenDistance),
+                 glm::vec2(screenWidth, screenDistance));*/
+  std::cout << "FOV:\t" << fov;
+  std::cout << (char)167 << '\n';
 }
 
 vecf& Scene::getObjects()
