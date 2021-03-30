@@ -44,6 +44,9 @@ public:
   bool init();
   uint initTexture();
 
+  bool isShouldCloseWindow();
+
+  uint2 getWindowSize() { return windowSize; }
   uint getWindowHeight() { return windowSize.y; }
   uint getWindowWidth() { return windowSize.x; }
 

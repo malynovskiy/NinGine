@@ -134,6 +134,11 @@ uint OpenGLContextWrapper::initTexture()
   return textureID;
 }
 
+bool OpenGLContextWrapper::isShouldCloseWindow()
+{
+  return glfwWindowShouldClose(m_window);
+}
+
 void OpenGLContextWrapper::initKeyMappings()
 {
   keyMap.insert(KeyPair(GLFW_KEY_KP_0, false));
