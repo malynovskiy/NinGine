@@ -8,7 +8,8 @@ namespace ningine
 {
 namespace math
 {
-  template<size_t DIM, typename T> struct vec
+  template<size_t DIM, typename T>
+  struct vec
   {
     vec()
     {
@@ -31,11 +32,13 @@ namespace math
   };
 
   typedef vec<2, int> Vec2i;
+  typedef vec<2, unsigned int> Vec2ui;
   typedef vec<2, float> Vec2f;
   typedef vec<3, float> Vec3f;
   typedef vec<4, float> Vec4f;
 
-  template<typename T> struct vec<2, T>
+  template<typename T>
+  struct vec<2, T>
   {
     vec() : x(T()), y(T()) {}
     vec(T X, T Y) : x(X), y(Y) {}
