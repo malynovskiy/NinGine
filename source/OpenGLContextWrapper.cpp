@@ -22,13 +22,15 @@ OpenGLContextWrapper::OpenGLContextWrapper()
 {
 }
 
+OpenGLContextWrapper::~OpenGLContextWrapper()
+{
+  glfwTerminate();
+}
+
 bool OpenGLContextWrapper::init()
 {
   if (!createContext())
-  {
-    glfwTerminate();
     return false;
-  }
 
   if (!constructShaders())
     return false;
@@ -137,6 +139,14 @@ uint OpenGLContextWrapper::initTexture()
 bool OpenGLContextWrapper::isShouldCloseWindow()
 {
   return glfwWindowShouldClose(m_window);
+}
+
+void OpenGLContextWrapper::render()
+{
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glUseProgram(m_shaderProgram.handle());
+
+  m_screenPlane.render(textureID);
 }
 
 void OpenGLContextWrapper::initKeyMappings()

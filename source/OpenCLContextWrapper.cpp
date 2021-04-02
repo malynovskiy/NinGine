@@ -41,4 +41,10 @@ void OpenCLContextWrapper::createBuffer(vecf &data)
     sizeof(float) * data.size(),
     data.data());
 }
+
+void OpenCLContextWrapper::clearBuffers()
+{
+  m_clWrapper.clearBuffers();
+}
+
 }// namespace ningine

@@ -39,12 +39,14 @@ class OpenGLContextWrapper
 {
 public:
   OpenGLContextWrapper();
-  ~OpenGLContextWrapper() {}
+  ~OpenGLContextWrapper();
 
   bool init();
   uint initTexture();
 
   bool isShouldCloseWindow();
+
+  void render();
 
   uint2 getWindowSize() { return windowSize; }
   uint getWindowHeight() { return windowSize.y; }
