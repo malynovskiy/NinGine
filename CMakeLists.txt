@@ -50,6 +50,7 @@ target_sources(${PROJECT_NAME}
 		source/CLError.cpp
 		source/GLScreen.cpp
 		source/GLShaderProgram.cpp
+		source/Vector.cpp
 		source/Scene.cpp
 
 		nintracer.cpp)

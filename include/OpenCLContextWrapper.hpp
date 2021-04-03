@@ -31,6 +31,8 @@ public:
 private:
   CLWrapper m_clWrapper;
 
+  // TODO: consider about moving fields that we are using for OpenCL-OpenGL interoperability 
+  //        into separate class, something like a brigde between two technologies
   cl::ImageGL glScreenImage;
 };
 }

@@ -27,6 +27,7 @@ namespace math
       return _data[i];
     }
 
+    static constexpr int length() { return DIM; }
   private:
     T _data[DIM];
   };
@@ -40,28 +41,31 @@ namespace math
   template<typename T>
   struct vec<2, T>
   {
-    vec() : x(T()), y(T()) {}
-    vec(T X, T Y) : x(X), y(Y) {}
+    typedef vec<2, T> type;
 
-    template<class U> vec<2, T>(const vec<2, U> &v);
+    constexpr vec() = default;
+    constexpr vec(const type &other) = default;
 
-    T &operator[](const size_t i)
-    {
-      assert(i < 2);
-      return i <= 0 ? x : y;
-    }
-    const T &operator[](const size_t i) const
-    {
-      assert(i < 2);
-      return i <= 0 ? x : y;
-    }
+    constexpr explicit vec(T scalar);
+    constexpr vec(T x, T y);
+
+    template<class U>
+    vec<2, T>(const vec<2, U> &v);
+
+    constexpr T &operator[](const size_t i);
+    constexpr T const &operator[](const size_t i) const;
+    
+    static constexpr size_t length() { return 2; }
 
     T x, y;
   };
 
-  template<typename T> struct vec<3, T>
+  template<typename T>
+  struct vec<3, T>
   {
-    vec() : x(T()), y(T()), z(T()) {}
+    constexpr vec() = default;
+    constexpr vec(const type &other) = default;
+
     vec(T X, T Y, T Z) : x(X), y(Y), z(Z) {}
 
     T &operator[](const size_t i)
@@ -74,6 +78,7 @@ namespace math
       assert(i < 3);
       return i <= 0 ? x : (1 == i ? y : z);
     }
+    static constexpr int length() { return 3; }
 
     float norm() { return std::sqrt(x * x + y * y + z * z); }
     vec<3, T> &normalize(T l = 1)
