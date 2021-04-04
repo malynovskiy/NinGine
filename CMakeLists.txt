@@ -35,6 +35,7 @@ target_sources(${PROJECT_NAME}
 		include/NingineInit.hpp
 		include/OpenGLContextWrapper.hpp
 		include/OpenCLContextWrapper.hpp
+		include/GraphicsContextBridge.hpp
 		include/Vector.hpp
 		include/Utility.hpp
 		include/Material.hpp
