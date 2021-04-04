@@ -35,8 +35,12 @@ public:
 
   void create(const float3 &CameraPosition, const float3 &CoordinateBasis, uint2 windowSize);
 
-  vecf& getObjects();
-  vecf& getLights();
+  vecf &getObjects() { return m_spheres; }
+  vecf &getLights() { return m_light_sources; }
+  float3 &getCameraPosition() { return cameraPosition; }
+  float getScreenDistance() { return screenDistance; }
+  uint getNumberOfSpheres() { return numberOfSpheres; }
+  uint getNumberOfLights() { return numberOfLightSources; }
 
   void putSphere(const Sphere &sphere);
   void putLightSource(const LightSource &lightSource);
