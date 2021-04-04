@@ -3,135 +3,44 @@
 #include "OpenCLUtility.hpp"
 #include "OpenCLContextWrapper.hpp"
 #include "OpenGLContextWrapper.hpp"
+#include "Utility.hpp"
 
 #include <iostream>
 #include <iomanip>
 #include <cassert>
 
-#define PI 3.14159265358979
-
 namespace ningine
 {
-
-int Ningine::screenWidth = 1920;
-int Ningine::screenHeight = 1080;
-// for test purposes lower reso
-// int Ningine::screenWidth = 1366;
-// int Ningine::screenHeight = 768;
-
-std::map<int, bool> Ningine::keyMap;
-
-bool Ningine::createGLContext()
-{
-  if (!glfwInit())
-  {
-    std::cerr << "Error, failed to init glfw: 0x" << std::hex << std::setw(8) << std::setfill('0')
-              << glfwGetError(nullptr) << '\n';
-    return false;
-  }
-
-  glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-  glfwWindowHint(GLFW_REFRESH_RATE, GLFW_DONT_CARE);
-
-  int numOfMonitors{};
-  GLFWmonitor **monitors;
-  if ((monitors = glfwGetMonitors(&numOfMonitors)) == nullptr)
-  {
-    std::cerr << "Error, something went wrong, GLFW haven't found any monitors!\n";
-    glfwTerminate();
-    return false;
-  }
-  // GLFWmonitor *monitor = numOfMonitors == 2 ? monitors[1] : monitors[0];
-  GLFWmonitor *monitor = monitors[0];
-  const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-
-  glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-  glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-  glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-  glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-
-  // window mode without borders
-  window = glfwCreateWindow(screenWidth, screenHeight, "Ningine Ray-Tracing", monitor, nullptr);
-
-  if (window == nullptr)
-  {
-    std::cerr << "Error, failed to create glfw window!\n";
-    glfwTerminate();
-    return false;
-  }
-
-  glfwMakeContextCurrent(window);
-
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-  {
-    std::cerr << "Error, failed to load the GLAD!\n";
-    glfwTerminate();
-    return false;
-  }
-
-  glfwSetWindowSizeCallback(window, resize_callback);
-  glfwSetKeyCallback(window, key_callback);
-
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-  std::cout << "OpenGL version is: " << glGetString(GL_VERSION) << '\n';
-
-  return true;
-}
-
 bool Ningine::init()
 {
-  if (!createGLContext())
+  if (!m_glContext.init())
     return false;
 
-  randDistribution = std::uniform_real_distribution<float>(0.0f, 1.0f);
+  const uint glTextureID = m_glContext.initTexture();
+  //randDistribution = std::uniform_real_distribution<float>(0.0f, 1.0f);
 
-  if (!shaderProgram.load(glShaderProgramName, vertexShaderName, fragmentShaderName))
-    std::cerr << "Failed to load a shader program" << std::endl;
+  m_clContext.init(m_glContext.getWindowHandle(), raytracer_kernel_path, glTextureID);
+  
+  const uint2 windowSize = m_glContext.getWindowSize();
+  const float3 windowCenter{ windowSize.x / 2.0f, windowSize.y / 2.0f, 0.0f };
+  m_scene.create(windowCenter, windowCenter, windowSize);
 
-  screenPlane.constructGeometry(&shaderProgram, screenWidth, screenHeight);
-
-  initKeyboardMappings();
-
-  glEnable(GL_DEPTH_TEST);
-
-  createScene();
-  createScreenImage();
-
-  // pushing our spheres data to the OpenCL buffer
-  clContext.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
-    sizeof(float) * spheres.size(),
-    spheres.data());
-
-  // pushing our lighting data to the OpenCL buffer
-  clContext.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
-    sizeof(float) * lightSources.size(),
-    lightSources.data());
+  // creating OpenCL bufferes with objects and lights data
+  m_clContext.createBuffer(m_scene.getObjects());
+  m_clContext.createBuffer(m_scene.getLights());
 
   // TODO: Rework for to be customizable
-  screenDistance = calculateDist(fov);
-  curr_coordinate = start_sphere_pos;
+  //curr_coordinate = start_sphere_pos;
 
-  std::cout << "screenDist\t" << screenDistance << "\n";
-
-  std::cout << "FOV:\t"
-            << calculateFOV(glm::vec2(screenHeight, 0),
-                 glm::vec2(0, screenDistance),
-                 glm::vec2(screenWidth, screenDistance));
-  std::cout << "FOV:\t" << fov;
-  std::cout << (char)167 << "\n";
-
-  glfwSwapInterval(1);
-  resize_callback(window, screenWidth, screenHeight);
   return true;
 }
 
 int Ningine::run()
 {
-  while (!glfwWindowShouldClose(window))
+  while (!m_glContext.isShouldCloseWindow())
   {
-    display();
-    glfwSwapBuffers(window);
+    render();
+
     processEvents();
 
     spheresMove();
@@ -139,7 +48,6 @@ int Ningine::run()
     printFrameRate();
   }
 
-  glfwTerminate();
   return 0;
 }
 
@@ -165,305 +73,69 @@ void Ningine::printFrameRate()
   }
 }
 
-void Ningine::display()
+void Ningine::render()
 {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  m_glContext.render();
+  utility::ScopeGuard glRenderingFinilize([&]() { m_glContext.post_render(); });
 
-  glUseProgram(shaderProgram.handle());
+  // TODO: Investigate do we need to clear every time buffers and create them again
+  //        maybe we could optimize this place by reusing existing buffers without clearing?
+  m_clContext.clearBuffers();
+  m_clContext.createBuffer(m_scene.getObjects());
+  m_clContext.createBuffer(m_scene.getLights());
 
-  screenPlane.render(textureID);
+  uint kernelArgsIndex{};
+  m_clContext.setKernelArgs(kernelArgsIndex++, m_clContext.getScreenImage());
+  m_clContext.setKernelArgs(kernelArgsIndex++, m_scene.getCameraPosition());
+  m_clContext.setKernelArgs(kernelArgsIndex++, m_scene.getScreenDistance());
+  m_clContext.setKernelArgs(kernelArgsIndex++, m_clContext.getBuffer(0));
+  m_clContext.setKernelArgs(kernelArgsIndex++, m_scene.getNumberOfSpheres());
+  m_clContext.setKernelArgs(kernelArgsIndex++, m_clContext.getBuffer(1));
+  m_clContext.setKernelArgs(kernelArgsIndex++, m_scene.getNumberOfLights());
 
-  clContext.clearBuffers();
-  clContext.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
-    sizeof(float) * spheres.size(),
-    spheres.data());
-
-  clContext.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
-    sizeof(float) * lightSources.size(),
-    lightSources.data());
-
-  clContext.setKernelArgs(0, screenImage);
-  clContext.setKernelArgs(1, camPos);
-  clContext.setKernelArgs(2, screenDistance);
-  clContext.setKernelArgs(3, clContext.getBuffer(0));
-  clContext.setKernelArgs(4, numberOfSpheres);
-  clContext.setKernelArgs(5, clContext.getBuffer(1));
-  clContext.setKernelArgs(6, numberOfLightSources);
-
-  screenRange = cl::NDRange(screenWidth, screenHeight);
-
-  commandQueue = cl::CommandQueue(clContext.getContext(), clContext.getDevice());
-  std::vector<cl::Memory> images(1, screenImage);
-
-  // tell openGL to let openCL use the memory
-  commandQueue.enqueueAcquireGLObjects(&images, nullptr);
-  commandQueue.enqueueNDRangeKernel(clContext.getKernel(), 0, screenRange);
-  // give the memory back to openGL
-  commandQueue.enqueueReleaseGLObjects(&images, nullptr);
-
-  glUseProgram(0);// turn off the current shader
+  const uint2 windowSize = m_glContext.getWindowSize();
+  m_clContext.processKernel({windowSize.x, windowSize.y});
 }
 
 void Ningine::processEvents()
 {
-  glfwPollEvents();
+  m_glContext.pollEvents();
   processKeyboardInput();
 }
 
-void Ningine::createScreenImage()
-{
-  initGLTexture();
-  initCLContext();
-}
-
-bool Ningine::initCLContext()
-{
-  cl_int error = CL_SUCCESS;
-
-  cl::Platform clPlatform = getPlatform();
-
-  ContextProperties contextProperties = {
-    CL_GL_CONTEXT_KHR, OpenGLContextWrapper::getPlatformGLNativeContext(window),
-    NativeDisplayProperty, OpenGLContextWrapper::getPlatformGLNativeWindow(window),
-    CL_CONTEXT_PLATFORM, (cl_context_properties)clPlatform(),
-    0 };
-
-  clContext.init(raytracer_kernel_path, contextProperties.data());
-
-  error = CL_SUCCESS;
-  screenImage =
-    cl::ImageGL(clContext.getContext(), CL_MEM_WRITE_ONLY, GL_TEXTURE_2D, 0, textureID, &error);
-
-  if (error != CL_SUCCESS)
-  {
-    std::cerr << "error creating cl::ImageGL:\t" << getErrorString(error) << std::endl;
-    return (error);
-  }
-
-  createCLKernels();
-
-  return true;
-}
-
-float Ningine::calculateFOV(glm::vec2 a, glm::vec2 b, glm::vec2 c)
-{
-  glm::vec2 v1 = glm::normalize(b - a);
-  glm::vec2 v2 = glm::normalize(c - a);
-  return static_cast<float>(acos(glm::dot(v1, v2)) * 180 / PI);
-}
-
-float Ningine::calculateDist(float fieldOfView)
-{
-  return static_cast<float>((screenWidth / 2.0f) / tan(fieldOfView / 2.0 * PI / 180.0f));
-}
-
-void Ningine::createCLKernels()
-{
-  clContext.createKernel("raytracer");
-}
-
-void Ningine::initGLTexture()
-{
-  // allocate the space for the window texture
-  int screenDim = ((screenWidth > screenHeight) ? screenWidth : screenHeight);
-
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-  glGenTextures(1, &textureID);
-  glBindTexture(GL_TEXTURE_2D, textureID);
-
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenDim, screenDim, 0, GL_RGB, GL_FLOAT, nullptr);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16.0f);
-
-  glUniform1i(glGetUniformLocation(shaderProgram.handle(), "tex"), 0);
-}
-
-void Ningine::pushBackSphere(const Sphere &sphere)
-{
-  spheres.push_back(sphere.center.x);
-  spheres.push_back(sphere.center.y);
-  spheres.push_back(sphere.center.z);
-
-  spheres.push_back(sphere.radius);
-
-  spheres.push_back(sphere.material.diffuse_color.x);
-  spheres.push_back(sphere.material.diffuse_color.y);
-  spheres.push_back(sphere.material.diffuse_color.z);
-
-  spheres.push_back(sphere.material.albedo.x);
-  spheres.push_back(sphere.material.albedo.y);
-  spheres.push_back(sphere.material.albedo.z);
-  spheres.push_back(sphere.material.albedo.w);
-
-  spheres.push_back(sphere.material.specular_exponent);
-  spheres.push_back(sphere.material.refractive_index);
-
-  numberOfSpheres++;
-
-  assert(spheres.size() / numberOfSpheres == attrsPerSphere);
-}
-
-void Ningine::pushBackLightSource(const LightSource &lightSource)
-{
-  lightSources.push_back(lightSource.position.x);
-  lightSources.push_back(lightSource.position.y);
-  lightSources.push_back(lightSource.position.z);
-
-  lightSources.push_back(lightSource.intensity);
-
-  numberOfLightSources++;
-  assert(lightSources.size() / numberOfLightSources == attrsPerLightSource);
-}
-
-// basic scene with some spheres
-void Ningine::createSpheres()
-{
-  using math::Vec3f;
-  numberOfSpheres = 0;
-
-  const Vec3f basis(coordinateBasis.x, coordinateBasis.y, coordinateBasis.z);
-
-  pushBackSphere(Sphere(basis + Vec3f(5, 0, 10 + 10), 2, materials::ivory));
-  // pushBackSphere(Sphere(basis + Vec3f(-1.0, -1.5, 12 + 40), 2, materials::thin_glass));
-
-  pushBackSphere(Sphere(basis + Vec3f(1.5, -0.5, 18 + 40), 3, materials::red_rubber));
-  pushBackSphere(Sphere(basis + Vec3f(7, 5, 18 + 50), 4, materials::mirror));
-
-  // 3
-  pushBackSphere(Sphere(basis + Vec3f(20, -1.0, 80),
-    4,
-    Material(math::Vec3f(0.0f, 0.0f, 0.0f), math::Vec4f(0.9f, 0.1f, 0.0f, 0.0f), 5.0f, 1.0f)));
-  // 4
-  pushBackSphere(Sphere(basis + Vec3f(26, 1, 45),
-    2,
-    Material(math::Vec3f(0.0f, 0.99f, 0.2f), math::Vec4f(0.9f, 0.1f, 0.0f, 0.0f), 5.0f, 1.0f)));
-  // 5
-  pushBackSphere(Sphere(basis + Vec3f(32, -0.5, 60),
-    2.5,
-    Material(math::Vec3f(0.1f, 0.1f, 0.99f), math::Vec4f(0.9f, 0.1f, 0.0f, 0.0f), 5.0f, 1.0f)));
-
-  // pushBackSphere(Sphere(basis + Vec3f(1.5, -0.5, 18 + 40),
-  //  1,
-  //  Material(math::Vec3f(0.72f, 0.08f, 0.99f), math::Vec4f(0.9f, 0.1f, 0.0f, 0.0f), 5.0f, 1.0f)));
-
-  // pushBackSphere(Sphere(basis + Vec3f(1.5, -0.5, 18 + 40),
-  //  4,
-  //  Material(math::Vec3f(0.99f, 0.08f, 0.6f), math::Vec4f(0.9f, 0.1f, 0.0f, 0.0f), 5.0f, 1.0f)));
-
-  // pushBackSphere(Sphere(basis + Vec3f(1.5, -0.5, 18 + 40),
-  //  3,
-  //  Material(math::Vec3f(0.22f, 0.58f, 0.55f), math::Vec4f(0.9f, 0.1f, 0.0f, 0.0f), 5.0f, 1.0f)));
-
-  // pushBackSphere(Sphere(basis + Vec3f(1.5, -0.5, 18 + 40),
-  //  4,
-  //  Material(math::Vec3f(0.93f, 0.46f, 0.23f), math::Vec4f(0.9f, 0.1f, 0.0f, 0.0f), 5.0f, 1.0f)));
-
-
-  spheres.shrink_to_fit();
-
-  // TODO: Replace this code later to a more robust approach of moving "lead" sphere
-  spherePos.x = spheres.at(0);
-  spherePos.y = spheres.at(1);
-  spherePos.z = spheres.at(2);
-}
-
-void Ningine::createTriangles() 
-{
-  using math::Vec3f;
-  //numberOfTriangles = 0;
-
-  const Vec3f basis(coordinateBasis.x, coordinateBasis.y, coordinateBasis.z);
-}
-
-void Ningine::createLighting()
-{
-  numberOfLightSources = 0;
-
-  const math::Vec3f basis(coordinateBasis.x, coordinateBasis.y, coordinateBasis.z);
-
-  // probably need more intensity
-  pushBackLightSource(LightSource(basis + math::Vec3f(-20.0f, 30.0f, 20.0f), 3.5f));
-  pushBackLightSource(LightSource(basis + math::Vec3f(20.0f, 20.0f, 30.0f), 1.5f));
-  lightSources.shrink_to_fit();
-}
-
-void Ningine::createScene()
-{
-  camPos = { screenWidth / 2.0f, screenHeight / 2.0f, 0.0f };
-  coordinateBasis = camPos;
-
-  createSpheres();
-  createTriangles();
-  createLighting();
-}
-
-void Ningine::initKeyboardMappings()
-{
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_0, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_1, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_2, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_3, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_4, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_5, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_6, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_7, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_8, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_9, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_DIVIDE, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_MULTIPLY, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_ADD, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_KP_SUBTRACT, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_LEFT_SHIFT, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_RIGHT_SHIFT, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_BACKSPACE, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_DELETE, false));
-
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_A, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_D, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_W, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_S, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_LEFT_SHIFT, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_SPACE, false));
-
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_UP, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_DOWN, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_LEFT, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_RIGHT, false));
-
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_PAGE_DOWN, false));
-  keyMap.insert(std::pair<int, bool>(GLFW_KEY_PAGE_UP, false));
-}
-
-void Ningine::resize_callback(GLFWwindow *window, int width, int height)
-{
-  screenWidth = width;
-  screenHeight = height;
-
-  glViewport(0, 0, width, height);
-}
-
-void Ningine::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
-{
-  try
-  {
-    if (action == GLFW_PRESS)
-      keyMap.at(key) = true;
-    else if (action == GLFW_RELEASE)
-      keyMap.at(key) = false;
-  }
-  catch (...)
-  {
-  }
-}
+//bool Ningine::initCLContext()
+//{
+//  cl_int error = CL_SUCCESS;
+//
+//  cl::Platform clPlatform = getPlatform();
+//
+//  ContextProperties contextProperties = {
+//    CL_GL_CONTEXT_KHR, OpenGLContextWrapper::getPlatformGLNativeContext(window),
+//    NativeDisplayProperty, OpenGLContextWrapper::getPlatformGLNativeWindow(window),
+//    CL_CONTEXT_PLATFORM, (cl_context_properties)clPlatform(),
+//    0 };
+//
+//  clContext.init(raytracer_kernel_path, contextProperties.data());
+//
+//  error = CL_SUCCESS;
+//  screenImage =
+//    cl::ImageGL(m_clContext.getContext(), CL_MEM_WRITE_ONLY, GL_TEXTURE_2D, 0, textureID, &error);
+//
+//  if (error != CL_SUCCESS)
+//  {
+//    std::cerr << "error creating cl::ImageGL:\t" << getErrorString(error) << std::endl;
+//    return (error);
+//  }
+//
+//  createCLKernels();
+//
+//  return true;
+//}
 
 void Ningine::processKeyboardInput()
 {
   // first sphere movement
-  if (keyMap.at(GLFW_KEY_LEFT))
+  /*if (keyMap.at(GLFW_KEY_LEFT))
     spherePos.x -= 0.1f;
 
   if (keyMap.at(GLFW_KEY_RIGHT))
@@ -498,7 +170,7 @@ void Ningine::processKeyboardInput()
     camPos.y -= 0.3f;
 
   if (keyMap.at(GLFW_KEY_SPACE))
-    camPos.y += 0.3f;
+    camPos.y += 0.3f;*/
 
   // if (keyMap.at(GLFW_KEY_BACKSPACE))
   //{
@@ -575,32 +247,32 @@ void Ningine::processKeyboardInput()
 
   // TODO: Output things on the window
   // std::cout << "Number of spheres\t" << numberOfSpheres << "\n";
-  if (!spheres.empty())
-  {
-    spheres.at((0 * attrsPerSphere) + 0) = spherePos.x;
-    spheres.at((0 * attrsPerSphere) + 1) = spherePos.y;
-    spheres.at((0 * attrsPerSphere) + 2) = spherePos.z;
+  //if (!spheres.empty())
+  //{
+  //  spheres.at((0 * attrsPerSphere) + 0) = spherePos.x;
+  //  spheres.at((0 * attrsPerSphere) + 1) = spherePos.y;
+  //  spheres.at((0 * attrsPerSphere) + 2) = spherePos.z;
 
-    /*std::cout << "Sphere pos: (" << spherePos.x << ", " << spherePos.y << ", " << spherePos.z
-              << "\n";*/
-  }
+  //  /*std::cout << "Sphere pos: (" << spherePos.x << ", " << spherePos.y << ", " << spherePos.z
+  //            << "\n";*/
+  //}
 }
 
 void Ningine::spheresMove() 
 {
-  if (!spheres.empty())
-  {
-    float t = 0.001f;
-#ifdef WINDOWS
-    t *= GetTickCount();
-#endif
-    // TODO: Should be addressed Linux and Mac there -> GetTickCount alternative
-    const float sint = sin(t); 
-    spheres.at((3 * attrsPerSphere) + 2) += sint;
-    spheres.at((4 * attrsPerSphere) + 2) -= 1- sint;
-    spheres.at((5 * attrsPerSphere) + 2) += 1- sint;
-    std::cout << sint << std::endl;
-  }
+//  if (!spheres.empty())
+//  {
+//    float t = 0.001f;
+//#ifdef WINDOWS
+//    t *= GetTickCount();
+//#endif
+//    // TODO: Should be addressed Linux and Mac there -> GetTickCount alternative
+//    const float sint = sin(t); 
+//    spheres.at((3 * attrsPerSphere) + 2) += sint;
+//    spheres.at((4 * attrsPerSphere) + 2) -= 1- sint;
+//    spheres.at((5 * attrsPerSphere) + 2) += 1- sint;
+//    std::cout << sint << std::endl;
+//  }
 }
 
 }// namespace ningine
