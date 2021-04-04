@@ -36,6 +36,7 @@ target_sources(${PROJECT_NAME}
 		include/OpenGLContextWrapper.hpp
 		include/OpenCLContextWrapper.hpp
 		include/Vector.hpp
+		include/Utility.hpp
 		include/Material.hpp
 		include/Light.hpp
 		include/Sphere.hpp
