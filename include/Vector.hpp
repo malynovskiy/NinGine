@@ -63,6 +63,8 @@ namespace math
   template<typename T>
   struct vec<3, T>
   {
+    typedef vec<3, T> type;
+
     constexpr vec() = default;
     constexpr vec(const type &other) = default;
 
