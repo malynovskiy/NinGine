@@ -35,6 +35,19 @@ int OpenCLContextWrapper::init(GLFWwindow *glWindow, const std::string &kernelPa
   return result;
 }
 
+void OpenCLContextWrapper::processKernel(cl::NDRange range)
+{
+  commandQueue = cl::CommandQueue(m_clWrapper.getContext(), m_clWrapper.getDevice());
+  std::vector<cl::Memory> images(1, glScreenImage);
+  
+  // tell openGL to let openCL use the memory
+  commandQueue.enqueueAcquireGLObjects(&images, nullptr);
+  screenRange = range;
+  commandQueue.enqueueNDRangeKernel(m_clWrapper.getKernel(), 0, screenRange);
+  // give the memory back to openGL
+  commandQueue.enqueueReleaseGLObjects(&images, nullptr);
+}
+
 void OpenCLContextWrapper::createBuffer(vecf &data) 
 {
   m_clWrapper.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,

@@ -25,7 +25,8 @@ public:
     kernel = cl::Kernel(program, name.c_str(), err);
   }
 
-  template<typename T> inline void setKernelArgs(cl_uint index, const T &value)
+  template<typename T>
+  inline void setKernelArgs(cl_uint index, const T &value)
   {
     kernel.setArg(index, value);
   }
@@ -33,7 +34,7 @@ public:
   inline const cl::Program &getProgram() const { return program; }
   inline const cl::Context &getContext() const { return context; }
   inline const cl::Device &getDevice() const { return device; }
-  inline const cl::Buffer &getBuffer(unsigned int i = 0) const { return memBuff[i]; }
+  inline const cl::Buffer &getBuffer(size_t i = 0) const { return memBuff.at(i); }
   inline const cl::Kernel &getKernel() const { return kernel; }
 
 private:
