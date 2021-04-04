@@ -47,6 +47,9 @@ public:
   bool isShouldCloseWindow();
 
   void render();
+  void post_render();
+
+  void pollEvents();
 
   uint2 getWindowSize() { return windowSize; }
   uint getWindowHeight() { return windowSize.y; }

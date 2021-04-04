@@ -149,6 +149,17 @@ void OpenGLContextWrapper::render()
   m_screenPlane.render(textureID);
 }
 
+void OpenGLContextWrapper::post_render()
+{
+  glUseProgram(0); // turn off the current shader program
+  glfwSwapBuffers(m_window);
+}
+
+void OpenGLContextWrapper::pollEvents()
+{
+  glfwPollEvents();
+}
+
 void OpenGLContextWrapper::initKeyMappings()
 {
   keyMap.insert(KeyPair(GLFW_KEY_KP_0, false));
