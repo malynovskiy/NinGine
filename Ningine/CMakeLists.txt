@@ -16,9 +16,10 @@ find_package(OpenCL REQUIRED)
 
 target_include_directories(${PROJECT_NAME}
 	PUBLIC
-		include
+		Headers
+		Math/Headers
 	PRIVATE
-		source
+		Source
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -32,27 +33,27 @@ target_link_libraries(${PROJECT_NAME}
 
 target_sources(${PROJECT_NAME}
 	PUBLIC
-		include/NingineInit.hpp
-		include/OpenGLContextWrapper.hpp
-		include/OpenCLContextWrapper.hpp
-		include/GraphicsContextBridge.hpp
-		include/Vector.hpp
-		include/Utility.hpp
-		include/Material.hpp
-		include/Light.hpp
-		include/Sphere.hpp
-		include/Scene.hpp
+		Headers/NingineInit.hpp
+		Headers/OpenGLContextWrapper.hpp
+		Headers/OpenCLContextWrapper.hpp
+		Headers/GraphicsContextBridge.hpp
+		Headers/Utility.hpp
+		Headers/Material.hpp
+		Headers/Light.hpp
+		Headers/Sphere.hpp
+		Headers/Scene.hpp
+		Math/Headers/Vector.hpp
 		
 	PRIVATE
-		source/Ningine.cpp
-		source/OpenGLContextWrapper.cpp
-		source/OpenCLContextWrapper.cpp
-		source/OpenCLUtility.cpp
-		source/CLWrapper.cpp
-		source/CLError.cpp
-		source/GLScreen.cpp
-		source/GLShaderProgram.cpp
-		source/Vector.cpp
-		source/Scene.cpp
+		Source/Ningine.cpp
+		Source/OpenGLContextWrapper.cpp
+		Source/OpenCLContextWrapper.cpp
+		Source/OpenCLUtility.cpp
+		Source/CLWrapper.cpp
+		Source/CLError.cpp
+		Source/GLScreen.cpp
+		Source/GLShaderProgram.cpp
+		Source/Scene.cpp
+		Math/Source/Vector.cpp
 
 		nintracer.cpp)
