@@ -11,10 +11,10 @@ configuration:
 clone_folder: c:/projects/NinGine
 
 build_script:
-- cd c:/projects/NinGine
+- cd c:/projects/NinGine/Ningine
 - mkdir build
 - cd build
-- cmake -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake c:/projects/NinGine -G "Visual Studio 16"
+- cmake -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake c:/projects/NinGine/Ningine -G "Visual Studio 16"
 - cmake --build .
 
 install:
