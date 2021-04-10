@@ -37,7 +37,7 @@ bool Ningine::init()
 
 int Ningine::run()
 {
-  while (!m_glContext.isShouldCloseWindow())
+  while (!m_glContext.shouldCloseWindow())
   {
     render();
 

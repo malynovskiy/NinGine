@@ -44,7 +44,7 @@ public:
   bool init();
   uint initTexture();
 
-  bool isShouldCloseWindow();
+  bool shouldCloseWindow();
 
   void render();
   void post_render();

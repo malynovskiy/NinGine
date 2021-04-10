@@ -136,7 +136,7 @@ uint OpenGLContextWrapper::initTexture()
   return textureID;
 }
 
-bool OpenGLContextWrapper::isShouldCloseWindow()
+bool OpenGLContextWrapper::shouldCloseWindow()
 {
   return glfwWindowShouldClose(m_window);
 }
