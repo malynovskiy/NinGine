@@ -12,9 +12,9 @@ namespace ningine
 constexpr float DefaultFieldOfView = 60.0f;
 
 // TODO: should be moved into future Camera class
-inline float calcScreenDistance(float fov, uint2 screenSize)
+inline float calcScreenDistance(float fov, uint screenWidth)
 {
-  return static_cast<float>((screenSize.x / 2.0f) / tan(screenSize.y / 2.0 * M_PI / 180.0f));
+  return static_cast<float>((screenWidth / 2.0f) / tan(fov / 2.0 * M_PI / 180.0f));
 }
 
 inline float calcFieldOfView(glm::vec2 a, glm::vec2 b, glm::vec2 c)
@@ -29,9 +29,9 @@ inline float calcFieldOfView(glm::vec2 a, glm::vec2 b, glm::vec2 c)
 class Scene
 {
 public:
-  Scene();
+  Scene() = default;
   Scene &operator=(Scene &&other) noexcept;
-  ~Scene() {}
+  ~Scene() = default;
 
   void create(const float3 &CameraPosition, const float3 &CoordinateBasis, uint2 windowSize);
 

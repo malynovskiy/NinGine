@@ -5,12 +5,6 @@
 
 namespace ningine
 {
-Scene::Scene()
-  : cameraPosition(), coordinateBasis(), fov(DefaultFieldOfView), numberOfLightSources(0),
-    numberOfSpheres(0)
-{
-  coordinateBasis = cameraPosition = float3{ 0.0f, 0.0f, 0.0f };
-}
 
 Scene &Scene::operator=(Scene &&other) noexcept
 {
@@ -33,14 +27,14 @@ Scene &Scene::operator=(Scene &&other) noexcept
 
 void Scene::create(const float3 &CameraPosition, const float3 &CoordinateBasis, uint2 windowSize)
 {
+  fov = DefaultFieldOfView;
   cameraPosition = CameraPosition;
   coordinateBasis = CoordinateBasis;
 
   createObjects();
   createLighting();
 
-  screenDistance = calcScreenDistance(fov, windowSize);
-
+  screenDistance = calcScreenDistance(fov, windowSize.x);
   // TODO: should be printed only for Debug build
   std::cout << "screenDist\t" << screenDistance << '\n';
   /*std::cout << "FOV:\t"
