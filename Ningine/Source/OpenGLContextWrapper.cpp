@@ -56,16 +56,16 @@ bool OpenGLContextWrapper::createContext()
   glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
   glfwWindowHint(GLFW_REFRESH_RATE, GLFW_DONT_CARE);
 
-  int numOfMonitors{};
+  int numberOfMonitors{};
   GLFWmonitor **monitors;
-  if ((monitors = glfwGetMonitors(&numOfMonitors)) == nullptr)
+  if ((monitors = glfwGetMonitors(&numberOfMonitors)) == nullptr)
   {
     std::cerr << "Error, something went wrong, GLFW haven't found any monitors!\n";
     return false;
   }
-  // GLFWmonitor *monitor = numOfMonitors == 2 ? monitors[1] : monitors[0];
-  // For now work only with Default monitor
-  GLFWmonitor *monitor = monitors[0];
+
+  // For debugging purposes we draw on a second monitor
+  GLFWmonitor *monitor = numberOfMonitors >= 2 ? monitors[1] : monitors[0];
   const GLFWvidmode *mode = glfwGetVideoMode(monitor);
 
   glfwWindowHint(GLFW_RED_BITS, mode->redBits);

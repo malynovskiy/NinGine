@@ -9,6 +9,8 @@ OpenCLContextWrapper::OpenCLContextWrapper() {}
 
 int OpenCLContextWrapper::init(GLFWwindow *glWindow, const std::string &kernelPath, uint glTextureID)
 {
+  assert(glWindow != nullptr);
+
   cl_int result = CL_SUCCESS;
 
   cl::Platform clPlatform = getPlatform();
