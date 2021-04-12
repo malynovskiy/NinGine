@@ -35,14 +35,12 @@ void Scene::create(const float3 &CameraPosition, const float3 &CoordinateBasis, 
   createLighting();
 
   screenDistance = calcScreenDistance(fov, windowSize.x);
-  // TODO: should be printed only for Debug build
+
+#ifdef _DEBUG
   std::cout << "screenDist\t" << screenDistance << '\n';
-  /*std::cout << "FOV:\t"
-            << calcFOV(glm::vec2(screenHeight, 0),
-                 glm::vec2(0, screenDistance),
-                 glm::vec2(screenWidth, screenDistance));*/
   std::cout << "FOV:\t" << fov;
   std::cout << (char)167 << '\n';
+#endif
 }
 
 void Scene::createObjects()

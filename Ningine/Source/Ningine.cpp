@@ -59,7 +59,7 @@ void Ningine::printFrameRate()
   float currentTime = 0.0f;
 
   #ifdef WINDOWS
-  currentTime = GetTickCount() * 0.001f;
+  currentTime = GetTickCount64() * 0.001f;
   #endif
   // TODO: Should be addressed Linux and Mac there -> GetTickCount alternative
 
@@ -102,35 +102,6 @@ void Ningine::processEvents()
   m_glContext.pollEvents();
   processKeyboardInput();
 }
-
-//bool Ningine::initCLContext()
-//{
-//  cl_int error = CL_SUCCESS;
-//
-//  cl::Platform clPlatform = getPlatform();
-//
-//  ContextProperties contextProperties = {
-//    CL_GL_CONTEXT_KHR, OpenGLContextWrapper::getPlatformGLNativeContext(window),
-//    NativeDisplayProperty, OpenGLContextWrapper::getPlatformGLNativeWindow(window),
-//    CL_CONTEXT_PLATFORM, (cl_context_properties)clPlatform(),
-//    0 };
-//
-//  clContext.init(raytracer_kernel_path, contextProperties.data());
-//
-//  error = CL_SUCCESS;
-//  screenImage =
-//    cl::ImageGL(m_clContext.getContext(), CL_MEM_WRITE_ONLY, GL_TEXTURE_2D, 0, textureID, &error);
-//
-//  if (error != CL_SUCCESS)
-//  {
-//    std::cerr << "error creating cl::ImageGL:\t" << getErrorString(error) << std::endl;
-//    return (error);
-//  }
-//
-//  createCLKernels();
-//
-//  return true;
-//}
 
 void Ningine::processKeyboardInput()
 {
