@@ -1,32 +1,15 @@
 #pragma once
 #include "CLWrapper.hpp"
+#include "Utility.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
-
-constexpr cl_ulong kB = 1024;
-constexpr cl_ulong MB = 1048576;
-constexpr cl_ulong GB = 1073741824;
-
-constexpr float to_kB(cl_ulong bytes)
-{
-  return bytes / static_cast<float>(kB);
-}
-
-constexpr float to_MB(cl_ulong bytes)
-{
-  return to_kB(bytes) / static_cast<float>(kB);
-}
-
-constexpr float to_GB(cl_ulong bytes)
-{
-  return to_MB(bytes) / static_cast<float>(kB);
-}
 
 namespace ningine
 {
 void CLWrapper::printDeviceInfo(const std::vector<cl::Device> &devices)
 {
+  using namespace utility;
   typedef std::vector<cl::Device>::const_iterator DeviceIterator;
 
   std::cout << "number of devices  \t" << devices.size() << "\n\n";
