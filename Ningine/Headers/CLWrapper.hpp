@@ -7,8 +7,8 @@ namespace ningine
 class CLWrapper
 {
 public:
-  CLWrapper() {}
-  ~CLWrapper() {}
+  CLWrapper() = default;
+  ~CLWrapper() = default;
 
   void init(std::string path, cl_context_properties *properties = nullptr);
 

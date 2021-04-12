@@ -43,6 +43,7 @@ target_sources(${PROJECT_NAME}
 		Headers/Sphere.hpp
 		Headers/Scene.hpp
 		Math/Headers/Vector.hpp
+		Math/Headers/Matrix.hpp
 		
 	PRIVATE
 		Source/Ningine.cpp
@@ -55,5 +56,6 @@ target_sources(${PROJECT_NAME}
 		Source/GLShaderProgram.cpp
 		Source/Scene.cpp
 		Math/Source/Vector.cpp
+		Math/Source/Matrix.cpp
 
 		nintracer.cpp)

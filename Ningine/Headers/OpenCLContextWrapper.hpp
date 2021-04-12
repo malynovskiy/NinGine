@@ -20,7 +20,7 @@ class OpenCLContextWrapper
 {
 public:
   OpenCLContextWrapper();
-  ~OpenCLContextWrapper() {}
+  ~OpenCLContextWrapper() = default;
 
   int init(GLFWwindow *glWindow, const std::string &kernelPath, uint glTextureID);
   void processKernel(cl::NDRange range);
