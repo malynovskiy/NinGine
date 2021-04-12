@@ -5,9 +5,10 @@
 
 namespace ningine
 {
-OpenCLContextWrapper::OpenCLContextWrapper() {}
+OpenCLContextWrapper::OpenCLContextWrapper() : CLWrapper() {}
 
-int OpenCLContextWrapper::init(GLFWwindow *glWindow, const std::string &kernelPath, uint glTextureID)
+int OpenCLContextWrapper::init(
+  GLFWwindow *glWindow, const std::string &kernelPath, uint glTextureID)
 {
   assert(glWindow != nullptr);
 
@@ -21,10 +22,10 @@ int OpenCLContextWrapper::init(GLFWwindow *glWindow, const std::string &kernelPa
     0 
   };
 
-  m_clWrapper.init(kernelPath, contextProperties.data());
+  CLWrapper::init(kernelPath, contextProperties.data());
 
-  glScreenImage = cl::ImageGL(
-    m_clWrapper.getContext(), CL_MEM_WRITE_ONLY, GL_TEXTURE_2D, 0, glTextureID, &result);
+  glScreenImage =
+    cl::ImageGL(getContext(), CL_MEM_WRITE_ONLY, GL_TEXTURE_2D, 0, glTextureID, &result);
 
   if (result != CL_SUCCESS)
   {
@@ -32,34 +33,29 @@ int OpenCLContextWrapper::init(GLFWwindow *glWindow, const std::string &kernelPa
     return result;
   }
 
-  m_clWrapper.createKernel(RaytracerKernelName);
+  createKernel(RaytracerKernelName);
 
   return result;
 }
 
 void OpenCLContextWrapper::processKernel(cl::NDRange range)
 {
-  commandQueue = cl::CommandQueue(m_clWrapper.getContext(), m_clWrapper.getDevice());
+  commandQueue = cl::CommandQueue(getContext(), getDevice());
   std::vector<cl::Memory> images(1, glScreenImage);
   
   // tell openGL to let openCL use the memory
   commandQueue.enqueueAcquireGLObjects(&images, nullptr);
   screenRange = range;
-  commandQueue.enqueueNDRangeKernel(m_clWrapper.getKernel(), 0, screenRange);
+  commandQueue.enqueueNDRangeKernel(getKernel(), 0, screenRange);
   // give the memory back to openGL
   commandQueue.enqueueReleaseGLObjects(&images, nullptr);
 }
 
 void OpenCLContextWrapper::createBuffer(vecf &data) 
 {
-  m_clWrapper.createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
+  CLWrapper::createBuffer(CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
     sizeof(float) * data.size(),
     data.data());
-}
-
-void OpenCLContextWrapper::clearBuffers()
-{
-  m_clWrapper.clearBuffers();
 }
 
 }// namespace ningine

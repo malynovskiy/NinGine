@@ -16,7 +16,7 @@ constexpr cl_context_properties NativeDisplayProperty =
                                                         0;
 #endif
 
-class OpenCLContextWrapper
+class OpenCLContextWrapper : public CLWrapper
 {
 public:
   OpenCLContextWrapper();
@@ -27,21 +27,11 @@ public:
 
   inline void updateScreenRange(uint2 size) { screenRange = { size.x, size.y }; }
 
-  // TODO: when CLWrapper would be merged with this class this stubs should be dropped
   void createBuffer(vecf &data);
-  void clearBuffers();
-  template<typename T>
-  inline void setKernelArgs(uint index, const T &value)
-  {
-    m_clWrapper.setKernelArgs(index, value);
-  }
-  inline const cl::Buffer &getBuffer(uint i = 0) const { return m_clWrapper.getBuffer(i); }
-
+  
   cl::ImageGL &getScreenImage() { return glScreenImage; }
 
 private:
-  CLWrapper m_clWrapper;
-
   cl::NDRange screenRange;
   cl::CommandQueue commandQueue;
 
