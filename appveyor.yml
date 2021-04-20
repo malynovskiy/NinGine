@@ -20,7 +20,7 @@ build_script:
 install:
 - cd c:/Tools/vcpkg 
 - vcpkg integrate install
-- vcpkg install glfw3:x64-windows glad:x64-windows glm:x64-windows opencl:x64-windows
+- vcpkg install --recurse glfw3:x64-windows glad:x64-windows glm:x64-windows opencl:x64-windows
 
 cache: c:/tools/vcpkg/installed/
 
