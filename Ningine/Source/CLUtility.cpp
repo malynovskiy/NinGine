@@ -1,4 +1,4 @@
-#include "OpenCLUtility.hpp"
+#include "CLUtility.hpp"
 #include "NingineInit.hpp"
 #include <iostream>
 #include <sstream>

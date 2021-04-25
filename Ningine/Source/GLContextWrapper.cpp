@@ -1,4 +1,4 @@
-#include "OpenGLContextWrapper.hpp"
+#include "GLContextWrapper.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -15,19 +15,19 @@ namespace ningine
 {
 typedef std::pair<int, bool> KeyPair;
 
-std::map<int, bool> OpenGLContextWrapper::keyMap;
+std::map<int, bool> GLContextWrapper::keyMap;
 
-OpenGLContextWrapper::OpenGLContextWrapper()
+GLContextWrapper::GLContextWrapper()
   : m_window(nullptr), m_shaderProgram(), m_screenPlane(), windowSize(DefaultWindowSize), textureID(0)
 {
 }
 
-OpenGLContextWrapper::~OpenGLContextWrapper()
+GLContextWrapper::~GLContextWrapper()
 {
   glfwTerminate();
 }
 
-bool OpenGLContextWrapper::init()
+bool GLContextWrapper::init()
 {
   if (!createContext())
     return false;
@@ -44,7 +44,7 @@ bool OpenGLContextWrapper::init()
   return true;
 }
 
-bool OpenGLContextWrapper::createContext()
+bool GLContextWrapper::createContext()
 {
   if (!glfwInit())
   {
@@ -104,7 +104,7 @@ bool OpenGLContextWrapper::createContext()
   return true;
 }
 
-bool OpenGLContextWrapper::constructShaders()
+bool GLContextWrapper::constructShaders()
 {
   if (m_shaderProgram.load(OpenGLShaderProgramName, VertexShaderPath, FragmentShaderPath) == false)
   {
@@ -115,7 +115,7 @@ bool OpenGLContextWrapper::constructShaders()
   return true;
 }
 
-uint OpenGLContextWrapper::initTexture()
+uint GLContextWrapper::initTexture()
 {
   // allocate the space for the window texture
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -136,12 +136,12 @@ uint OpenGLContextWrapper::initTexture()
   return textureID;
 }
 
-bool OpenGLContextWrapper::shouldCloseWindow()
+bool GLContextWrapper::shouldCloseWindow()
 {
   return glfwWindowShouldClose(m_window);
 }
 
-void OpenGLContextWrapper::render()
+void GLContextWrapper::render()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glUseProgram(m_shaderProgram.handle());
@@ -149,18 +149,18 @@ void OpenGLContextWrapper::render()
   m_screenPlane.render(textureID);
 }
 
-void OpenGLContextWrapper::post_render()
+void GLContextWrapper::post_render()
 {
   glUseProgram(0); // turn off the current shader program
   glfwSwapBuffers(m_window);
 }
 
-void OpenGLContextWrapper::pollEvents()
+void GLContextWrapper::pollEvents()
 {
   glfwPollEvents();
 }
 
-void OpenGLContextWrapper::initKeyMappings()
+void GLContextWrapper::initKeyMappings()
 {
   keyMap.insert(KeyPair(GLFW_KEY_KP_0, false));
   keyMap.insert(KeyPair(GLFW_KEY_KP_1, false));
@@ -198,12 +198,12 @@ void OpenGLContextWrapper::initKeyMappings()
 }
 
 // TODO: investigate whether we need resize callback at all
-void OpenGLContextWrapper::resize_callback(GLFWwindow *window, int width, int height)
+void GLContextWrapper::resize_callback(GLFWwindow *window, int width, int height)
 {
   glViewport(0, 0, width, height);
 }
 
-void OpenGLContextWrapper::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+void GLContextWrapper::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
   try
   {
@@ -217,7 +217,7 @@ void OpenGLContextWrapper::key_callback(GLFWwindow *window, int key, int scancod
   }
 }
 
-intptr_t OpenGLContextWrapper::getPlatformGLNativeContext(GLFWwindow *window)
+intptr_t GLContextWrapper::getPlatformGLNativeContext(GLFWwindow *window)
 {
   intptr_t nativeContext{};
 
@@ -235,7 +235,7 @@ intptr_t OpenGLContextWrapper::getPlatformGLNativeContext(GLFWwindow *window)
   return nativeContext;
 }
 
-intptr_t OpenGLContextWrapper::getPlatformGLNativeWindow(GLFWwindow *window)
+intptr_t GLContextWrapper::getPlatformGLNativeWindow(GLFWwindow *window)
 {
   intptr_t nativeWindow{};
 

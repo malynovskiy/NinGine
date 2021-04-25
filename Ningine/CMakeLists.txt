@@ -34,8 +34,13 @@ target_link_libraries(${PROJECT_NAME}
 target_sources(${PROJECT_NAME}
 	PUBLIC
 		Headers/NingineInit.hpp
-		Headers/OpenGLContextWrapper.hpp
-		Headers/OpenCLContextWrapper.hpp
+		Headers/Ningine.hpp
+		Headers/GLContextWrapper.hpp
+		Headers/GLScreen.hpp
+		Headers/GLShaderProgram.hpp
+		Headers/CLContextWrapper.hpp
+		Headers/CLUtility.hpp
+		Headers/CLError.hpp
 		Headers/GraphicsContextBridge.hpp
 		Headers/Utility.hpp
 		Headers/Material.hpp
@@ -47,13 +52,13 @@ target_sources(${PROJECT_NAME}
 		
 	PRIVATE
 		Source/Ningine.cpp
-		Source/OpenGLContextWrapper.cpp
-		Source/OpenCLContextWrapper.cpp
-		Source/OpenCLUtility.cpp
-		Source/CLWrapper.cpp
-		Source/CLError.cpp
+		Source/GLContextWrapper.cpp
 		Source/GLScreen.cpp
 		Source/GLShaderProgram.cpp
+		Source/CLContextWrapper.cpp
+		Source/CLUtility.cpp
+		Source/CLWrapper.cpp
+		Source/CLError.cpp
 		Source/Scene.cpp
 		Math/Source/Vector.cpp
 		Math/Source/Matrix.cpp

@@ -29,17 +29,16 @@
 
 #include <map>
 
-
 namespace ningine
 {
 constexpr char *WindowName = "Ningine Ray-Tracing";
 constexpr uint2 DefaultWindowSize = { 1366, 768 };
 
-class OpenGLContextWrapper
+class GLContextWrapper
 {
 public:
-  OpenGLContextWrapper();
-  ~OpenGLContextWrapper();
+  GLContextWrapper();
+  ~GLContextWrapper();
 
   bool init();
   uint initTexture();

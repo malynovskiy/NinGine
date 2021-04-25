@@ -1,8 +1,8 @@
 #pragma once
 #include <glad/glad.h>
 
-#include "OpenGLContextWrapper.hpp"
-#include "OpenCLContextWrapper.hpp"
+#include "GLContextWrapper.hpp"
+#include "CLContextWrapper.hpp"
 #include "GraphicsContextBridge.hpp"
 
 #include <random>
@@ -45,8 +45,8 @@ private:
   //std::random_device randGen;
   //std::uniform_real_distribution<float> randDistribution;
 
-  OpenGLContextWrapper m_glContext;
-  OpenCLContextWrapper m_clContext;
+  GLContextWrapper m_glContext;
+  CLContextWrapper m_clContext;
   
   //GraphicsContextBridge m_graphicsContexBridge;
 

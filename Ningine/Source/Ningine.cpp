@@ -1,8 +1,8 @@
 #include "Ningine.hpp"
 
-#include "OpenCLUtility.hpp"
-#include "OpenCLContextWrapper.hpp"
-#include "OpenGLContextWrapper.hpp"
+#include "CLUtility.hpp"
+#include "CLContextWrapper.hpp"
+#include "GLContextWrapper.hpp"
 #include "Utility.hpp"
 
 #include <iostream>

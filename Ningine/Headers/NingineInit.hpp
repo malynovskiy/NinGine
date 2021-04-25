@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include "CLWrapper.hpp"
 
 #if defined(_WIN32)
   #define WINDOWS
@@ -9,6 +8,11 @@
   #define LINUX
 #elif defined(__MACH__)
   #define MAC
+#endif
+
+#include <CL/cl.hpp>
+#ifndef _WIN32
+#include <CL/cl2.hpp>
 #endif
 
 namespace ningine
