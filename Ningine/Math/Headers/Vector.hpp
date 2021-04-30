@@ -42,7 +42,7 @@ namespace math
   struct vec<2, T>
   {
     typedef vec<2, T> type;
-
+    
     constexpr vec() = default;
     constexpr vec(const type &other) = default;
 
@@ -54,8 +54,13 @@ namespace math
 
     constexpr T &operator[](const size_t i);
     constexpr T const &operator[](const size_t i) const;
-    
-    static constexpr size_t length() { return 2; }
+
+    T norm() { return std::sqrt(x * x + y * y); }
+    type &normalize(T l = 1)
+    {
+      *this = (*this) * (l / norm());
+      return *this;
+    }
 
     T x, y;
   };
@@ -80,21 +85,26 @@ namespace math
       assert(i < 3);
       return i <= 0 ? x : (1 == i ? y : z);
     }
-    static constexpr int length() { return 3; }
-
-    float norm() { return std::sqrt(x * x + y * y + z * z); }
-    vec<3, T> &normalize(T l = 1)
+    
+    T norm() { return std::sqrt(x * x + y * y + z * z); }
+    type &normalize(T l = 1)
     {
       *this = (*this) * (l / norm());
       return *this;
     }
 
-    T x, y, z;
+    union { T x, y, z; };
+    union { T r, g, b; };
   };
 
-  template<typename T> struct vec<4, T>
+  template<typename T>
+  struct vec<4, T>
   {
-    vec() : x(T()), y(T()), z(T()), w(T()) {}
+    typedef vec<4, T> type;
+    
+    constexpr vec() = default;
+    constexpr vec(const type& other) = default;
+
     vec(T X, T Y, T Z, T W) : x(X), y(Y), z(Z), w(W) {}
 
     T &operator[](const size_t i)
@@ -108,11 +118,13 @@ namespace math
       return i <= 0 ? x : (1 == i ? y : (2 == i ? z : w));
     }
 
-    T x, y, z, w;
+    union { T x, y, z, w; };
+    union { T r, g, b, a; };
   };
 
   // Addition
-  template<size_t DIM, typename T> vec<DIM, T> operator+(vec<DIM, T> lhs, const vec<DIM, T> &rhs)
+  template<size_t DIM, typename T>
+  vec<DIM, T> operator+(vec<DIM, T> lhs, const vec<DIM, T> &rhs)
   {
     for (size_t i = DIM; i--; lhs[i] += rhs[i])
       ;
@@ -120,7 +132,8 @@ namespace math
   }
 
   // Substraction
-  template<size_t DIM, typename T> vec<DIM, T> operator-(vec<DIM, T> lhs, const vec<DIM, T> &rhs)
+  template<size_t DIM, typename T>
+  vec<DIM, T> operator-(vec<DIM, T> lhs, const vec<DIM, T> &rhs)
   {
     for (size_t i = DIM; i--; lhs[i] -= rhs[i])
       ;
@@ -128,7 +141,8 @@ namespace math
   }
 
   // Dot product
-  template<size_t DIM, typename T> T operator*(const vec<DIM, T> &lhs, const vec<DIM, T> &rhs)
+  template<size_t DIM, typename T>
+  T operator*(const vec<DIM, T> &lhs, const vec<DIM, T> &rhs)
   {
     T ret = T();
     for (size_t i = DIM; i--; ret += lhs[i] * rhs[i])
@@ -136,7 +150,7 @@ namespace math
     return ret;
   }
 
-  // Product of the vector with scalar
+  // Scalar product
   template<size_t DIM, typename T, typename U>
   vec<DIM, T> operator*(const vec<DIM, T> lhs, const U &scalar)
   {
@@ -147,19 +161,22 @@ namespace math
   }
 
   // Oposite
-  template<size_t DIM, typename T> vec<DIM, T> operator-(const vec<DIM, T> &lhs)
+  template<size_t DIM, typename T>
+  vec<DIM, T> operator-(const vec<DIM, T> &lhs)
   {
     return lhs * T(-1);
   }
 
   // Cross product
-  template<typename T> vec<3, T> cross(vec<3, T> v1, vec<3, T> v2)
+  template<typename T>
+  vec<3, T> cross(vec<3, T> v1, vec<3, T> v2)
   {
     return vec<3, T>(
       v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
   }
 
-  template<size_t DIM, typename T> std::ostream &operator<<(std::ostream &out, const vec<DIM, T> &v)
+  template<size_t DIM, typename T>
+  std::ostream &operator<<(std::ostream &out, const vec<DIM, T> &v)
   {
     for (size_t i = 0; i < DIM; ++i) out << v[i] << ' ';
 
