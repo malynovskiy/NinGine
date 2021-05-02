@@ -1,13 +1,15 @@
-cmake_minimum_required(VERSION 3.15)
-project(Ningine)
+cmake_minimum_required(VERSION 3.16)
+project(Ningine CXX)
 
 add_executable(${PROJECT_NAME})
 
-if(MSVC)
+if (MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /W4)
-else()
+else ()
 	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
-endif()
+endif ()
+
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
