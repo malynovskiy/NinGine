@@ -4,6 +4,9 @@
 ## About:
 Ningine - is the game engine project, created and developed in educational purposes. It's going to be the part of my diploma work. 
 
+![Glass](demo_glass.gif)
+![Reflection](demo_reflecton.gif)
+
 ## Getting started:
 ### Windows:
 
