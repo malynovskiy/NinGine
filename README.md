@@ -22,6 +22,7 @@ Ningine - is the game engine project, created and developed in educational purpo
 3) Open the project with Visual Studio and configure CMake toolchain file:
 	
 	a) Open CMake Settings Editor
+	
 	b) Under CMake 	toolchain file, add the path to the vcpkg toolchain file:
 		[vcpkg root]/scripts/buildsystems/vcpkg.cmake
 4) Install all required packadges with vcpkg
