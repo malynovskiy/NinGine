@@ -28,7 +28,7 @@ Ningine - is the game engine project, created and developed in educational purpo
 4) Install all required packadges with vcpkg
 	
 ```cmd
-> vcpkg install glfw:x64-windows
+> vcpkg install glfw3:x64-windows
 > vcpkg install glad:x64-windows
 > vcpkg install glm:x64-windows
 > vcpkg install opencl:x64-windows
@@ -67,7 +67,7 @@ $ ./vcpkg/bootstrap-vcpkg.sh
 ```
 3) Install all required packadges with vcpkg
 ```sh
-$ sudo ./[vcpkg root]/vcpkg install glfw:x64-osx
+$ sudo ./[vcpkg root]/vcpkg install glfw3:x64-osx
 $ sudo ./[vcpkg root]/vcpkg install glad:x64-osx
 $ sudo ./[vcpkg root]/vcpkg install glm:x64-osx
 $ sudo ./[vcpkg root]/vcpkg install opencl:x64-osx
