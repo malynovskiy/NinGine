@@ -34,6 +34,11 @@ Ningine - is the game engine project, created and developed in educational purpo
 > vcpkg install opencl:x64-windows
 ```
 
+5) Integrate vcpkg into Visual Studio
+```cmd
+> vcpkg integrate install
+```
+
 ### Linux:
 
 1) Install CMake
